@@ -2,12 +2,15 @@ package com.studyquest.usuarios;
 
 import com.studyquest.usuarios.dto.UserRequestDTO;
 import com.studyquest.usuarios.dto.UserResponseDTO;
-import jakarta.enterprise.context.ApplicationScoped; // <- Importação nova!
+import io.quarkus.elytron.security.common.BcryptUtil;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 import java.util.List;
+import java.util.UUID;
 
 @ApplicationScoped
 public class UserService {
@@ -20,13 +23,15 @@ public class UserService {
 
     @Transactional
     public UserResponseDTO createUser(UserRequestDTO dto) {
+        userRepository.findByEmail(dto.email()).ifPresent(u -> {
+            throw new WebApplicationException("Email já cadastrado", Response.Status.CONFLICT);
+        });
+
         User user = User.builder()
                 .name(dto.name())
                 .email(dto.email())
-                .passwordHash(dto.password())
+                .passwordHash(BcryptUtil.bcryptHash(dto.password())) // hash da senha
                 .avatarUrl(dto.avatarUrl())
-                .lvl(1)
-                .totalXp(0)
                 .build();
 
         userRepository.persist(user);
@@ -39,10 +44,10 @@ public class UserService {
                 .toList();
     }
 
-    public UserResponseDTO findById(Long id) {
+    public UserResponseDTO findById(UUID id) {
         User user = userRepository.findById(id);
         if (user == null) {
-            throw new NotFoundException("User not found");
+            throw new NotFoundException("Usuário não encontrado");
         }
         return new UserResponseDTO(user);
     }

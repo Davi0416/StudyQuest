@@ -1,14 +1,10 @@
 package com.studyquest.usuarios;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -17,13 +13,37 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
+
     @Id
-    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
     private String name;
+
+    @Column(unique = true, nullable = false)
     private String email;
+
     private String passwordHash;
+
     private String avatarUrl;
-    private Integer lvl;
-    private Integer totalXp;
+
+    @Builder.Default
+    private String provider = "local";
+
+    private String providerId;
+
+    @Builder.Default
+    private Integer lvl = 1;
+
+    @Builder.Default
+    private Integer totalXp = 0;
+
+    @Builder.Default
+    private Integer currentStreak = 0;
+
+    @Builder.Default
+    private Integer maxStreak = 0;
+
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
