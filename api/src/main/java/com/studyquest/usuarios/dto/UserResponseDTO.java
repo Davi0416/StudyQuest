@@ -2,15 +2,28 @@ package com.studyquest.usuarios.dto;
 
 import com.studyquest.usuarios.User;
 
+import java.util.UUID;
+
 public record UserResponseDTO(
-        Long id,
+        UUID id,
         String name,
         String email,
         String avatarUrl,
         Integer lvl,
-        Integer totalXp
+        Integer totalXp,
+        Integer currentStreak,
+        Integer maxStreak
 ) {
     public UserResponseDTO(User user) {
-        this(user.getId(), user.getName(), user.getEmail(), user.getAvatarUrl(), user.getLvl(), user.getTotalXp());
+        this(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getAvatarUrl(),
+                user.getLvl(),
+                user.getTotalXp(),
+                user.getCurrentStreak(),
+                user.getMaxStreak()
+        );
     }
 }
