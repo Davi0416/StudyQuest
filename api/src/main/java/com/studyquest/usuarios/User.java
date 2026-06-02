@@ -3,6 +3,7 @@ package com.studyquest.usuarios;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Table(name = "users")
 @Builder
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -43,6 +45,8 @@ public class User {
 
     @Builder.Default
     private Integer maxStreak = 0;
+
+    private LocalDate lastActivityDate;
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
