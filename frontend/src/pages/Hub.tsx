@@ -14,6 +14,7 @@ export function Hub() {
   const navigate = useNavigate();
 
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
+  const [catalogo, setCatalogo] = useState<Trilha[]>([]);
   const [revisao, setRevisao] = useState<RevisaoHoje | null>(null);
   const [ranking, setRanking] = useState<RankingResponse | null>(null);
   const [conquistas, setConquistas] = useState<Conquista[]>([]);
@@ -21,14 +22,16 @@ export function Hub() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [trilhasRes, revRes, rankRes, conqRes] = await Promise.all([
+        const [trilhasRes, revRes, rankRes, conqRes, allTrilhasRes] = await Promise.all([
           api.get('/trilhas/ativas'),
           api.get('/revisao/hoje'),
           api.get('/gamificacao/ranking/semanal'),
-          api.get('/gamificacao/conquistas')
+          api.get('/gamificacao/conquistas'),
+          api.get('/trilhas'),
         ]);
         
         setTrilhas(unwrap(trilhasRes));
+        setCatalogo(unwrap(allTrilhasRes));
         setRevisao(unwrap(revRes));
         setRanking(unwrap(rankRes));
         setConquistas(unwrap(conqRes).slice(0, 4)); // Get latest 4
@@ -42,6 +45,19 @@ export function Hub() {
   if (!user) return null;
 
   const activeTrilha = trilhas.length > 0 ? trilhas[0] : null;
+  const activeIds = new Set(trilhas.map(t => t.id));
+  const trilhasDisponiveis = catalogo.filter(t => !activeIds.has(t.id));
+
+  const handleMatricular = async (trilhaId: number) => {
+    try {
+      await api.post(`/trilhas/${trilhaId}/matricular`);
+      const trilhasRes = await api.get('/trilhas/ativas');
+      setTrilhas(unwrap(trilhasRes));
+      setCatalogo(prev => prev.map(t => t.id === trilhaId ? { ...t, matriculado: true } : t));
+    } catch (err) {
+      console.error('Failed to enroll in trail', err);
+    }
+  };
   const progressPct = activeTrilha && activeTrilha.nosConcluidosCount !== null && activeTrilha.xpTotal > 0 ? Math.round((activeTrilha.nosConcluidosCount / (activeTrilha.xpTotal / 100)) * 100) : 0; // approximate since totalNos is not in Trilha interface, wait `nosConcluidosCount` is present.
 
   return (
@@ -137,8 +153,8 @@ export function Hub() {
                   </div>
                   <div>
                     <div className="text-xs text-gold font-semibold tracking-wide uppercase">Trilha ativa</div>
-                    <h3 className="font-cinzel font-bold text-[21px] my-1">{activeTrilha?.titulo || 'Java & Spring Boot'}</h3>
-                    <p className="text-[13px] text-text-dim">{activeTrilha?.descricao || 'Módulo 4 · Fundamentos do Spring'}</p>
+                    <h3 className="font-cinzel font-bold text-[21px] my-1">{activeTrilha?.titulo || 'Nenhuma trilha ativa'}</h3>
+                    <p className="text-[13px] text-text-dim">{activeTrilha?.descricao || 'Matricule-se em uma trilha para começar sua jornada.'}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -163,10 +179,29 @@ export function Hub() {
                     <b className="font-semibold text-[14.5px]">Injeção de Dependências (DI)</b>
                   </div>
                 </div>
-                <Button className="gap-2" onClick={() => navigate('/mapa')}>
-                  <IconSword size={18} /> Continuar Missão
+                <Button className="gap-2" onClick={() => activeTrilha ? navigate('/mapa') : trilhasDisponiveis[0] && handleMatricular(trilhasDisponiveis[0].id)} disabled={!activeTrilha && trilhasDisponiveis.length === 0}>
+                  <IconSword size={18} /> {activeTrilha ? 'Continuar Missão' : 'Iniciar Trilha'}
                 </Button>
               </div>
+
+              {!activeTrilha && trilhasDisponiveis.length > 0 && (
+                <div className="mt-5 pt-4 border-t border-border">
+                  <div className="text-xs text-gold font-semibold tracking-wide uppercase mb-3">Trilhas disponíveis</div>
+                  <div className="flex flex-col gap-2">
+                    {trilhasDisponiveis.map(t => (
+                      <div key={t.id} className="flex items-center justify-between gap-3 p-3 rounded-md bg-surface-2 border border-border">
+                        <div>
+                          <div className="font-semibold text-sm">{t.titulo}</div>
+                          <div className="text-xs text-text-dim line-clamp-2">{t.descricao}</div>
+                        </div>
+                        <Button className="shrink-0 py-1 px-3 text-xs h-auto" onClick={() => handleMatricular(t.id)}>
+                          Matricular
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </Card>
 
             {/* REVISÃO DIÁRIA */}
