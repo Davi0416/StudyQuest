@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface-2: #1c222b;
+    --border:    #30363d;
+    --text:      #e6edf3;
+    --text-dim:  #8b949e;
+    --text-mute: #6e7681;
+  
+    --gold:  #f0c060;
+    --green: #7ee787;
+    --blue:  #58a6ff;
+    --red:   #e06c75;
+  
+    --r-sm: 8px;
+    --r-md: 10px;
+    --r-lg: 12px;
+    --hairline: 0.5px solid var(--border);
+    --shadow-soft: 0 8px 24px -12px rgba(0,0,0,.7);
+  }
+  
+  *, ::before, ::after {
+    border-color: var(--border);
+  }
+  
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .reveal { 
+    opacity:0; 
+    transform:translateY(14px);
+    animation: rise .6s cubic-bezier(.2,.7,.2,1) forwards;
+    animation-delay: var(--d, 0s); 
+  }
+  
+  @keyframes rise { 
+    to { opacity:1; transform:none; } 
+  }
+}

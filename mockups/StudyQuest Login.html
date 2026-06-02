@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StudyQuest — Entrar</title>
+
+<!-- ============ FONTES ============ -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<!-- ============ ÍCONES (Tabler Outline) ============ -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" />
+
+<style>
+/* ===================================================================
+   TOKENS / VARIÁVEIS DE TEMA  (idênticos ao HUB e Mapa)
+   =================================================================== */
+:root{
+  --bg:        #0d1117;
+  --surface:   #161b22;
+  --surface-2: #1c222b;
+  --border:    #30363d;
+  --text:      #e6edf3;
+  --text-dim:  #8b949e;
+  --text-mute: #6e7681;
+
+  --gold:  #f0c060;
+  --green: #7ee787;
+  --blue:  #58a6ff;
+  --red:   #e06c75;
+
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 12px;
+
+  --shadow-soft: 0 8px 24px -12px rgba(0,0,0,.7);
+  --hairline: 0.5px solid var(--border);
+}
+
+/* ===================================================================
+   RESET BÁSICO
+   =================================================================== */
+*{ margin:0; padding:0; box-sizing:border-box; }
+html,body{ min-height:100%; }
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter', system-ui, sans-serif;
+  font-size:15px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  display:flex; align-items:center; justify-content:center;
+  padding:32px 20px;
+  /* leve textura atmosférica, sem gradiente pesado (igual ao HUB) */
+  background-image:
+    radial-gradient(900px 560px at 82% -10%, rgba(240,192,96,.06), transparent 60%),
+    radial-gradient(760px 540px at 4% 4%, rgba(88,166,255,.05), transparent 55%);
+  background-attachment:fixed;
+}
+a{ color:inherit; text-decoration:none; }
+button{ font-family:inherit; cursor:pointer; border:none; background:none; color:inherit; }
+i.ti{ font-size:1.15em; line-height:1; }
+.serif{ font-family:'Cinzel', serif; }
+
+/* animação de entrada */
+.reveal{ opacity:0; transform:translateY(14px); animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards; animation-delay:var(--d,0s); }
+@keyframes rise{ to{ opacity:1; transform:none; } }
+
+/* ===================================================================
+   CARTÃO PRINCIPAL (split: marca + formulário)
+   =================================================================== */
+.auth{
+  width:100%; max-width:940px;
+  display:grid; grid-template-columns:1.05fr 1fr;
+  background:var(--surface);
+  border:var(--hairline);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:var(--shadow-soft);
+  position:relative;
+}
+.auth::before{ /* brilho dourado discreto no topo (igual à trilha) */
+  content:""; position:absolute; inset:0 0 auto 0; height:1px; z-index:5;
+  background:linear-gradient(90deg,transparent,rgba(240,192,96,.6),transparent);
+}
+
+/* ============ PAINEL DE MARCA (esquerda) ============ */
+.brand{
+  position:relative;
+  padding:48px 44px;
+  display:flex; flex-direction:column;
+  border-right:var(--hairline);
+  background:
+    radial-gradient(520px 360px at 18% 12%, rgba(240,192,96,.10), transparent 60%),
+    linear-gradient(160deg, #12161d, #0d1117);
+  overflow:hidden;
+}
+/* sutil grade de "mapa" ao fundo */
+.brand::after{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background-image:
+    linear-gradient(rgba(240,192,96,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240,192,96,.04) 1px, transparent 1px);
+  background-size:46px 46px;
+  -webkit-mask-image:radial-gradient(circle at 30% 30%, #000, transparent 78%);
+          mask-image:radial-gradient(circle at 30% 30%, #000, transparent 78%);
+}
+.brand > *{ position:relative; z-index:1; }
+
+/* logo (igual à topbar do HUB) */
+.logo{ display:flex; align-items:center; gap:11px; }
+.logo-mark{
+  width:40px; height:40px; display:grid; place-items:center;
+  border:0.5px solid rgba(240,192,96,.5);
+  border-radius:10px;
+  background:linear-gradient(160deg, rgba(240,192,96,.16), rgba(240,192,96,.04));
+  color:var(--gold); font-size:22px;
+}
+.logo-text{
+  font-family:'Cinzel', serif; font-weight:700; font-size:22px;
+  letter-spacing:.5px; color:var(--text);
+}
+.logo-text b{ color:var(--gold); font-weight:700; }
+
+.brand-hero{ margin-top:auto; }
+.brand .eyebrow{
+  font-size:12.5px; color:var(--gold); font-weight:600;
+  letter-spacing:1.6px; text-transform:uppercase;
+  display:flex; align-items:center; gap:7px; margin-bottom:14px;
+}
+.brand h1{
+  font-family:'Cinzel', serif; font-weight:700; font-size:31px;
+  line-height:1.18; margin-bottom:14px;
+}
+.brand h1 span{ color:var(--gold); }
+.brand p{ color:var(--text-dim); font-size:14px; max-width:34ch; }
+
+/* lista de vantagens com ícones Tabler */
+.perks{ list-style:none; margin-top:30px; display:flex; flex-direction:column; gap:14px; }
+.perks li{ display:flex; align-items:center; gap:13px; font-size:14px; color:var(--text); }
+.perks .pi{
+  width:36px; height:36px; flex-shrink:0; border-radius:9px;
+  display:grid; place-items:center; font-size:19px;
+  border:0.5px solid transparent;
+}
+.perks .pi.gold{ color:var(--gold);  background:rgba(240,192,96,.10); border-color:rgba(240,192,96,.25); }
+.perks .pi.green{ color:var(--green); background:rgba(126,231,135,.10); border-color:rgba(126,231,135,.25); }
+.perks .pi.blue{ color:var(--blue);  background:rgba(88,166,255,.10); border-color:rgba(88,166,255,.25); }
+.perks li small{ display:block; color:var(--text-mute); font-size:12px; }
+
+/* rodapé do painel: prova social leve */
+.brand-foot{
+  margin-top:34px; padding-top:22px; border-top:var(--hairline);
+  display:flex; align-items:center; gap:11px; font-size:12.5px; color:var(--text-mute);
+}
+.brand-foot .stars{ color:var(--gold); letter-spacing:1px; }
+
+/* ============ PAINEL DO FORMULÁRIO (direita) ============ */
+.form-panel{ padding:44px 42px; display:flex; flex-direction:column; }
+
+/* abas Entrar / Criar conta */
+.tabs{
+  display:grid; grid-template-columns:1fr 1fr; gap:4px;
+  background:var(--surface-2); border:var(--hairline);
+  border-radius:var(--r-md); padding:5px; margin-bottom:28px;
+  position:relative;
+}
+.tab{
+  position:relative; z-index:1;
+  padding:11px 10px; border-radius:7px;
+  font-weight:600; font-size:14px; color:var(--text-dim);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:color .2s;
+}
+.tab i{ font-size:16px; }
+.tab.active{ color:#1a1206; }
+/* indicador deslizante dourado */
+.tab-ind{
+  position:absolute; z-index:0; top:5px; bottom:5px; left:5px;
+  width:calc(50% - 5px);
+  border-radius:7px;
+  background:linear-gradient(150deg,#f0c060,#d8a945);
+  box-shadow:0 6px 16px -8px rgba(240,192,96,.7);
+  transition:transform .28s cubic-bezier(.2,.7,.2,1);
+}
+.tabs[data-mode="register"] .tab-ind{ transform:translateX(100%); }
+
+/* cabeçalho do formulário */
+.form-head{ margin-bottom:24px; }
+.form-head h2{
+  font-family:'Cinzel', serif; font-weight:700; font-size:24px;
+  margin-bottom:6px;
+}
+.form-head p{ color:var(--text-dim); font-size:13.5px; }
+
+/* campos */
+.field{ margin-bottom:16px; }
+.field label{
+  display:block; font-size:12.5px; font-weight:600;
+  color:var(--text-dim); margin-bottom:7px; letter-spacing:.2px;
+}
+.input{
+  position:relative; display:flex; align-items:center;
+  background:var(--surface-2); border:0.5px solid var(--border);
+  border-radius:var(--r-sm); transition:border-color .18s, box-shadow .18s, background .18s;
+}
+.input:focus-within{
+  border-color:var(--gold);
+  box-shadow:0 0 0 3px rgba(240,192,96,.14);
+  background:#20262f;
+}
+.input > i.lead{
+  padding:0 0 0 13px; color:var(--text-mute); font-size:18px;
+  transition:color .18s;
+}
+.input:focus-within > i.lead{ color:var(--gold); }
+.input input{
+  flex:1; min-width:0; background:none; border:none; outline:none;
+  color:var(--text); font-family:inherit; font-size:14.5px;
+  padding:12px 14px;
+}
+.input input::placeholder{ color:var(--text-mute); }
+/* botão mostrar/ocultar senha */
+.reveal-pass{
+  padding:0 13px; color:var(--text-mute); font-size:18px; display:grid; place-items:center;
+  transition:color .18s;
+}
+.reveal-pass:hover{ color:var(--text-dim); }
+
+/* linha utilitária: lembrar / esqueci senha */
+.field-util{ display:flex; align-items:center; justify-content:space-between; margin:-4px 0 22px; }
+.checkbox{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); cursor:pointer; user-select:none; }
+.checkbox input{ position:absolute; opacity:0; pointer-events:none; }
+.checkbox .box{
+  width:18px; height:18px; border-radius:5px; flex-shrink:0;
+  border:0.5px solid var(--border); background:var(--surface-2);
+  display:grid; place-items:center; color:#1a1206; font-size:12px;
+  transition:background .16s, border-color .16s;
+}
+.checkbox .box i{ opacity:0; transform:scale(.5); transition:opacity .16s, transform .16s; }
+.checkbox input:checked + .box{ background:var(--gold); border-color:var(--gold); }
+.checkbox input:checked + .box i{ opacity:1; transform:none; }
+.forgot{ font-size:13px; color:var(--text-dim); transition:color .18s; }
+.forgot:hover{ color:var(--blue); }
+
+/* termos (somente no registro) */
+.terms{ font-size:12px; color:var(--text-mute); margin:-4px 0 22px; }
+.terms a{ color:var(--text-dim); border-bottom:0.5px solid var(--border); }
+.terms a:hover{ color:var(--gold); border-color:var(--gold); }
+
+/* botão dourado primário (igual ao HUB) */
+.btn-gold{
+  display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
+  padding:13px 20px; border-radius:var(--r-sm);
+  background:linear-gradient(150deg,#f0c060,#d8a945);
+  color:#1a1206; font-weight:700; font-size:14.5px;
+  box-shadow:0 6px 18px -8px rgba(240,192,96,.7);
+  transition:transform .16s, box-shadow .16s, filter .16s;
+}
+.btn-gold:hover{ transform:translateY(-2px); box-shadow:0 10px 24px -8px rgba(240,192,96,.8); filter:brightness(1.05); }
+.btn-gold:active{ transform:translateY(0); }
+
+/* divisor "ou" */
+.divider{ display:flex; align-items:center; gap:14px; margin:22px 0; color:var(--text-mute); font-size:12px; letter-spacing:1px; text-transform:uppercase; }
+.divider::before, .divider::after{ content:""; flex:1; height:0.5px; background:var(--border); }
+
+/* botão Google (estilo ghost) */
+.btn-google{
+  display:flex; align-items:center; justify-content:center; gap:11px; width:100%;
+  padding:12px 18px; border-radius:var(--r-sm);
+  border:0.5px solid var(--border); background:var(--surface-2);
+  color:var(--text); font-weight:600; font-size:14px;
+  transition:border-color .16s, background .16s, transform .16s;
+}
+.btn-google:hover{ border-color:#3d444d; background:#222936; transform:translateY(-2px); }
+.btn-google .g{ width:18px; height:18px; flex-shrink:0; }
+
+/* alternador no rodapé do formulário */
+.switch-line{ margin-top:26px; text-align:center; font-size:13.5px; color:var(--text-dim); }
+.switch-line button{ color:var(--gold); font-weight:600; }
+.switch-line button:hover{ text-decoration:underline; }
+
+/* troca de painéis (login <-> registro) */
+.pane[hidden]{ display:none; }
+.pane{ animation:fade .35s ease; }
+@keyframes fade{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+
+/* campo "nome" só aparece no registro — controlado por [hidden] */
+
+/* ===================================================================
+   RESPONSIVO
+   =================================================================== */
+@media (max-width:780px){
+  .auth{ grid-template-columns:1fr; max-width:440px; }
+  .brand{ border-right:none; border-bottom:var(--hairline); padding:36px 34px 32px; }
+  .brand-hero{ margin-top:26px; }
+  .perks{ display:none; }
+  .brand-foot{ margin-top:24px; }
+}
+@media (max-width:480px){
+  .form-panel{ padding:34px 26px; }
+  .brand{ padding:30px 26px 26px; }
+}
+</style>
+</head>
+<body>
+
+<main class="auth reveal" style="--d:.04s">
+
+  <!-- ============================================================ -->
+  <!-- PAINEL DE MARCA                                               -->
+  <!-- ============================================================ -->
+  <aside class="brand">
+    <div class="logo">
+      <div class="logo-mark"><i class="ti ti-sword"></i></div>
+      <div class="logo-text">Study<b>Quest</b></div>
+    </div>
+
+    <div class="brand-hero">
+      <div class="eyebrow"><i class="ti ti-sparkles"></i>Sua jornada começa aqui</div>
+      <h1>Transforme seus estudos em uma <span>grande aventura</span></h1>
+      <p>Acumule XP, mantenha seu streak em chamas e desbloqueie cada nó do mapa de conhecimento.</p>
+
+      <ul class="perks">
+        <li>
+          <span class="pi gold"><i class="ti ti-bolt"></i></span>
+          <span>Ganhe XP a cada missão<small>Suba de nível enquanto aprende</small></span>
+        </li>
+        <li>
+          <span class="pi green"><i class="ti ti-stack-2"></i></span>
+          <span>Revisão espaçada (Leitner)<small>Memorize de verdade, sem decoreba</small></span>
+        </li>
+        <li>
+          <span class="pi blue"><i class="ti ti-crown"></i></span>
+          <span>Ranking semanal com amigos<small>Compita e suba no pódio</small></span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="brand-foot">
+      <span class="stars">★★★★★</span>
+      <span>Mais de 12 mil aventureiros já estudam aqui</span>
+    </div>
+  </aside>
+
+  <!-- ============================================================ -->
+  <!-- PAINEL DO FORMULÁRIO                                          -->
+  <!-- ============================================================ -->
+  <section class="form-panel">
+
+    <!-- abas -->
+    <div class="tabs" id="tabs" data-mode="login">
+      <div class="tab-ind"></div>
+      <button class="tab active" data-tab="login"><i class="ti ti-login-2"></i>Entrar</button>
+      <button class="tab" data-tab="register"><i class="ti ti-user-plus"></i>Criar conta</button>
+    </div>
+
+    <!-- ===================== PAINEL: ENTRAR ===================== -->
+    <div class="pane" id="pane-login">
+      <div class="form-head">
+        <h2>Bem-vindo de volta</h2>
+        <p>Continue de onde parou na sua jornada.</p>
+      </div>
+
+      <form onsubmit="return false">
+        <div class="field">
+          <label for="l-email">E-mail</label>
+          <div class="input">
+            <i class="ti ti-mail lead"></i>
+            <input type="email" id="l-email" placeholder="voce@exemplo.com" autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="l-pass">Senha</label>
+          <div class="input">
+            <i class="ti ti-lock lead"></i>
+            <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password" />
+            <button type="button" class="reveal-pass" data-target="l-pass" aria-label="Mostrar senha"><i class="ti ti-eye"></i></button>
+          </div>
+        </div>
+
+        <div class="field-util">
+          <label class="checkbox">
+            <input type="checkbox" checked />
+            <span class="box"><i class="ti ti-check"></i></span>
+            Manter conectado
+          </label>
+          <a href="#" class="forgot">Esqueci minha senha</a>
+        </div>
+
+        <button type="submit" class="btn-gold"><i class="ti ti-sword"></i>Entrar na aventura</button>
+      </form>
+
+      <div class="divider">ou</div>
+
+      <button class="btn-google">
+        <svg class="g" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8a12 12 0 1 1 0-24c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 1 0 24 44c11 0 19.5-8 19.5-20 0-1.3-.1-2.3-.4-3.5z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.6 2.3-7.2 2.3-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C40.9 36 44 30.7 44 24c0-1.3-.1-2.3-.4-3.5z"/>
+        </svg>
+        Continuar com Google
+      </button>
+
+      <p class="switch-line">Ainda não tem conta? <button type="button" data-go="register">Criar conta grátis</button></p>
+    </div>
+
+    <!-- ===================== PAINEL: CRIAR CONTA ===================== -->
+    <div class="pane" id="pane-register" hidden>
+      <div class="form-head">
+        <h2>Crie sua conta</h2>
+        <p>Comece sua jornada e ganhe seus primeiros 50 XP.</p>
+      </div>
+
+      <form onsubmit="return false">
+        <div class="field">
+          <label for="r-name">Nome de aventureiro</label>
+          <div class="input">
+            <i class="ti ti-user lead"></i>
+            <input type="text" id="r-name" placeholder="Como devemos te chamar?" autocomplete="name" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="r-email">E-mail</label>
+          <div class="input">
+            <i class="ti ti-mail lead"></i>
+            <input type="email" id="r-email" placeholder="voce@exemplo.com" autocomplete="email" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="r-pass">Senha</label>
+          <div class="input">
+            <i class="ti ti-lock lead"></i>
+            <input type="password" id="r-pass" placeholder="Mínimo de 8 caracteres" autocomplete="new-password" />
+            <button type="button" class="reveal-pass" data-target="r-pass" aria-label="Mostrar senha"><i class="ti ti-eye"></i></button>
+          </div>
+        </div>
+
+        <p class="terms">Ao criar a conta, você concorda com os <a href="#">Termos</a> e a <a href="#">Política de Privacidade</a>.</p>
+
+        <button type="submit" class="btn-gold"><i class="ti ti-flag-2"></i>Criar conta e começar</button>
+      </form>
+
+      <div class="divider">ou</div>
+
+      <button class="btn-google">
+        <svg class="g" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8a12 12 0 1 1 0-24c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 1 0 24 44c11 0 19.5-8 19.5-20 0-1.3-.1-2.3-.4-3.5z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.6 2.3-7.2 2.3-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C40.9 36 44 30.7 44 24c0-1.3-.1-2.3-.4-3.5z"/>
+        </svg>
+        Cadastrar com Google
+      </button>
+
+      <p class="switch-line">Já tem uma conta? <button type="button" data-go="login">Fazer login</button></p>
+    </div>
+
+  </section>
+</main>
+
+<script>
+/* ===================================================================
+   ALTERNÂNCIA ENTRE ABAS + UTILITÁRIOS
+   =================================================================== */
+(function(){
+  const tabs   = document.getElementById('tabs');
+  const tabBtns= tabs.querySelectorAll('.tab');
+  const panes  = {
+    login:    document.getElementById('pane-login'),
+    register: document.getElementById('pane-register')
+  };
+
+  function setMode(mode){
+    tabs.dataset.mode = mode;
+    tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === mode));
+    Object.entries(panes).forEach(([k,el]) => { el.hidden = (k !== mode); });
+  }
+
+  // clique nas abas
+  tabBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.tab)));
+  // links "criar conta" / "fazer login" no rodapé
+  document.querySelectorAll('[data-go]').forEach(b =>
+    b.addEventListener('click', () => setMode(b.dataset.go))
+  );
+
+  // mostrar / ocultar senha
+  document.querySelectorAll('.reveal-pass').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inp = document.getElementById(btn.dataset.target);
+      const ic  = btn.querySelector('i');
+      const show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password';
+      ic.className = show ? 'ti ti-eye-off' : 'ti ti-eye';
+    });
+  });
+})();
+</script>
+</body>
+</html>
