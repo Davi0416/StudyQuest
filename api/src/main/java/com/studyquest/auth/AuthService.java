@@ -23,9 +23,11 @@ public class AuthService {
     private static final String ISSUER = "https://studyquest.app";
 
     private final UserRepository userRepository;
+    private final io.smallrye.jwt.auth.principal.JWTParser jwtParser;
 
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, io.smallrye.jwt.auth.principal.JWTParser jwtParser) {
         this.userRepository = userRepository;
+        this.jwtParser = jwtParser;
     }
 
     @Transactional
@@ -59,7 +61,7 @@ public class AuthService {
     public TokenResponse refresh(String refreshToken) {
         // valida o refresh token e emite novo access token
         try {
-            var claims = io.smallrye.jwt.auth.principal.JWTParser.parse(refreshToken);
+            var claims = jwtParser.parse(refreshToken);
             String subject = claims.getSubject();
             UUID userId = UUID.fromString(subject);
             User user = userRepository.findById(userId);
