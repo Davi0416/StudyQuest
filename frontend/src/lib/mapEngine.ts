@@ -32,7 +32,43 @@ export const ZONES = [
   { b: 'cave', c: 48, r: 6 }, { b: 'cave', c: 51, r: 11 },
 ];
 
-export const LAKE = { c: 5, r: 16, rad: 3.6 };
+export const LAKE = { c: 5, r: 16, rad: 3.4 };
+
+function isLakeTile(c: number, r: number) {
+  const dl = Math.hypot(c - LAKE.c, r - LAKE.r) + (hash2(c, r) - 0.5) * 1.6;
+  return dl < LAKE.rad;
+}
+
+function carveNodePlatforms(biome: string[][], nodeTiles: [number, number][], nodeBiomes: string[]) {
+  nodeTiles.forEach(([c, r], i) => {
+    const plat = nodeBiomes[i] ?? 'grass';
+    biome[c][r] = plat;
+    for (const [dc, dr] of [[0, -1], [0, 1], [-1, 0], [1, 0]] as const) {
+      const tc = c + dc;
+      const tr = r + dr;
+      if (tc < 0 || tr < 0 || tc >= COLS || tr >= ROWS) continue;
+      if (isLakeTile(tc, tr)) biome[tc][tr] = plat;
+    }
+  });
+}
+
+function paintBridgeTile(ctx: CanvasRenderingContext2D, x: number, y: number, c: number, r: number) {
+  const rng = (i: number) => hash2(c * 7 + i * 13, r * 7 + i * 29);
+  ctx.fillStyle = '#5a3f22';
+  ctx.fillRect(x, y, TILE, TILE);
+  for (let yy = 0; yy < TILE; yy++) {
+    const plank = yy % 3 === 0 ? '#6b4a2a' : '#4a3218';
+    ctx.fillStyle = plank;
+    ctx.fillRect(x + 1, y + yy, TILE - 2, 1);
+  }
+  ctx.fillStyle = '#3d2812';
+  ctx.fillRect(x, y, 1, TILE);
+  ctx.fillRect(x + TILE - 1, y, 1, TILE);
+  if (rng(0) > 0.55) {
+    ctx.fillStyle = '#7a5538';
+    ctx.fillRect(x + 2 + (rng(1) * 3 | 0), y + 2 + (rng(2) * 3 | 0), 2, 1);
+  }
+}
 
 export const HTML_DECO = [
   { type: 'torch' as const, tile: [25, 24] as [number, number] },
@@ -42,6 +78,8 @@ export const HTML_DECO = [
   { type: 'torch' as const, tile: [39, 18] as [number, number] },
   { type: 'flag' as const, tile: [8, 30] as [number, number] },
   { type: 'flag' as const, tile: [19, 25] as [number, number] },
+  { type: 'bridge' as const, tile: [6, 19] as [number, number] },
+  { type: 'bridge' as const, tile: [5, 18] as [number, number] },
 ];
 
 const SPR_TREE = ['..FFF..', '.FFFFF.', 'FFFFFFF', 'FFFFFFF', 'FFOFFOF', '.FFFFF.', '..FFF..', '...T...', '...T...'];
@@ -64,8 +102,7 @@ export function buildBiomeGrid(): string[][] {
   for (let c = 0; c < COLS; c++) {
     grid[c] = [];
     for (let r = 0; r < ROWS; r++) {
-      const dl = Math.hypot(c - LAKE.c, r - LAKE.r) + (hash2(c, r) - 0.5) * 1.6;
-      if (dl < LAKE.rad) {
+      if (isLakeTile(c, r)) {
         grid[c][r] = 'water';
         continue;
       }
@@ -137,7 +174,8 @@ export type MapEngineState = {
 export function createMapEngine(
   canvas: HTMLCanvasElement,
   nodeTiles: [number, number][],
-  edges: [number, number][]
+  edges: [number, number][],
+  nodeBiomes: string[] = []
 ): MapEngineState {
   canvas.width = COLS * TILE;
   canvas.height = ROWS * TILE;
@@ -148,6 +186,7 @@ export function createMapEngine(
   ctx.imageSmoothingEnabled = false;
 
   const biome = buildBiomeGrid();
+  carveNodePlatforms(biome, nodeTiles, nodeBiomes);
   const pathSet = buildPathSet(nodeTiles, edges);
   const waterTiles: [number, number][] = [];
 
@@ -176,6 +215,14 @@ export function createMapEngine(
     const y = r * TILE;
     const isPath = pathSet.has(key(c, r));
     const b = biome[c][r];
+    const onLake = isLakeTile(c, r);
+
+    if (isPath && onLake) {
+      paintWaterTile(c, r, 0);
+      paintBridgeTile(ctx, x, y, c, r);
+      return;
+    }
+
     const pal = isPath ? PAL.path : (PAL[b as BiomeKey] ?? PAL.grass);
 
     ctx.fillStyle = pal.base;
@@ -219,7 +266,8 @@ export function createMapEngine(
   for (let c = 0; c < COLS; c++) {
     for (let r = 0; r < ROWS; r++) {
       paintTile(c, r);
-      if (biome[c][r] === 'water') waterTiles.push([c, r]);
+      const onBridge = pathSet.has(key(c, r)) && isLakeTile(c, r);
+      if (biome[c][r] === 'water' && !onBridge) waterTiles.push([c, r]);
     }
   }
 
@@ -263,6 +311,14 @@ export function createMapEngine(
   }
 
   const bossTile = nodeTiles[nodeTiles.length - 1];
+  const minibossTile = nodeTiles.length > 1 ? nodeTiles[nodeTiles.length - 2] : null;
+  if (minibossTile) {
+    const mx = minibossTile[0] * TILE;
+    const my = minibossTile[1] * TILE;
+    ctx.fillStyle = '#1a1208';
+    ctx.fillRect(mx - 4, my + 2, 14, 8);
+    drawSprite(ctx, SPR_ROCK, mx - 2, my + 1, { R: '#5c4030', H: '#7a5538' });
+  }
   if (bossTile) {
     const bx = bossTile[0] * TILE;
     const by = bossTile[1] * TILE;

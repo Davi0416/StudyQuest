@@ -5,70 +5,12 @@ import { Topbar } from '../components/Topbar';
 import { AulaExercicio } from '../components/AulaExercicio';
 import api, { unwrap } from '../lib/api';
 import type { AulaBloco, AulaProgresso, Flashcard, No } from '../types';
+import { AulaRichText } from '../components/AulaRichText';
 import { Button } from '../components/ui/Button';
-import { IconBolt, IconCheck, IconBook, IconCards, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
-
-function looksLikeCode(line: string): boolean {
-  const t = line.trim();
-  return /^(print|if |else|elif |for |while |try|except|def |import |from |return |break|continue|[a-z_][\w]*\s*=)/.test(t)
-    || (t.includes('(') && t.includes(')'));
-}
+import { IconBolt, IconCheck, IconBook, IconCards, IconChevronLeft, IconChevronRight, IconPlayerPlay } from '@tabler/icons-react';
 
 function TextoBloco({ conteudo }: { conteudo: string }) {
-  return (
-    <div className="p-5 rounded-lg bg-surface border border-border space-y-2">
-      {conteudo.split('\n').map((line, i) => {
-        const trimmed = line.trim();
-        if (!trimmed) return <div key={i} className="h-1" />;
-
-        if (trimmed.startsWith('💡')) {
-          return (
-            <div key={i} className="px-4 py-3 rounded-md bg-gold/10 border border-gold/25 text-sm text-text-dim leading-relaxed">
-              {trimmed}
-            </div>
-          );
-        }
-
-        if (trimmed.startsWith('⚠️')) {
-          return (
-            <div key={i} className="px-4 py-3 rounded-md bg-amber-500/10 border border-amber-500/30 text-sm text-text-dim leading-relaxed">
-              {trimmed}
-            </div>
-          );
-        }
-
-        if (trimmed.startsWith('▶')) {
-          return (
-            <p key={i} className="text-sm font-semibold text-text mt-3 first:mt-0">
-              {trimmed}
-            </p>
-          );
-        }
-
-        if (trimmed.startsWith('•')) {
-          return (
-            <li key={i} className="ml-4 text-text-dim leading-relaxed list-none before:content-['•'] before:mr-2 before:text-gold">
-              {trimmed.slice(1).trim()}
-            </li>
-          );
-        }
-
-        if (looksLikeCode(trimmed)) {
-          return (
-            <pre key={i} className="px-4 py-2 rounded-md bg-surface-2 border border-border text-sm font-mono text-green overflow-x-auto">
-              {trimmed}
-            </pre>
-          );
-        }
-
-        return (
-          <p key={i} className="text-text-dim leading-relaxed">
-            {trimmed}
-          </p>
-        );
-      })}
-    </div>
-  );
+  return <AulaRichText conteudo={conteudo} />;
 }
 
 function youtubeAssistirUrl(url: string, linkAssistir?: string): string {
@@ -86,8 +28,8 @@ function VideoBloco({ titulo, url, linkAssistir }: { titulo: string; url: string
   return (
     <div className="rounded-lg overflow-hidden border border-border bg-surface flex flex-col">
       <div className="px-4 py-3 border-b border-border bg-surface-2 flex items-center gap-2 shrink-0">
-        <span className="text-lg">📺</span>
-        <span className="text-sm font-semibold">{titulo}</span>
+        <IconPlayerPlay size={16} className="text-gold shrink-0" />
+        <span className="text-sm font-semibold font-cinzel tracking-wide">{titulo}</span>
       </div>
       <div className="aspect-video bg-black">
         <iframe
@@ -108,7 +50,7 @@ function VideoBloco({ titulo, url, linkAssistir }: { titulo: string; url: string
           rel="noopener noreferrer"
           className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-xs font-semibold bg-red-600/90 hover:bg-red-600 text-white shrink-0 transition-colors"
         >
-          Assistir na Taverna ↗
+          Assistir no YouTube ↗
         </a>
       </div>
     </div>
@@ -149,7 +91,7 @@ function FlashcardsBloco({ cards }: { cards: Flashcard[] }) {
               className="text-left p-4 rounded-md border border-border bg-surface-2 hover:border-gold/40 transition-colors min-h-[100px]"
             >
               <div className="text-[10px] uppercase tracking-widest text-gold mb-2">
-                {virado ? 'Solução' : 'Ameaça'}
+                {virado ? 'Resposta' : 'Pergunta'}
               </div>
               <p className="text-sm text-text-dim whitespace-pre-wrap">
                 {virado ? card.verso : card.frente}
@@ -164,9 +106,15 @@ function FlashcardsBloco({ cards }: { cards: Flashcard[] }) {
 
 function tituloPasso(bloco: AulaBloco): string {
   switch (bloco.tipo) {
-    case 'texto': return 'Leitura';
+    case 'texto': {
+      const first = bloco.conteudo.split('\n').map(l => l.trim()).find(Boolean);
+      if (first?.startsWith('## ')) return first.slice(3).slice(0, 42);
+      if (first?.startsWith('▶')) return first.slice(1).trim().slice(0, 42);
+      if (first?.startsWith('Prática:')) return 'Campo de treinamento';
+      return 'Leitura';
+    }
     case 'video': return bloco.titulo;
-    case 'exercicio': return bloco.titulo || (bloco.boss ? 'Missão Final' : `Exercício nível ${bloco.nivel}`);
+    case 'exercicio': return bloco.titulo || (bloco.boss ? 'Boss final' : bloco.miniboss ? 'Miniboss' : `Exercício · nível ${bloco.nivel}`);
     case 'flashcards': return 'Flashcards';
     default: return 'Conteúdo';
   }

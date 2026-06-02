@@ -4,6 +4,7 @@ import com.studyquest.offline.UserTrilha;
 import com.studyquest.shared.db.LocalDb;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
 import com.studyquest.trilhas.dto.TrilhaResponse;
+import com.studyquest.trilhas.seed.TrilhaSeedLoader;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -21,9 +22,13 @@ public class TrilhaService {
     TrilhaRepository trilhaRepository;
 
     @Inject
+    TrilhaSeedLoader trilhaSeedLoader;
+
+    @Inject
     LocalDb localDb;
 
     public List<TrilhaResponse> listarTodas() {
+        trilhaSeedLoader.ensureSeeded();
         return trilhaRepository.findAtivas().stream()
                 .map(TrilhaResponse::of)
                 .toList();
@@ -39,6 +44,7 @@ public class TrilhaService {
     }
 
     public List<TrilhaResponse> ativas(UUID userId) {
+        trilhaSeedLoader.ensureSeeded();
         List<UserTrilha> userTrilhas = localDb.read(em ->
                 em.createQuery("SELECT ut FROM UserTrilha ut WHERE ut.userId = :uid", UserTrilha.class)
                         .setParameter("uid", userId)

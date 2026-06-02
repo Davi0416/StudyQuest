@@ -13,9 +13,11 @@ import com.studyquest.trilhas.TrilhaRepository;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,6 +31,7 @@ import java.util.Set;
 @ApplicationScoped
 public class TrilhaSeedLoader {
 
+    private static final Logger LOG = Logger.getLogger(TrilhaSeedLoader.class);
     private static final String INDEX = "trilhas/index.json";
 
     @Inject
@@ -49,8 +52,51 @@ public class TrilhaSeedLoader {
     @Inject
     EntityManager em;
 
+    @Inject
+    Instance<TrilhaSeedLoader> self;
+
+    void onStart(@Observes StartupEvent event) {
+        self.get().syncFromJson();
+    }
+
+    /** Sincroniza JSON → banco na subida (sempre idempotente). */
     @Transactional
-    void onStart(@Observes StartupEvent event) throws IOException {
+    public void syncFromJson() {
+        try {
+            LOG.info("Sincronizando trilhas a partir dos JSONs em resources/trilhas/...");
+            seedAll();
+            LOG.infof("Trilhas prontas: %d ativa(s)", trilhaRepository.findAtivas().size());
+        } catch (IOException e) {
+            throw new IllegalStateException("Falha ao carregar trilhas do JSON", e);
+        }
+    }
+
+    /** Garante catálogo completo antes de listar (ex.: hot reload sem StartupEvent). */
+    @Transactional
+    public void ensureSeeded() {
+        try {
+            if (catalogoCompleto()) {
+                return;
+            }
+            self.get().syncFromJson();
+        } catch (IOException e) {
+            throw new IllegalStateException("Falha ao carregar trilhas do JSON", e);
+        }
+    }
+
+    private boolean catalogoCompleto() throws IOException {
+        List<String> arquivos = objectMapper.readValue(resource(INDEX), new TypeReference<>() {});
+        for (String arquivo : arquivos) {
+            TrilhaSeedDto dto = objectMapper.readValue(resource("trilhas/" + arquivo), TrilhaSeedDto.class);
+            Optional<Trilha> trilha = trilhaRepository.find("titulo", dto.titulo()).firstResultOptional();
+            if (trilha.isEmpty() || !trilha.get().isAtivo()) {
+                return false;
+            }
+        }
+        return !arquivos.isEmpty();
+    }
+
+    private void seedAll() throws IOException {
         List<String> arquivos = objectMapper.readValue(resource(INDEX), new TypeReference<>() {});
         for (String arquivo : arquivos) {
             TrilhaSeedDto dto = objectMapper.readValue(resource("trilhas/" + arquivo), TrilhaSeedDto.class);
@@ -70,6 +116,7 @@ public class TrilhaSeedLoader {
         trilha.setDescricao(dto.descricao());
         trilha.setCor(dto.cor());
         trilha.setXpTotal(xpTotal);
+        trilha.setAtivo(true);
 
         List<No> existentes = noRepository.find("trilhaId", trilha.getId()).list();
         Set<Integer> ordensJson = new HashSet<>();
@@ -99,20 +146,38 @@ public class TrilhaSeedLoader {
         Map<Integer, No> nosAtualizados = new HashMap<>();
         for (NoSeedDto noDto : dto.nos()) {
             No no = porOrdem.get(noDto.ordem());
+            String aulaJson = noDto.aula() != null
+                    ? objectMapper.writeValueAsString(noDto.aula())
+                    : null;
+
             if (no == null) {
                 no = No.builder()
                         .trilhaId(trilha.getId())
                         .ordem(noDto.ordem())
+                        .titulo(noDto.titulo())
+                        .conteudo(noDto.conteudo())
+                        .xpRecompensa(noDto.xpRecompensa())
+                        .aulaJson(aulaJson)
                         .build();
                 noRepository.persist(no);
+            } else {
+                no.setTitulo(noDto.titulo());
+                no.setConteudo(noDto.conteudo());
+                no.setXpRecompensa(noDto.xpRecompensa());
+                no.setAulaJson(aulaJson);
             }
 
-            no.setTitulo(noDto.titulo());
-            no.setConteudo(noDto.conteudo());
-            no.setXpRecompensa(noDto.xpRecompensa());
-            no.setAulaJson(noDto.aula() != null
-                    ? objectMapper.writeValueAsString(noDto.aula())
-                    : null);
+            flashcardRepository.find("noId", no.getId()).list().forEach(flashcardRepository::delete);
+            if (noDto.flashcards() != null) {
+                for (FlashcardSeedDto fc : noDto.flashcards()) {
+                    flashcardRepository.persist(Flashcard.builder()
+                            .trilhaId(trilha.getId())
+                            .noId(no.getId())
+                            .frente(fc.frente())
+                            .verso(fc.verso())
+                            .build());
+                }
+            }
 
             missaoRepository.find("noId", no.getId()).firstResultOptional()
                     .ifPresent(missaoRepository::delete);
@@ -148,6 +213,7 @@ public class TrilhaSeedLoader {
                 .descricao(dto.descricao())
                 .cor(dto.cor())
                 .xpTotal(xpTotal)
+                .ativo(true)
                 .build();
         trilhaRepository.persist(trilha);
 
