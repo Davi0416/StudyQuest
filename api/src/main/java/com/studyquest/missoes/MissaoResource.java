@@ -27,6 +27,12 @@ public class MissaoResource {
     JsonWebToken jwt;
 
     @GET
+    @Path("/por-no/{noId}")
+    public ApiResponse<MissaoResponse> porNo(@PathParam("noId") Long noId) {
+        return ApiResponse.ok(missaoService.porNoId(noId));
+    }
+
+    @GET
     @Path("/{id}")
     public ApiResponse<MissaoResponse> detalhe(@PathParam("id") Long id) {
         return ApiResponse.ok(missaoService.detalhe(id));
