@@ -1,12 +1,4 @@
--- Trilhas iniciais
-INSERT INTO trilhas (titulo, descricao, icon_url, cor, xp_total, ativo, criada_em)
-VALUES
-  ('Python para Iniciantes', 'Do zero ao primeiro projeto em Python', null, '#3B82F6', 2000, true, now()),
-  ('Algoritmos e Estruturas de Dados', 'Fundamentos essenciais para qualquer dev', null, '#8B5CF6', 3000, true, now()),
-  ('JavaScript Moderno', 'ES6+, async/await, APIs e muito mais', null, '#F59E0B', 2500, true, now())
-ON CONFLICT DO NOTHING;
-
--- Conquistas
+-- Conquistas iniciais (trilhas são carregadas de api/src/main/resources/trilhas/*.json)
 INSERT INTO conquistas (titulo, descricao, icon_url, criterio)
 VALUES
   ('Primeiros Passos', 'Ganhe 500 XP no total', null, 'xp_total >= 500'),

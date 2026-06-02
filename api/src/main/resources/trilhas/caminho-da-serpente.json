@@ -1,0 +1,441 @@
+{
+  "titulo": "O Caminho da Serpente",
+  "descricao": "Python 3 do zero absoluto — teoria, flashcards, desafios práticos e a missão final do Limpador de Registros.",
+  "cor": "#22C55E",
+  "xpTotal": 450,
+  "nos": [
+    {
+      "ordem": 1,
+      "titulo": "O Básico do Básico",
+      "conteudo": "Antes de lutar contra dragões, você precisa saber falar com o computador.\n\nO feitiço print() é o megafone do Python — tudo entre parênteses e aspas aparece na tela.\n\nVariáveis são caixas com etiquetas para guardar dados no seu inventário:\n• int — número inteiro (ex: 10 moedas)\n• float — número decimal (ex: 3.5 de dano)\n• str — texto entre aspas (ex: \"Espada Longa\")\n• bool — True ou False (ex: envenenado = True)\n\nCoerção (Alquimia): transforme tipos com int(), float() ou str().\nExemplo: int(\"10\") transforma o texto \"10\" no número 10.",
+      "xpRecompensa": 50,
+      "prerequisitosOrdem": [],
+      "flashcards": [
+        {
+          "frente": "O Megafone\nComo fazer o computador dizer \"Olá, Mundo\"?",
+          "verso": "Usando o comando: print(\"Olá, Mundo\")"
+        },
+        {
+          "frente": "Alquimia Básica\nO que a função int() faz com o texto \"42\"?",
+          "verso": "Transforma a string \"42\" no número inteiro 42."
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
+            "tipo": "texto",
+            "conteudo": "Bem-vindo, aventureiro! ⚔️\n\nSe você nunca viu uma linha de código na vida, está no lugar certo. Programar é dar instruções bem claras para o computador — como um receita de bolo, passo a passo.\n\nNesta trilha você vai aprender Python, uma linguagem usada em jogos, sites, inteligência artificial e muito mais. Não precisa ser \"bom de matemática\" nem falar inglês fluente. Só precisa de paciência e vontade de praticar."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ O que é um programa?\n\nQuando você manda o computador fazer algo, você escreve um programa. O Python lê suas instruções de cima para baixo, uma por vez.\n\n▶ Seu primeiro comando: print()\n\nPense no print() como um megafone: tudo que você colocar dentro dele aparece na tela.\n\nExemplo — copie mentalmente:\nprint(\"Olá, Mundo\")\n\nO que aparece na tela:\nOlá, Mundo\n\n💡 Tudo que for texto precisa ficar entre aspas (\"assim\"). Números não precisam de aspas."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Variáveis = caixas com etiqueta\n\nImagine uma caixa onde você guarda itens. A etiqueta da caixa é o nome; o que está dentro é o valor.\n\nExemplo:\nbananas = 5\n\nAgora, sempre que você escrever bananas, o Python lembra que ali tem o número 5.\n\n▶ Tipos de dados (o que cabe na caixa)\n• int — número inteiro, sem vírgula (ex: 10 moedas)\n• float — número com vírgula (ex: 3.5 de dano)\n• str — texto, sempre entre aspas (ex: \"Espada Longa\")\n• bool — verdadeiro ou falso: True ou False (ex: porta_aberta = True)\n\n💡 Os nomes das caixas não podem ter espaço. Use underline: minha_espada"
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Transformando tipos (coerção)\n\nÀs vezes o Python guarda um número como texto (\"10\") e você precisa de número de verdade para calcular. Aí entram as funções de conversão:\n\n• int(\"10\") → vira o número 10\n• float(\"3.5\") → vira 3.5\n• str(42) → vira o texto \"42\"\n\n▶ Cuidado com essa armadilha!\n\n\"10\" * 2 resulta em \"1010\" (texto repetido), NÃO em 20.\n\nPara somar de verdade, converta antes:\nint(\"10\") * 2  →  20\n\n💡 Regra prática: vai fazer conta? Converta para int() ou float() primeiro."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Primeiros comandos: print() e variáveis (Curso em Vídeo #04)",
+            "url": "https://www.youtube.com/embed/31llNGKWDdo",
+            "linkAssistir": "https://www.youtube.com/watch?v=31llNGKWDdo"
+          },
+          {
+            "tipo": "video",
+            "titulo": "Tipos primitivos e saída de dados (Curso em Vídeo #06)",
+            "url": "https://www.youtube.com/embed/hdDHg1p3YVc",
+            "linkAssistir": "https://www.youtube.com/watch?v=hdDHg1p3YVc"
+          },
+          {
+            "tipo": "exercicio",
+            "id": "basico-bananas",
+            "nivel": 1,
+            "icone": "⚔️",
+            "enunciado": "Desafio fácil — mostrar um número na tela.\n\n1. Crie a variável bananas com o valor 5\n2. Use print() para mostrar o conteúdo de bananas\n\nResultado esperado na tela: 5",
+            "codigoInicial": "bananas = 5\n# Use print() abaixo para mostrar bananas\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "5\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "basico-ficha-rpg",
+            "nivel": 2,
+            "icone": "🛡️",
+            "enunciado": "Monte a ficha do seu personagem.\n\n1. Crie nome (texto) e idade (número)\n2. Imprima uma frase juntando os dois\n\nExemplo de saída:\nAventureiro tem 20 anos\n\n💡 Você pode juntar texto e número assim:\nprint(nome, \"tem\", idade, \"anos\")",
+            "codigoInicial": "nome = \"Aventureiro\"\nidade = 20\n# Imprima uma frase juntando nome e idade\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "Aventureiro tem 20 anos\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "basico-coercao",
+            "nivel": 3,
+            "icone": "🔮",
+            "enunciado": "Bug de alquimia! 🧪\n\nO código abaixo deveria calcular 10 + 10 = 20, mas está saindo \"1010\".\n\nCorrija usando int() para que o resultado seja 20.",
+            "codigoInicial": "quantidade = \"10\"\ntotal = quantidade * 2\nprint(total)\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "20\n" }
+            ]
+          },
+          { "tipo": "flashcards" }
+        ]
+      }
+    },
+    {
+      "ordem": 2,
+      "titulo": "Matemática e Textos",
+      "conteudo": "Operadores goblínicos:\n• // — divisão inteira (corta o decimal)\n• % — resto da divisão\n\nMagia de textos:\n• \"Oi\" + \", Guerreiro\" = \"Oi, Guerreiro\"\n• \"Au\" * 3 = \"AuAuAu\"\n\nF-strings (Inscrições Rúnicas): coloque f antes das aspas para injetar variáveis.\nExemplo: f\"Eu tenho {bananas} bananas\"",
+      "xpRecompensa": 50,
+      "prerequisitosOrdem": [1],
+      "flashcards": [
+        {
+          "frente": "A Espada e o Machado\nQual a diferença entre / e //?",
+          "verso": "/ devolve float (2.5), // corta o decimal e devolve int (2)."
+        },
+        {
+          "frente": "O Poder do 'F'\nComo colocar uma variável chamada vida dentro de um texto?",
+          "verso": "Usando f-string: f\"Minha vida é {vida}\""
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
+            "tipo": "texto",
+            "conteudo": "Neste capítulo você aprende duas coisas que aparecem em todo jogo: contas (dano, moedas, vida) e textos (nomes, mensagens, diálogos).\n\nO Python funciona como uma calculadora superpoderosa — e também sabe brincar com palavras como se fossem blocos de Lego."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Operadores matemáticos\n\nSímbolo | Nome | Exemplo | Resultado\n+ | soma | 5 + 3 | 8\n- | subtração | 5 - 3 | 2\n* | multiplicação | 5 * 3 | 15\n/ | divisão normal | 10 / 3 | 3.333...\n// | divisão inteira | 10 // 3 | 3 (joga fora o resto)\n% | resto da divisão | 10 % 3 | 1 (sobra 1 moeda)\n\n▶ Exemplo do saque\n\n10 moedas divididas por 3 goblins:\n• 10 // 3 = 3 moedas para cada um\n• 10 % 3 = 1 moeda sobrando\n\n💡 Use // quando precisar de número redondo (sem vírgula)."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Textos (strings) também somam e multiplicam!\n\n\"Oi\" + \", Guerreiro\"  →  \"Oi, Guerreiro\"\n\"Au\" * 3           →  \"AuAuAu\"\n\n▶ Fatiar texto (slicing)\n\nCada letra tem uma posição, começando do 0:\n\nPalavra:  E  S  T  U  D  A  R\nPosição:  0  1  2  3  4  5  6\n\n\"ESTUDAR\"[0:4] pega da posição 0 até antes da 4 → \"ESTU\"\n\n💡 Pense em [início:fim] como recortar um pedaço da palavra."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ F-strings — a forma mais fácil de montar frases\n\nColoque a letra f antes das aspas e coloque variáveis entre chaves { }:\n\npreco = 49.9\nprint(f\"O item custa R$ {preco:.2f}\")\n\nSaída:\nO item custa R$ 49.90\n\nO :.2f formata o número com exatamente 2 casas depois da vírgula — perfeito para preços.\n\n💡 Sempre que quiser juntar texto + variável, prefira f-string. É mais legível que outras formas."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Operadores aritméticos (Curso em Vídeo #07)",
+            "url": "https://www.youtube.com/embed/Vw6gLypRKmY",
+            "linkAssistir": "https://www.youtube.com/watch?v=Vw6gLypRKmY"
+          },
+          {
+            "tipo": "video",
+            "titulo": "Manipulando textos e fatiamento (Curso em Vídeo #09)",
+            "url": "https://www.youtube.com/embed/a7DH88vk2Sk",
+            "linkAssistir": "https://www.youtube.com/watch?v=a7DH88vk2Sk"
+          },
+          {
+            "tipo": "exercicio",
+            "id": "math-divisao-inteira",
+            "nivel": 1,
+            "icone": "⚔️",
+            "enunciado": "Divida o tesouro!\n\n10 moedas para 3 goblins. Use // (divisão inteira) e imprima quanto cada um recebe.\n\nResultado esperado: 3",
+            "codigoInicial": "# Calcule 10 // 3 e mostre com print()\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "3\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "math-slicing-estu",
+            "nivel": 2,
+            "icone": "🛡️",
+            "enunciado": "Recorte a palavra!\n\nNa palavra \"ESTUDAR\", use slicing para pegar só \"ESTU\" e imprima.\n\n💡 Lembre: [0:4] pega do início até antes da posição 4.",
+            "codigoInicial": "palavra = \"ESTUDAR\"\n# Use slicing e print\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "ESTU\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "math-fstring-preco",
+            "nivel": 3,
+            "icone": "🔮",
+            "enunciado": "Etiqueta de preço no mercador.\n\nO item custa preco = 49.9. Use f-string para imprimir exatamente:\n\nO item custa R$ 49.90\n\n💡 Use {preco:.2f} dentro da f-string.",
+            "codigoInicial": "preco = 49.9\n# Escreva seu print com f-string abaixo\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "O item custa R$ 49.90\n" }
+            ]
+          },
+          { "tipo": "flashcards" }
+        ]
+      }
+    },
+    {
+      "ordem": 3,
+      "titulo": "Condicionais",
+      "conteudo": "Uma aventura é feita de escolhas:\n• if — verifica se algo é verdadeiro\n• elif — segunda opção se a primeira falhar\n• else — caminho padrão\n\nSinais de comparação: == (igual?), != (diferente?)\nAtenção: = guarda valor, == compara valores.\n\nConectivos: and (E) / or (OU) juntam condições.",
+      "xpRecompensa": 50,
+      "prerequisitosOrdem": [2],
+      "flashcards": [
+        {
+          "frente": "Igualdade vs Atribuição\nQual a diferença entre = e ==?",
+          "verso": "= coloca um valor na variável. == compara se dois valores são iguais."
+        },
+        {
+          "frente": "Condições Duplas\nComo checar se ouro é maior que 10 E chave é True?",
+          "verso": "if ouro > 10 and chave == True:"
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
+            "tipo": "texto",
+            "conteudo": "Até aqui seu programa seguia uma linha reta — sempre as mesmas instruções.\n\nAgora ele aprende a decidir: \"Se isso for verdade, faça A; senão, faça B.\"\n\nIsso se chama condicional — a base de qualquer jogo (vida > 0? atacar ou fugir?), formulário (senha correta?) ou chatbot."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ if / else — o caminho se divide\n\nif CONDIÇÃO:\n    # roda só se for verdadeiro\nelse:\n    # roda se a condição for falsa\n\nExemplo:\nfome = True\nif fome:\n    print(\"Comer\")\nelse:\n    print(\"Dormir\")\n\n💡 Depois do if e do else, o código precisa estar indentado (com espaços à esquerda). O Python usa isso para saber o que pertence a cada bloco."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Comparando valores\n\n==  igual a?        (5 == 5 → True)\n!=  diferente de?   (5 != 3 → True)\n>   maior que?\n<   menor que?\n>=  maior ou igual?\n<=  menor ou igual?\n\n⚠️ ATENÇÃO — erro clássico de iniciante:\n• = guarda valor na variável (nome = \"Ana\")\n• == pergunta se dois valores são iguais (nome == \"Ana\")\n\n▶ Juntando condições\n• and — as DUAS precisam ser verdadeiras\n• or — basta UMA ser verdadeira\n\nExemplo:\nif usuario == \"admin\" and senha == \"1234\":\n    print(\"Entrou!\")"
+          },
+          {
+            "tipo": "video",
+            "titulo": "Condições if e else (Curso em Vídeo #10)",
+            "url": "https://www.youtube.com/embed/K10u3XIf1-Q",
+            "linkAssistir": "https://www.youtube.com/watch?v=K10u3XIf1-Q"
+          },
+          {
+            "tipo": "exercicio",
+            "id": "cond-fome",
+            "nivel": 1,
+            "icone": "⚔️",
+            "enunciado": "Seu personagem está com fome?\n\nA variável fome já vale True.\n\n• Se fome for True → imprima \"Comer\"\n• Senão → imprima \"Dormir\"\n\nResultado esperado: Comer",
+            "codigoInicial": "fome = True\n# Escreva if / else abaixo\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "Comer\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "cond-paridade",
+            "nivel": 2,
+            "icone": "🛡️",
+            "enunciado": "Número par ou ímpar?\n\nUse numero = 7 e o operador % (resto da divisão).\n\n• Se numero % 2 == 0 → imprima \"Par\"\n• Senão → imprima \"Ímpar\"\n\n💡 7 dividido por 2 sobra 1, então é ímpar.",
+            "codigoInicial": "numero = 7\n# if / else para Par ou Ímpar\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "Ímpar\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "cond-login",
+            "nivel": 3,
+            "icone": "🔮",
+            "enunciado": "Portão da fortaleza 🔐\n\nSó libere se usuario E senha estiverem corretos.\n\nAs variáveis já estão prontas no código. Imprima \"Acesso liberado\" quando os dois baterem.\n\n💡 Use and para exigir as duas condições.",
+            "codigoInicial": "usuario_db = \"heroi\"\nsenha_db = \"1234\"\nusuario_digitado = \"heroi\"\nsenha_digitada = \"1234\"\n# Verifique login e imprima Acesso liberado\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "Acesso liberado\n" }
+            ]
+          },
+          { "tipo": "flashcards" }
+        ]
+      }
+    },
+    {
+      "ordem": 4,
+      "titulo": "Laços de Repetição",
+      "conteudo": "Feitiços de repetição (loops):\n• while — repete enquanto a condição for True (cuidado com loops infinitos!)\n• for — repete quantidade exata de vezes, item por item\n\nComandos especiais:\n• break — para o loop imediatamente\n• continue — pula para a próxima repetição",
+      "xpRecompensa": 50,
+      "prerequisitosOrdem": [2],
+      "flashcards": [
+        {
+          "frente": "O Segredo do For\nPara que serve o \"else\" no \"for\"?",
+          "verso": "Só executa se o laço terminar naturalmente (sem ser parado por um break)."
+        },
+        {
+          "frente": "Fuga Tática\nComo paro um loop while imediatamente?",
+          "verso": "Usando o comando break."
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
+            "tipo": "texto",
+            "conteudo": "Imagina escrever \"Ataque!\" 100 vezes na mão. Cansativo, né?\n\nLoops (laços) fazem o computador repetir um bloco de código por você — dezenas, centenas ou milhares de vezes, sem erro e sem cansaço.\n\nExistem dois feitiços principais: while (enquanto) e for (para cada)."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ while — repete ENQUANTO a condição for verdadeira\n\ncontador = 1\nwhile contador <= 5:\n    print(contador)\n    contador = contador + 1\n\nIsso imprime 1, 2, 3, 4, 5 — um por linha.\n\n⚠️ Sempre atualize a variável de controle dentro do while! Senão o loop nunca termina (loop infinito).\n\n▶ for — repete para cada item de uma sequência\n\nfor n in range(6):\n    print(n)\n\nImprime 0, 1, 2, 3, 4, 5.\n\n💡 range(6) gera números de 0 até 5."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Comandos especiais dentro do loop\n\n• break — para tudo e sai do loop na hora\n• continue — pula só esta volta e vai para a próxima\n\nExemplo com break:\n\nfor item in [\"111\", \"segredo\", \"222\"]:\n    if item == \"segredo\":\n        print(\"Achei!\")\n        break\n\n▶ else no for (bônus)\n\nO else depois de um for só roda se o loop terminou sem break — útil em buscas."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Laço for (Curso em Vídeo #013)",
+            "url": "https://www.youtube.com/embed/cL4YDtFnCt4",
+            "linkAssistir": "https://www.youtube.com/watch?v=cL4YDtFnCt4"
+          },
+          {
+            "tipo": "video",
+            "titulo": "Laço while (Curso em Vídeo #014)",
+            "url": "https://www.youtube.com/embed/LH6OIn2lBaI",
+            "linkAssistir": "https://www.youtube.com/watch?v=LH6OIn2lBaI"
+          },
+          {
+            "tipo": "exercicio",
+            "id": "loop-while-contagem",
+            "nivel": 1,
+            "icone": "⚔️",
+            "enunciado": "Contagem regressiva manual.\n\nUse while para imprimir os números de 1 a 5, um por linha.\n\n💡 Comece com contador = 1 e vá somando 1 a cada volta.",
+            "codigoInicial": "contador = 1\n# while: imprima de 1 a 5\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "1\n2\n3\n4\n5\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "loop-for-pares",
+            "nivel": 2,
+            "icone": "🛡️",
+            "enunciado": "Só os pares!\n\nUse for com range() para imprimir os pares de 0 a 10 (incluindo o 10), um por linha.\n\n💡 range(0, 11, 2) pula de 2 em 2.",
+            "codigoInicial": "# for + range: pares de 0 a 10\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "0\n2\n4\n6\n8\n10\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "loop-break-segredo",
+            "nivel": 3,
+            "icone": "🔮",
+            "enunciado": "Caça ao tesouro.\n\nPercorra a lista [\"111\", \"segredo\", \"222\"].\n\nQuando encontrar \"segredo\", imprima \"Achei!\" e pare com break.",
+            "codigoInicial": "passagens = [\"111\", \"segredo\", \"222\"]\nfor item in passagens:\n    pass\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "Achei!\n" }
+            ]
+          },
+          { "tipo": "flashcards" }
+        ]
+      }
+    },
+    {
+      "ordem": 5,
+      "titulo": "Listas, Tuplas e Boss Final",
+      "conteudo": "Equipamentos de armazenamento, proteção contra erros e a missão final: O Limpador de Registros.",
+      "xpRecompensa": 250,
+      "prerequisitosOrdem": [3, 4],
+      "flashcards": [
+        {
+          "frente": "Identificação de Itens\nComo diferenciar uma Lista de uma Tupla pelo visual?",
+          "verso": "Listas usam colchetes [], Tuplas usam parênteses ()."
+        },
+        {
+          "frente": "O Escudo Try/Except\nO que acontece se o código der erro dentro do bloco try?",
+          "verso": "O Python pula para o bloco except em vez de explodir o programa inteiro."
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
+            "tipo": "texto",
+            "conteudo": "Você já sabe guardar UMA coisa numa variável (uma espada, uma poção).\n\nMas e guardar VÁRIAS coisas juntas — tipo uma mochila cheia de itens?\n\nPara isso existem listas e tuplas: \"caixas\" que cabem vários valores dentro, em ordem."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Lista [ ] — mochila flexível\n\nVocê pode adicionar, remover e trocar itens quando quiser.\n\nmochila = [\"poção\", \"poção\", \"poção\"]\nmochila.append(\"veneno\")   # adiciona no final\nlen(mochila)                 # conta quantos itens tem → 4\n\n▶ Tupla ( ) — cofre trancado\n\nDepois de criada, NÃO muda mais. Ótima para dados que não podem ser alterados.\n\ncofre = (\"espada\", \"escudo\", \"poção\")\ncofre[0]   # lê o primeiro item → \"espada\"\n\n💡 Visual rápido: colchetes [ ] = lista | parênteses ( ) = tupla"
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ try / except — escudo contra erros\n\nÀs vezes o usuário digita \"abc\" quando você esperava um número. Sem proteção, o programa quebra.\n\nCom try/except, você tenta o código arriscado e, se der erro, trata com calma:\n\ntry:\n    numero = int(input())\n    print(\"Número válido:\", numero)\nexcept ValueError:\n    print(\"Erro: digite um número!\")\n\n💡 Pense no try como \"tentar fazer\" e no except como \"se der problema, faça isso aqui\"."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Listas em Python (Curso em Vídeo #17 — Mundo 3)",
+            "url": "https://www.youtube.com/embed/videoseries?list=PLHz_AreHm4dksnH2jVTIVNviIMBVYyFnH&index=2",
+            "linkAssistir": "https://www.youtube.com/playlist?list=PLHz_AreHm4dksnH2jVTIVNviIMBVYyFnH"
+          },
+          {
+            "tipo": "video",
+            "titulo": "Tuplas (Curso em Vídeo #16)",
+            "url": "https://www.youtube.com/embed/0LB3FSfjvao",
+            "linkAssistir": "https://www.youtube.com/watch?v=0LB3FSfjvao"
+          },
+          {
+            "tipo": "exercicio",
+            "id": "lista-append-len",
+            "nivel": 1,
+            "icone": "⚔️",
+            "enunciado": "Organize a mochila.\n\n1. A lista mochila já tem 3 poções\n2. Use .append() para adicionar \"veneno\" no final\n3. Imprima len(mochila) — deve ser 4",
+            "codigoInicial": "mochila = [\"poção\", \"poção\", \"poção\"]\n# append veneno e print len\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "4\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "tupla-cofre-espada",
+            "nivel": 2,
+            "icone": "🛡️",
+            "enunciado": "Abra o cofre.\n\nA tupla cofre guarda (\"espada\", \"escudo\", \"poção\").\n\nLeia o primeiro item com cofre[0] e imprima \"espada\".",
+            "codigoInicial": "cofre = (\"espada\", \"escudo\", \"poção\")\n# Leia cofre[0] e imprima\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "", "expected_output": "espada\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "try-except-valueerror",
+            "nivel": 3,
+            "icone": "🔮",
+            "enunciado": "Proteja contra entrada inválida.\n\n1. Leia um dado com input()\n2. Tente converter com int()\n3. Se o usuário digitar letras, capture ValueError e imprima:\nErro: digite um número!\n\n💡 O teste automático vai simular a entrada \"abc\".",
+            "codigoInicial": "dado = input()\n# try int(dado) / except ValueError\n\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "abc", "expected_output": "Erro: digite um número!\n" }
+            ]
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "🏆 MISSÃO FINAL: O Limpador de Registros\n\nVocê achou um pergaminho antigo coberto de sujeira. Precisa limpá-lo!\n\nEntrada (via input):\nxX_LAMA_Xx-Herolink-25-Guerreiros\n\nSaída esperada:\n*** Herolink *** tem 25 anos...\n\n▶ Passo a passo\n1. Leia a string com input()\n2. Use .split(\"-\") para quebrar em pedaços\n3. Ignore o pedaço 0 (a lama)\n4. Use partes[1] como nome e partes[2] como idade\n5. Monte a f-string com asteriscos decorando o nome\n\n💡 Exemplo: partes = dado.split(\"-\")"
+          },
+          {
+            "tipo": "exercicio",
+            "id": "boss-limpador-registros",
+            "nivel": 4,
+            "icone": "🐉",
+            "boss": true,
+            "titulo": "O Limpador de Registros",
+            "enunciado": "Boss final! 🐉\n\nPurifique o registro sujo lido com input().\n\nEntrada: xX_LAMA_Xx-Herolink-25-Guerreiros\nSaída: *** Herolink *** tem 25 anos...\n\nDica:\npartes = dado.split(\"-\")\nnome = partes[1]\nidade = partes[2]\n# monte a f-string com ***",
+            "codigoInicial": "dado = input()\n# Purifique o registro abaixo\n\n",
+            "linguagem": "python",
+            "testes": [
+              {
+                "stdin": "xX_LAMA_Xx-Herolink-25-Guerreiros",
+                "expected_output": "*** Herolink *** tem 25 anos...\n"
+              }
+            ]
+          },
+          { "tipo": "flashcards" }
+        ]
+      }
+    }
+  ]
+}
