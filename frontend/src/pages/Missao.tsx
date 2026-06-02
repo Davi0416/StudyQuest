@@ -44,6 +44,11 @@ export function Missao() {
         if (sub.primeiraAprovacao) {
           addXp(missao.xpRecompensa);
         }
+        try {
+          await api.post(`/nos/${missao.noId}/concluir`);
+        } catch (err) {
+          console.error('Failed to complete node after mission', err);
+        }
       } else {
         setFeedback({ status: 'error', text: sub.feedback || 'Falha nos testes.' });
       }

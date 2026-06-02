@@ -34,7 +34,33 @@ export interface No {
   ordem: number
   xpRecompensa: number
   prerequisitoIds: number[]
-  status: 'BLOQUEADO' | 'EM_PROGRESSO' | 'CONCLUIDO'
+  status: 'BLOQUEADO' | 'DISPONIVEL' | 'EM_PROGRESSO' | 'CONCLUIDO'
+  temMissao: boolean
+  aulaBlocos: AulaBloco[]
+}
+
+export type AulaBloco =
+  | { tipo: 'texto'; titulo?: string; conteudo: string }
+  | { tipo: 'video'; titulo: string; url: string; linkAssistir?: string }
+  | { tipo: 'exercicio'; id: string; nivel: number; icone: string; titulo?: string; boss?: boolean; enunciado: string; codigoInicial: string; linguagem: string; testes: { stdin?: string; expected_output: string }[] }
+  | { tipo: 'flashcards' }
+
+export interface ValidarCodigoResult {
+  aprovado: boolean
+  feedback: string
+  aprovados: number
+  total: number
+}
+
+export interface ExercicioProgresso {
+  id: string
+  codigo: string
+  aprovado: boolean
+}
+
+export interface AulaProgresso {
+  passo: number
+  exercicios: ExercicioProgresso[]
 }
 
 export interface Missao {

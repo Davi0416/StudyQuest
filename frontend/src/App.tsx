@@ -5,6 +5,7 @@ import { Login } from './pages/Login';
 import { Hub } from './pages/Hub';
 import { Mapa } from './pages/Mapa';
 import { Missao } from './pages/Missao';
+import { Aula } from './pages/Aula';
 import { Revisao } from './pages/Revisao';
 import { Ranking } from './pages/Ranking';
 import { Conquistas } from './pages/Conquistas';
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Hub /></ProtectedRoute>} />
           <Route path="/mapa" element={<ProtectedRoute><Mapa /></ProtectedRoute>} />
+          <Route path="/aula/:id" element={<ProtectedRoute><Aula /></ProtectedRoute>} />
           <Route path="/missao/:id" element={<ProtectedRoute><Missao /></ProtectedRoute>} />
           <Route path="/revisao" element={<ProtectedRoute><Revisao /></ProtectedRoute>} />
           <Route path="/conquistas" element={<ProtectedRoute><Conquistas /></ProtectedRoute>} />

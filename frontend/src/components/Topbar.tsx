@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { IconSword, IconMap, IconFlask, IconMedal, IconTrophy, IconFlame } from '@tabler/icons-react';
 
@@ -11,12 +11,12 @@ export function Topbar() {
   return (
     <header className="sticky top-0 z-50 h-[64px] backdrop-blur-[12px] border-b border-border bg-bg/80 px-6 flex items-center justify-between">
       {/* Logo */}
-      <div className="flex items-center gap-2">
+      <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Início">
         <IconSword className="text-gold" size={24} />
         <h1 className="font-cinzel text-xl font-bold text-text">
           Study<span className="text-gold">Quest</span>
         </h1>
-      </div>
+      </Link>
 
       {/* Nav */}
       <nav className="flex items-center gap-6">
@@ -56,15 +56,18 @@ export function Topbar() {
           </div>
           
           {/* Avatar */}
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-[#d8a945] flex items-center justify-center text-[#1a1206] font-bold text-lg">
-              {user.name.charAt(0).toUpperCase()}
+          <Link to="/perfil" className="relative group" title="Meu perfil">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-[#d8a945] flex items-center justify-center text-[#1a1206] font-bold text-lg ring-2 ring-transparent group-hover:ring-gold/50 transition-shadow overflow-hidden">
+              {user.avatarUrl ? (
+                <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+              ) : (
+                user.name.charAt(0).toUpperCase()
+              )}
             </div>
-            {/* Badge Nível */}
             <div className="absolute -bottom-1 -right-1 bg-surface border border-border text-[10px] font-bold px-1.5 rounded-sm">
               Lvl {user.lvl}
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </header>
