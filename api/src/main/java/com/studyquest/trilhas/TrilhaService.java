@@ -1,13 +1,12 @@
 package com.studyquest.trilhas;
 
-import com.studyquest.local.UserTrilha;
+import com.studyquest.offline.UserTrilha;
+import com.studyquest.shared.db.LocalDb;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
 import com.studyquest.trilhas.dto.TrilhaResponse;
-import io.quarkus.hibernate.orm.PersistenceUnit;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
@@ -22,8 +21,7 @@ public class TrilhaService {
     TrilhaRepository trilhaRepository;
 
     @Inject
-    @PersistenceUnit("local")
-    EntityManager localEm;
+    LocalDb localDb;
 
     public List<TrilhaResponse> listarTodas() {
         return trilhaRepository.findAtivas().stream()
@@ -41,10 +39,11 @@ public class TrilhaService {
     }
 
     public List<TrilhaResponse> ativas(UUID userId) {
-        List<UserTrilha> userTrilhas = localEm
-                .createQuery("SELECT ut FROM UserTrilha ut WHERE ut.userId = :uid", UserTrilha.class)
-                .setParameter("uid", userId)
-                .getResultList();
+        List<UserTrilha> userTrilhas = localDb.read(em ->
+                em.createQuery("SELECT ut FROM UserTrilha ut WHERE ut.userId = :uid", UserTrilha.class)
+                        .setParameter("uid", userId)
+                        .getResultList()
+        );
 
         return userTrilhas.stream().map(ut -> {
             Trilha t = trilhaRepository.findById(ut.getTrilhaId());
@@ -53,26 +52,29 @@ public class TrilhaService {
         }).filter(t -> t != null).toList();
     }
 
-    @Transactional
     public TrilhaResponse matricular(Long trilhaId, UUID userId) {
         Trilha trilha = trilhaRepository.findById(trilhaId);
         if (trilha == null) throw new RecursoNaoEncontradoException("Trilha não encontrada");
 
-        if (findUserTrilha(userId, trilhaId).isPresent()) {
-            throw new WebApplicationException("Já matriculado nessa trilha", Response.Status.CONFLICT);
-        }
-
-        UserTrilha ut = UserTrilha.builder()
-                .userId(userId)
-                .trilhaId(trilhaId)
-                .build();
-        localEm.persist(ut);
+        localDb.write(em -> {
+            if (findUserTrilha(em, userId, trilhaId).isPresent()) {
+                throw new WebApplicationException("Já matriculado nessa trilha", Response.Status.CONFLICT);
+            }
+            em.persist(UserTrilha.builder()
+                    .userId(userId)
+                    .trilhaId(trilhaId)
+                    .build());
+        });
 
         return TrilhaResponse.of(trilha, 0, 0);
     }
 
     private Optional<UserTrilha> findUserTrilha(UUID userId, Long trilhaId) {
-        return localEm.createQuery(
+        return localDb.read(em -> findUserTrilha(em, userId, trilhaId));
+    }
+
+    private Optional<UserTrilha> findUserTrilha(EntityManager em, UUID userId, Long trilhaId) {
+        return em.createQuery(
                         "SELECT ut FROM UserTrilha ut WHERE ut.userId = :uid AND ut.trilhaId = :tid",
                         UserTrilha.class)
                 .setParameter("uid", userId)
