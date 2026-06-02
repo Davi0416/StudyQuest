@@ -12,7 +12,8 @@ public record UserResponseDTO(
         Integer lvl,
         Integer totalXp,
         Integer currentStreak,
-        Integer maxStreak
+        Integer maxStreak,
+        boolean emailVerified
 ) {
     public UserResponseDTO(User user) {
         this(
@@ -23,7 +24,8 @@ public record UserResponseDTO(
                 user.getLvl(),
                 user.getTotalXp(),
                 user.getCurrentStreak(),
-                user.getMaxStreak()
+                user.getMaxStreak(),
+                user.isEmailVerified()
         );
     }
 }
