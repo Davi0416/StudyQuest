@@ -2,6 +2,7 @@ package com.studyquest.auth;
 
 import com.studyquest.auth.dto.LoginRequest;
 import com.studyquest.auth.dto.RegisterRequest;
+import com.studyquest.auth.dto.RegisterResponse;
 import com.studyquest.auth.dto.TokenResponse;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
 import com.studyquest.usuarios.User;
@@ -14,6 +15,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,15 +25,21 @@ public class AuthService {
     private static final String ISSUER = "https://studyquest.app";
 
     private final UserRepository userRepository;
+    private final EmailVerificationService emailVerificationService;
     private final io.smallrye.jwt.auth.principal.JWTParser jwtParser;
 
-    public AuthService(UserRepository userRepository, io.smallrye.jwt.auth.principal.JWTParser jwtParser) {
+    public AuthService(
+            UserRepository userRepository,
+            EmailVerificationService emailVerificationService,
+            io.smallrye.jwt.auth.principal.JWTParser jwtParser
+    ) {
         this.userRepository = userRepository;
+        this.emailVerificationService = emailVerificationService;
         this.jwtParser = jwtParser;
     }
 
     @Transactional
-    public TokenResponse register(RegisterRequest req) {
+    public RegisterResponse register(RegisterRequest req) {
         userRepository.findByEmail(req.email()).ifPresent(u -> {
             throw new WebApplicationException("Email já cadastrado", Response.Status.CONFLICT);
         });
@@ -41,10 +49,44 @@ public class AuthService {
                 .email(req.email())
                 .passwordHash(BcryptUtil.bcryptHash(req.password()))
                 .avatarUrl(req.avatarUrl())
+                .emailVerified(false)
                 .build();
 
         userRepository.persist(user);
+        emailVerificationService.sendCode(user);
+
+        return new RegisterResponse(
+                user.getEmail(),
+                "Enviamos um código de 6 dígitos para o seu e-mail. Confirme para entrar na aventura."
+        );
+    }
+
+    @Transactional
+    public TokenResponse verifyEmail(String email, String code) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+
+        if (user.isEmailVerified()) {
+            return generateTokens(user);
+        }
+
+        emailVerificationService.verify(email, code);
+        user.setEmailVerified(true);
+        user.setEmailVerifiedAt(LocalDateTime.now());
+
         return generateTokens(user);
+    }
+
+    @Transactional
+    public void resendVerification(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+
+        if (user.isEmailVerified()) {
+            throw new WebApplicationException("E-mail já verificado", Response.Status.CONFLICT);
+        }
+
+        emailVerificationService.resendCode(user);
     }
 
     public TokenResponse login(LoginRequest req) {
@@ -55,11 +97,17 @@ public class AuthService {
             throw new WebApplicationException("Credenciais inválidas", Response.Status.UNAUTHORIZED);
         }
 
+        if (!user.isEmailVerified()) {
+            throw new WebApplicationException(
+                    "E-mail não verificado. Confira sua caixa de entrada ou solicite um novo código.",
+                    Response.Status.FORBIDDEN
+            );
+        }
+
         return generateTokens(user);
     }
 
     public TokenResponse refresh(String refreshToken) {
-        // valida o refresh token e emite novo access token
         try {
             var claims = jwtParser.parse(refreshToken);
             String subject = claims.getSubject();

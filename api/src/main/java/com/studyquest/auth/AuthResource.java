@@ -1,8 +1,6 @@
 package com.studyquest.auth;
 
-import com.studyquest.auth.dto.LoginRequest;
-import com.studyquest.auth.dto.RegisterRequest;
-import com.studyquest.auth.dto.TokenResponse;
+import com.studyquest.auth.dto.*;
 import com.studyquest.shared.response.ApiResponse;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -23,10 +21,23 @@ public class AuthResource {
     @POST
     @Path("/register")
     public Response register(@Valid RegisterRequest req) {
-        TokenResponse tokens = authService.register(req);
+        RegisterResponse result = authService.register(req);
         return Response.status(Response.Status.CREATED)
-                .entity(ApiResponse.ok(tokens, "Conta criada com sucesso"))
+                .entity(ApiResponse.ok(result, result.message()))
                 .build();
+    }
+
+    @POST
+    @Path("/verify")
+    public ApiResponse<TokenResponse> verify(@Valid VerifyEmailRequest req) {
+        return ApiResponse.ok(authService.verifyEmail(req.email(), req.code()), "E-mail verificado com sucesso");
+    }
+
+    @POST
+    @Path("/verify/resend")
+    public ApiResponse<Void> resendVerification(@Valid ResendVerificationRequest req) {
+        authService.resendVerification(req.email());
+        return ApiResponse.ok(null, "Novo código enviado para o seu e-mail");
     }
 
     @POST
@@ -44,7 +55,6 @@ public class AuthResource {
     @POST
     @Path("/logout")
     public ApiResponse<Void> logout() {
-        // JWT é stateless — client descarta o token
         return ApiResponse.ok(null, "Logout realizado");
     }
 }

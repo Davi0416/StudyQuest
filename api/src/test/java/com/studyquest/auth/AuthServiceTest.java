@@ -2,7 +2,7 @@ package com.studyquest.auth;
 
 import com.studyquest.auth.dto.LoginRequest;
 import com.studyquest.auth.dto.RegisterRequest;
-import com.studyquest.auth.dto.TokenResponse;
+import com.studyquest.auth.dto.RegisterResponse;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
 import com.studyquest.usuarios.User;
 import com.studyquest.usuarios.UserRepository;
@@ -24,14 +24,16 @@ import static org.mockito.Mockito.*;
 class AuthServiceTest {
 
     UserRepository userRepo;
+    EmailVerificationService emailVerificationService;
     JWTParser jwtParser;
     AuthService service;
 
     @BeforeEach
     void setUp() {
         userRepo = mock(UserRepository.class);
+        emailVerificationService = mock(EmailVerificationService.class);
         jwtParser = mock(JWTParser.class);
-        service = new AuthService(userRepo, jwtParser);
+        service = new AuthService(userRepo, emailVerificationService, jwtParser);
     }
 
     @Test
@@ -44,17 +46,44 @@ class AuthServiceTest {
     }
 
     @Test
+    void register_sucesso_enviaCodigo() {
+        when(userRepo.findByEmail("novo@x.com")).thenReturn(Optional.empty());
+
+        RegisterResponse res = service.register(new RegisterRequest("João", "novo@x.com", "senha123", null));
+
+        assertEquals("novo@x.com", res.email());
+        verify(userRepo).persist(any(User.class));
+        verify(emailVerificationService).sendCode(any(User.class));
+    }
+
+    @Test
     void login_senhaErrada_lancaUnauthorized() {
         User user = User.builder()
                 .id(UUID.randomUUID())
                 .email("a@a.com")
                 .passwordHash(BcryptUtil.bcryptHash("certa"))
+                .emailVerified(true)
                 .build();
         when(userRepo.findByEmail("a@a.com")).thenReturn(Optional.of(user));
 
         var req = new LoginRequest("a@a.com", "errada");
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> service.login(req));
         assertEquals(Response.Status.UNAUTHORIZED.getStatusCode(), ex.getResponse().getStatus());
+    }
+
+    @Test
+    void login_emailNaoVerificado_lancaForbidden() {
+        User user = User.builder()
+                .id(UUID.randomUUID())
+                .email("a@a.com")
+                .passwordHash(BcryptUtil.bcryptHash("certa"))
+                .emailVerified(false)
+                .build();
+        when(userRepo.findByEmail("a@a.com")).thenReturn(Optional.of(user));
+
+        var req = new LoginRequest("a@a.com", "certa");
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> service.login(req));
+        assertEquals(Response.Status.FORBIDDEN.getStatusCode(), ex.getResponse().getStatus());
     }
 
     @Test
