@@ -25,6 +25,9 @@ public class No {
     @Column(columnDefinition = "TEXT")
     private String conteudo;
 
+    @Column(columnDefinition = "TEXT")
+    private String aulaJson;
+
     private Long trilhaId;
 
     @Builder.Default
