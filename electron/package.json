@@ -23,8 +23,8 @@
     },
     "extraResources": [
       {
-        "from": "../api/target/quarkus-app",
-        "to": "quarkus-app",
+        "from": "../api/target/backend",
+        "to": "backend",
         "filter": ["**/*"]
       },
       {
