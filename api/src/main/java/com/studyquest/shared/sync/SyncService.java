@@ -1,12 +1,10 @@
 package com.studyquest.shared.sync;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.studyquest.local.SyncEvent;
-import io.quarkus.hibernate.orm.PersistenceUnit;
+import com.studyquest.offline.SyncEvent;
+import com.studyquest.shared.db.LocalDb;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 
 import java.util.Map;
 import java.util.UUID;
@@ -15,21 +13,19 @@ import java.util.UUID;
 public class SyncService {
 
     @Inject
-    @PersistenceUnit("local")
-    EntityManager localEm;
+    LocalDb localDb;
 
     @Inject
     ObjectMapper objectMapper;
 
-    @Transactional
     public void enqueue(UUID userId, String eventType, Map<String, Object> payload) {
         try {
-            SyncEvent event = SyncEvent.builder()
+            String json = objectMapper.writeValueAsString(payload);
+            localDb.write(em -> em.persist(SyncEvent.builder()
                     .userId(userId)
                     .eventType(eventType)
-                    .payload(objectMapper.writeValueAsString(payload))
-                    .build();
-            localEm.persist(event);
+                    .payload(json)
+                    .build()));
         } catch (Exception e) {
             // falha silenciosa — não pode comprometer a operação principal
         }
