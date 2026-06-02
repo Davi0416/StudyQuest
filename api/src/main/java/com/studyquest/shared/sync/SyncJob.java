@@ -1,6 +1,6 @@
 package com.studyquest.shared.sync;
 
-import com.studyquest.local.SyncEvent;
+import com.studyquest.offline.SyncEvent;
 import io.quarkus.hibernate.orm.PersistenceUnit;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;

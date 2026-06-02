@@ -2,7 +2,7 @@ package com.studyquest.revisao;
 
 import com.studyquest.flashcards.Flashcard;
 import com.studyquest.flashcards.FlashcardRepository;
-import com.studyquest.local.LeitnerCard;
+import com.studyquest.offline.LeitnerCard;
 import com.studyquest.revisao.dto.ResponderRevisaoRequest;
 import com.studyquest.revisao.dto.RevisaoHojeResponse;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;

@@ -1,6 +1,6 @@
 package com.studyquest.trilhas;
 
-import com.studyquest.local.UserTrilha;
+import com.studyquest.offline.UserTrilha;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
 import com.studyquest.trilhas.dto.TrilhaResponse;
 import io.quarkus.hibernate.orm.PersistenceUnit;

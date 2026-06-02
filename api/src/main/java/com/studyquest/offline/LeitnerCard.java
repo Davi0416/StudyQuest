@@ -1,4 +1,4 @@
-package com.studyquest.local;
+package com.studyquest.offline;
 
 import jakarta.persistence.*;
 import lombok.*;

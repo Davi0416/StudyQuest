@@ -1,6 +1,6 @@
 package com.studyquest.nos;
 
-import com.studyquest.local.UserNo;
+import com.studyquest.offline.UserNo;
 import com.studyquest.nos.dto.NoResponse;
 import com.studyquest.shared.exception.NoBloqueadoException;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;

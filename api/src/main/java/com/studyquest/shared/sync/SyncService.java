@@ -1,7 +1,7 @@
 package com.studyquest.shared.sync;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.studyquest.local.SyncEvent;
+import com.studyquest.offline.SyncEvent;
 import io.quarkus.hibernate.orm.PersistenceUnit;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
