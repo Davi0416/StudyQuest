@@ -43,12 +43,9 @@ nb-configuration.xml
 /.quarkus/cli/plugins/
 # TLS Certificates
 .certs/
-<<<<<<< HEAD
-=======
 
 # JWT Keys — nunca comite chaves privadas
 privateKey.pem
 
 # SQLite dev
 *.db
->>>>>>> feature/infra
