@@ -1,41 +1,49 @@
 package com.studyquest.usuarios;
 
-import com.studyquest.usuarios.dto.UserRequestDTO;
+import com.studyquest.shared.response.ApiResponse;
+import com.studyquest.usuarios.dto.UpdateProfileRequest;
 import com.studyquest.usuarios.dto.UserResponseDTO;
+import com.studyquest.usuarios.dto.UserStatsDTO;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import org.jboss.resteasy.reactive.RestResponse;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import java.util.List;
 import java.util.UUID;
 
-@Path("/users")
+@Path("/api/users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@RolesAllowed("user")
 public class UserResource {
 
-    private final UserService userService;
+    @Inject
+    UserService userService;
 
     @Inject
-    public UserResource(UserService userService) {
-        this.userService = userService;
+    JsonWebToken jwt;
+
+    @GET
+    @Path("/me")
+    public ApiResponse<UserResponseDTO> me() {
+        return ApiResponse.ok(userService.me(currentUserId()));
     }
 
-    @POST
-    public RestResponse<UserResponseDTO> createUser(@Valid UserRequestDTO dto) {
-        return RestResponse.status(RestResponse.Status.CREATED, userService.createUser(dto));
+    @PUT
+    @Path("/me")
+    public ApiResponse<UserResponseDTO> updateProfile(@Valid UpdateProfileRequest req) {
+        return ApiResponse.ok(userService.updateProfile(currentUserId(), req));
     }
 
     @GET
-    public RestResponse<List<UserResponseDTO>> findAll() {
-        return RestResponse.ok(userService.listAll());
+    @Path("/me/stats")
+    public ApiResponse<UserStatsDTO> stats() {
+        return ApiResponse.ok(userService.stats(currentUserId()));
     }
 
-    @GET
-    @Path("/{id}")
-    public RestResponse<UserResponseDTO> findById(@PathParam("id") UUID id) {
-        return RestResponse.ok(userService.findById(id));
+    private UUID currentUserId() {
+        return UUID.fromString(jwt.getSubject());
     }
 }
