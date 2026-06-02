@@ -15,7 +15,7 @@ fi
 
 echo "==> [1/5] Build nativo do backend (GraalVM via Docker)..."
 cd "$ROOT/api"
-./mvnw package -Pnative -DskipTests -Dquarkus.native.container-build=true -q
+./mvnw package -Pnative -DskipTests -Dquarkus.native.container-build=true -Dquarkus.profile=desktop -q
 
 mkdir -p "$BACKEND_OUT"
 cp "target/studyquest-runner" "$BACKEND_OUT/"

@@ -28,10 +28,10 @@ Write-Host "==> [1/6] Build do backend..."
 Set-Location (Join-Path $Root 'api')
 if ($Native) {
   Write-Host "    Modo nativo (GraalVM + Docker)..."
-  & .\mvnw.cmd package '-Pnative' '-DskipTests' '-Dquarkus.native.container-build=true' '-q'
+  & .\mvnw.cmd package '-Pnative' '-DskipTests' '-Dquarkus.native.container-build=true' '-Dquarkus.profile=desktop' '-q'
 } else {
   Write-Host "    Modo JVM embutido (JRE + quarkus-app)..."
-  & .\mvnw.cmd package '-DskipTests' '-q'
+  & .\mvnw.cmd package '-DskipTests' '-Dquarkus.profile=desktop' '-q'
 }
 
 New-Item -ItemType Directory -Force -Path $BackendOut | Out-Null
