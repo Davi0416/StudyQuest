@@ -9,75 +9,69 @@ const http = require('http')
 const isDev = !app.isPackaged
 
 const resourcesPath = isDev
-  ? path.join(__dirname, '..')         // project root when running with `electron .`
-  : process.resourcesPath              // inside packaged app
+  ? path.join(__dirname, '..')   // raiz do projeto em modo dev
+  : process.resourcesPath        // dentro do app empacotado
 
 const frontendDist = isDev
   ? path.join(resourcesPath, 'frontend', 'dist')
   : path.join(resourcesPath, 'frontend-dist')
 
-const quarkusJar = isDev
-  ? path.join(resourcesPath, 'api', 'target', 'quarkus-app', 'quarkus-run.jar')
-  : path.join(resourcesPath, 'quarkus-app', 'quarkus-run.jar')
-
-const quarkusLibs = isDev
-  ? path.join(resourcesPath, 'api', 'target', 'quarkus-app')
-  : path.join(resourcesPath, 'quarkus-app')
+// Binário nativo gerado pelo GraalVM — não exige JVM
+const binaryName = process.platform === 'win32' ? 'studyquest-runner.exe' : 'studyquest-runner'
+const backendBin = isDev
+  ? path.join(resourcesPath, 'api', 'target', binaryName)
+  : path.join(resourcesPath, 'backend', binaryName)
 
 const API_PORT = 8080
 const API_HEALTH = `http://localhost:${API_PORT}/q/health/live`
 
-// ── Java process ───────────────────────────────────────────────────────────
+// ── Backend process ────────────────────────────────────────────────────────
 
-let javaProcess = null
+let backendProcess = null
 
-function startQuarkus() {
-  if (!fs.existsSync(quarkusJar)) {
+function startBackend() {
+  if (!fs.existsSync(backendBin)) {
     dialog.showErrorBox(
-      'API não encontrada',
-      `Arquivo não encontrado:\n${quarkusJar}\n\nExecute o script de build antes de iniciar o app.`
+      'Backend não encontrado',
+      `Arquivo não encontrado:\n${backendBin}\n\nExecute o script de build nativo antes de iniciar o app.`
     )
     app.quit()
     return
   }
 
-  // Java executable: usa JAVA_HOME se definido, senão 'java' do PATH
-  const javaExe = process.env.JAVA_HOME
-    ? path.join(process.env.JAVA_HOME, 'bin', 'java')
-    : 'java'
-
-  const env = {
-    ...process.env,
-    QUARKUS_HTTP_PORT: String(API_PORT),
-    // Em produção defina estas variáveis no ambiente do instalador
-    JWT_PRIVATE_KEY_LOCATION: path.join(quarkusLibs, 'privateKey.pem'),
+  // Garante permissão de execução no Linux/macOS
+  if (process.platform !== 'win32') {
+    fs.chmodSync(backendBin, 0o755)
   }
 
-  javaProcess = spawn(javaExe, ['-jar', quarkusJar], {
-    cwd: quarkusLibs,
-    env,
+  backendProcess = spawn(backendBin, [], {
+    env: {
+      ...process.env,
+      QUARKUS_HTTP_PORT: String(API_PORT),
+      JWT_PRIVATE_KEY_LOCATION: path.join(path.dirname(backendBin), 'privateKey.pem'),
+    },
     stdio: isDev ? 'inherit' : 'ignore',
   })
 
-  javaProcess.on('error', (err) => {
+  backendProcess.on('error', (err) => {
     dialog.showErrorBox(
-      'Erro ao iniciar a API',
-      `Não foi possível executar o Java.\n\nDetalhe: ${err.message}\n\nVerifique se o Java 21 está instalado e no PATH.`
+      'Erro ao iniciar o backend',
+      `Não foi possível executar o binário nativo.\n\nDetalhe: ${err.message}`
     )
     app.quit()
   })
 }
 
-function killQuarkus() {
-  if (javaProcess) {
-    javaProcess.kill()
-    javaProcess = null
+function killBackend() {
+  if (backendProcess) {
+    backendProcess.kill()
+    backendProcess = null
   }
 }
 
 // ── Health check ───────────────────────────────────────────────────────────
 
-function waitForApi(retries = 40, delayMs = 500) {
+function waitForApi(retries = 40, delayMs = 250) {
   return new Promise((resolve, reject) => {
     const attempt = (remaining) => {
       http.get(API_HEALTH, (res) => {
@@ -86,13 +80,13 @@ function waitForApi(retries = 40, delayMs = 500) {
         } else if (remaining > 0) {
           setTimeout(() => attempt(remaining - 1), delayMs)
         } else {
-          reject(new Error('API não respondeu a tempo'))
+          reject(new Error('Backend não respondeu a tempo'))
         }
       }).on('error', () => {
         if (remaining > 0) {
           setTimeout(() => attempt(remaining - 1), delayMs)
         } else {
-          reject(new Error('API não iniciou (timeout)'))
+          reject(new Error('Backend não iniciou (timeout)'))
         }
       })
     }
@@ -101,17 +95,13 @@ function waitForApi(retries = 40, delayMs = 500) {
 }
 
 // ── Protocol: app:// ───────────────────────────────────────────────────────
-// Serve os arquivos estáticos do React e faz fallback para index.html
-// para que o BrowserRouter funcione corretamente.
+// Serve os arquivos estáticos do React com fallback para index.html
+// para que o BrowserRouter funcione corretamente sem servidor HTTP.
 
 function registerAppProtocol() {
   protocol.handle('app', (request) => {
     let urlPath = request.url.slice('app://'.length)
-
-    // Remove parâmetros de query e fragmentos
     urlPath = urlPath.split('?')[0].split('#')[0]
-
-    // Remove barra inicial duplicada
     if (urlPath.startsWith('/')) urlPath = urlPath.slice(1)
 
     const filePath = path.join(frontendDist, urlPath)
@@ -120,7 +110,6 @@ function registerAppProtocol() {
       return net.fetch(`file://${filePath}`)
     }
 
-    // SPA fallback: qualquer rota desconhecida entrega o index.html
     return net.fetch(`file://${path.join(frontendDist, 'index.html')}`)
   })
 }
@@ -144,22 +133,17 @@ function createWindow() {
 
   win.loadURL('app://index.html')
 
-  if (isDev) {
-    win.webContents.openDevTools({ mode: 'detach' })
-  }
+  if (isDev) win.webContents.openDevTools({ mode: 'detach' })
 
-  win.on('closed', () => killQuarkus())
+  win.on('closed', () => killBackend())
 }
 
 // ── App lifecycle ──────────────────────────────────────────────────────────
 
 app.whenReady().then(async () => {
   registerAppProtocol()
+  startBackend()
 
-  // Inicia a API Java em background
-  startQuarkus()
-
-  // Mostra janela de splash enquanto aguarda
   const splash = new BrowserWindow({
     width: 400,
     height: 260,
@@ -169,12 +153,10 @@ app.whenReady().then(async () => {
     webPreferences: { contextIsolation: true },
   })
   splash.loadURL(`data:text/html,
-    <html>
-    <body style="margin:0;background:#0f172a;display:flex;flex-direction:column;
-                 align-items:center;justify-content:center;height:100vh;
-                 font-family:sans-serif;color:#e2e8f0;">
+    <html><body style="margin:0;background:#0f172a;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#e2e8f0;">
       <h2 style="margin:0 0 8px">StudyQuest</h2>
-      <p style="margin:0;font-size:13px;color:#94a3b8">Iniciando a API…</p>
+      <p style="margin:0;font-size:13px;color:#94a3b8">Iniciando…</p>
     </body></html>
   `)
 
@@ -184,14 +166,14 @@ app.whenReady().then(async () => {
     createWindow()
   } catch (err) {
     splash.close()
-    dialog.showErrorBox('Erro de inicialização', `${err.message}\n\nVerifique o banco de dados e as configurações.`)
-    killQuarkus()
+    dialog.showErrorBox('Erro de inicialização', err.message)
+    killBackend()
     app.quit()
   }
 })
 
 app.on('window-all-closed', () => {
-  killQuarkus()
+  killBackend()
   if (process.platform !== 'darwin') app.quit()
 })
 
@@ -199,4 +181,4 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) createWindow()
 })
 
-app.on('before-quit', () => killQuarkus())
+app.on('before-quit', () => killBackend())

@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
-# build-desktop.sh — Gera o executável desktop do StudyQuest
-# Pré-requisitos: Java 21, Node.js 18+, Maven wrapper (./mvnw)
+# build-desktop.sh — Gera o executável desktop do StudyQuest (sem dependências externas)
+# Pré-requisitos: GraalVM 21+, Node.js 18+, Maven wrapper (./mvnw)
 set -e
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ELECTRON_DIR="$ROOT/electron"
+BACKEND_OUT="$ROOT/api/target/backend"
 
-echo "==> [1/4] Build do backend (Quarkus)..."
+echo "==> [1/4] Build nativo do backend (GraalVM)..."
 cd "$ROOT/api"
-./mvnw package -DskipTests -q
-echo "    OK — $ROOT/api/target/quarkus-app/quarkus-run.jar"
+./mvnw package -Pnative -DskipTests -q
+
+# Organiza o binário e a chave privada numa pasta limpa para o electron-builder
+mkdir -p "$BACKEND_OUT"
+cp target/studyquest-runner* "$BACKEND_OUT/"
+[ -f src/main/resources/privateKey.pem ] && cp src/main/resources/privateKey.pem "$BACKEND_OUT/"
+echo "    OK — $BACKEND_OUT/"
 
 echo "==> [2/4] Build do frontend (Vite)..."
 cd "$ROOT/frontend"
@@ -22,9 +28,7 @@ cd "$ELECTRON_DIR"
 npm ci --silent
 
 echo "==> [4/4] Empacotando com electron-builder..."
-# Detecta plataforma e empacota apenas para ela por padrão.
-# Para cross-compile passe: --win / --mac / --linux
 npm run dist -- "${@}"
 
 echo ""
-echo "Pronto! Executável gerado em: $ELECTRON_DIR/dist-electron/"
+echo "Pronto! Executável em: $ELECTRON_DIR/dist-electron/"
