@@ -1,10 +1,12 @@
 package com.studyquest.missoes.runner;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -16,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 public class LocalPythonRunner {
 
     private static final int TIMEOUT_SECONDS = 5;
+
+    @ConfigProperty(name = "studyquest.python.executable")
+    Optional<String> pythonExecutable;
 
     public ExecutionResult run(String codigo, String stdin) throws IOException, InterruptedException {
         Path script = Files.createTempFile("studyquest-", ".py");
@@ -55,6 +60,13 @@ public class LocalPythonRunner {
     }
 
     private String[] pythonCommand() {
+        if (pythonExecutable.isPresent() && !pythonExecutable.get().isBlank()) {
+            return new String[]{pythonExecutable.get()};
+        }
+        String env = System.getenv("STUDYQUEST_PYTHON");
+        if (env != null && !env.isBlank()) {
+            return new String[]{env};
+        }
         if (System.getProperty("os.name", "").toLowerCase().contains("win")) {
             return new String[]{"py", "-3"};
         }

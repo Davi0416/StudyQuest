@@ -21,6 +21,10 @@
     "directories": {
       "output": "dist-electron"
     },
+    "files": [
+      "main.js",
+      "preload.js"
+    ],
     "extraResources": [
       {
         "from": "../api/target/backend",
@@ -31,26 +35,27 @@
         "from": "../frontend/dist",
         "to": "frontend-dist",
         "filter": ["**/*"]
+      },
+      {
+        "from": "resources/python-win",
+        "to": "python",
+        "filter": ["**/*"]
       }
     ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
-      "icon": "build/icon.ico"
+      "target": [{ "target": "nsis", "arch": ["x64"] }]
     },
     "mac": {
       "target": [{ "target": "dmg", "arch": ["x64", "arm64"] }],
-      "icon": "build/icon.icns",
       "category": "public.app-category.education"
     },
     "linux": {
       "target": [{ "target": "AppImage", "arch": ["x64"] }],
-      "icon": "build/icon.png",
       "category": "Education"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "installerIcon": "build/icon.ico",
       "shortcutName": "StudyQuest"
     }
   }

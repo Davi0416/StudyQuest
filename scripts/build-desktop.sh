@@ -1,34 +1,47 @@
 #!/usr/bin/env bash
-# build-desktop.sh — Gera o executável desktop do StudyQuest (sem dependências externas)
-# Pré-requisitos: GraalVM 21+, Node.js 18+, Maven wrapper (./mvnw)
+# build-desktop.sh — Gera o instalador desktop do StudyQuest (sem dependências para o usuário final)
 set -e
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 ELECTRON_DIR="$ROOT/electron"
 BACKEND_OUT="$ROOT/api/target/backend"
+PYTHON_DIR="$ELECTRON_DIR/resources/python"
+PYTHON_VERSION="3.12.10"
 
-echo "==> [1/4] Build nativo do backend (GraalVM)..."
+echo "==> [0/5] Chaves JWT..."
+if [ ! -f "$ROOT/api/src/main/resources/privateKey.pem" ]; then
+  bash "$ROOT/scripts/generate-jwt-keys.sh"
+fi
+
+echo "==> [1/5] Build nativo do backend (GraalVM via Docker)..."
 cd "$ROOT/api"
-./mvnw package -Pnative -DskipTests -q
+./mvnw package -Pnative -DskipTests -Dquarkus.native.container-build=true -q
 
-# Organiza o binário e a chave privada numa pasta limpa para o electron-builder
 mkdir -p "$BACKEND_OUT"
-cp target/studyquest-runner* "$BACKEND_OUT/"
-[ -f src/main/resources/privateKey.pem ] && cp src/main/resources/privateKey.pem "$BACKEND_OUT/"
+cp "target/studyquest-runner" "$BACKEND_OUT/"
+cp src/main/resources/privateKey.pem "$BACKEND_OUT/"
+cp src/main/resources/publicKey.pem "$BACKEND_OUT/"
+chmod +x "$BACKEND_OUT/studyquest-runner"
 echo "    OK — $BACKEND_OUT/"
 
-echo "==> [2/4] Build do frontend (Vite)..."
+echo "==> [2/5] Python embutido..."
+mkdir -p "$PYTHON_DIR"
+if [ ! -f "$PYTHON_DIR/bin/python3" ]; then
+  echo "    Use o Python do sistema em dev; para release Linux empacote em $PYTHON_DIR"
+fi
+
+echo "==> [3/5] Build do frontend (Vite)..."
 cd "$ROOT/frontend"
 npm ci --silent
 npm run build
 echo "    OK — $ROOT/frontend/dist/"
 
-echo "==> [3/4] Instalando dependências do Electron..."
+echo "==> [4/5] Dependências do Electron..."
 cd "$ELECTRON_DIR"
 npm ci --silent
 
-echo "==> [4/4] Empacotando com electron-builder..."
-npm run dist -- "${@}"
+echo "==> [5/5] Empacotando com electron-builder..."
+npm run dist -- "$@"
 
 echo ""
-echo "Pronto! Executável em: $ELECTRON_DIR/dist-electron/"
+echo "Pronto! Instalador em: $ELECTRON_DIR/dist-electron/"
