@@ -1,42 +1,50 @@
 {
   "titulo": "O Caminho da Serpente",
-  "descricao": "Python 3 do zero absoluto — teoria, flashcards, desafios práticos e a missão final do Limpador de Registros.",
+  "descricao": "Python 3 do zero — trilha completa com vertentes, miniboss e boss final da Serpente Ascendente.",
   "cor": "#22C55E",
-  "xpTotal": 450,
+  "xpTotal": 725,
   "nos": [
     {
       "ordem": 1,
       "titulo": "O Básico do Básico",
-      "conteudo": "Antes de lutar contra dragões, você precisa saber falar com o computador.\n\nO feitiço print() é o megafone do Python — tudo entre parênteses e aspas aparece na tela.\n\nVariáveis são caixas com etiquetas para guardar dados no seu inventário:\n• int — número inteiro (ex: 10 moedas)\n• float — número decimal (ex: 3.5 de dano)\n• str — texto entre aspas (ex: \"Espada Longa\")\n• bool — True ou False (ex: envenenado = True)\n\nCoerção (Alquimia): transforme tipos com int(), float() ou str().\nExemplo: int(\"10\") transforma o texto \"10\" no número 10.",
+      "conteudo": "## Capítulo 1 — O Despertar do Código\n\nAntes de enfrentar dragões, você precisa aprender a falar a língua dos computadores. Neste capítulo você domina o megafone print(), monta seu inventário de variáveis e descobre os quatro tipos fundamentais de dados.\n\nObjetivo: Ao final você será capaz de:\n• Mostrar mensagens na tela com print()\n• Guardar dados em variáveis com nomes claros\n• Diferenciar int, float, str e bool\n• Converter tipos com int(), float() e str()\n\nFeitiços deste capítulo: print() · variáveis · coerção de tipos",
       "xpRecompensa": 50,
       "prerequisitosOrdem": [],
       "flashcards": [
         {
           "frente": "O Megafone\nComo fazer o computador dizer \"Olá, Mundo\"?",
-          "verso": "Usando o comando: print(\"Olá, Mundo\")"
+          "verso": "Usando o comando: print(\"Olá, Mundo\")\n\nO print() é a função mais usada no início — ela envia qualquer valor para a tela."
+        },
+        {
+          "frente": "Caixas com Etiqueta\nO que é uma variável em Python?",
+          "verso": "Um nome que aponta para um valor guardado na memória.\n\nExemplo: bananas = 5\nSempre que você escrever bananas, o Python lembra do 5."
         },
         {
           "frente": "Alquimia Básica\nO que a função int() faz com o texto \"42\"?",
-          "verso": "Transforma a string \"42\" no número inteiro 42."
+          "verso": "Transforma a string \"42\" no número inteiro 42.\n\nSem isso, \"42\" + 1 daria erro — são tipos diferentes!"
+        },
+        {
+          "frente": "Armadilha do Texto\nO que acontece com \"10\" * 2?",
+          "verso": "Resultado: \"1010\" (texto repetido duas vezes).\n\nPara somar de verdade: int(\"10\") * 2 → 20"
         }
       ],
       "aula": {
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "Bem-vindo, aventureiro! ⚔️\n\nSe você nunca viu uma linha de código na vida, está no lugar certo. Programar é dar instruções bem claras para o computador — como um receita de bolo, passo a passo.\n\nNesta trilha você vai aprender Python, uma linguagem usada em jogos, sites, inteligência artificial e muito mais. Não precisa ser \"bom de matemática\" nem falar inglês fluente. Só precisa de paciência e vontade de praticar."
+            "conteudo": "## Capítulo 1 — O Despertar do Código\n\nBem-vindo, aventureiro. Você acaba de pisar na primeira pedra do Caminho da Serpente — uma trilha antiga onde cada linha de código é um passo rumo ao domínio de Python.\n\nContexto: A Lenda do Início\n\nDizem que todo grande mago de código começou igual a você: olhando para a tela e se perguntando \"como faço isso funcionar?\". A resposta é simples — programar é dar instruções claras, uma por vez, como uma receita de poção.\n\nO Python é a linguagem escolhida pelos sábios porque ela lê quase como português. Jogos, sites, inteligência artificial, automações — tudo isso pode ser feito com ela.\n\nObjetivo: Neste capítulo você vai:\n• Entender como um programa pensa\n• Usar print() para falar com o mundo\n• Criar variáveis e conhecer os tipos de dados\n• Evitar a armadilha mais comum de iniciantes\n\nDica: Não precisa ser bom em matemática nem falar inglês fluente. Só precisa de curiosidade e vontade de praticar."
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ O que é um programa?\n\nQuando você manda o computador fazer algo, você escreve um programa. O Python lê suas instruções de cima para baixo, uma por vez.\n\n▶ Seu primeiro comando: print()\n\nPense no print() como um megafone: tudo que você colocar dentro dele aparece na tela.\n\nExemplo — copie mentalmente:\nprint(\"Olá, Mundo\")\n\nO que aparece na tela:\nOlá, Mundo\n\n💡 Tudo que for texto precisa ficar entre aspas (\"assim\"). Números não precisam de aspas."
+            "conteudo": "▶ O que é um programa?\n\nQuando você manda o computador fazer algo, você escreve um programa — uma lista ordenada de instruções. O Python lê essa lista de cima para baixo, linha por linha, sem pular nada (a menos que você peça).\n\nPense assim: você é o mestre, o Python é o aprendiz obediente. Se você escrever bem, ele executa perfeitamente. Se escrever confuso, ele trava e mostra um erro — o que é ótimo, porque erros ensinam.\n\n▶ Seu primeiro comando: print()\n\nO print() é o megafone do Python. Tudo que você colocar dentro dele aparece na tela do usuário.\n\nprint(\"Olá, Mundo\")\n\nO que aparece na tela:\nOlá, Mundo\n\nMestre:\n\"O print() é seu melhor amigo nos primeiros dias. Use-o para testar ideias, ver valores de variáveis e debugar problemas. Você vai escrever centenas de prints antes de se tornar um veterano.\"\n\nDica: Regras de ouro do print():\n• Texto sempre entre aspas: \"assim\" ou 'assim'\n• Números não precisam de aspas: print(42) funciona\n• Você pode imprimir várias coisas: print(\"Tenho\", 5, \"moedas\")"
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ Variáveis = caixas com etiqueta\n\nImagine uma caixa onde você guarda itens. A etiqueta da caixa é o nome; o que está dentro é o valor.\n\nExemplo:\nbananas = 5\n\nAgora, sempre que você escrever bananas, o Python lembra que ali tem o número 5.\n\n▶ Tipos de dados (o que cabe na caixa)\n• int — número inteiro, sem vírgula (ex: 10 moedas)\n• float — número com vírgula (ex: 3.5 de dano)\n• str — texto, sempre entre aspas (ex: \"Espada Longa\")\n• bool — verdadeiro ou falso: True ou False (ex: porta_aberta = True)\n\n💡 Os nomes das caixas não podem ter espaço. Use underline: minha_espada"
+            "conteudo": "▶ Variáveis = caixas com etiqueta\n\nImagine uma mochila de aventureiro. Cada bolso tem uma etiqueta (nome) e guarda algo (valor). Variáveis funcionam exatamente assim na memória do computador.\n\nbananas = 5\nnome = \"Aragorn\"\nvida = 100.0\nvivo = True\n\nDepois de criar, basta usar o nome — o Python sabe o que tem dentro.\n\nprint(bananas)   →  5\nprint(nome)      →  Aragorn\n\n▶ Tipos de dados — o que cabe na caixa\n\nCada valor tem um tipo. Conhecer os tipos evita bugs misteriosos:\n\n• int — número inteiro, sem vírgula\n  Exemplos: 10 moedas, 3 vidas, -5 de dano\n\n• float — número com casas decimais\n  Exemplos: 3.5 de dano, 99.99 de preço, 1.0\n\n• str — texto (string), sempre entre aspas\n  Exemplos: \"Espada Longa\", \"Olá\", \"123\" (texto, não número!)\n\n• bool — verdadeiro ou falso (booleano)\n  Apenas dois valores: True ou False\n  Exemplos: porta_aberta = True, envenenado = False\n\nAtenção: Nomes de variáveis:\n• Não podem ter espaços — use underline: minha_espada\n• Não comece com número: 2espadas é inválido\n• São sensíveis a maiúsculas: Vida ≠ vida\n\nDica: Quer saber o tipo? Use type(valor) — ex: type(5) mostra int"
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ Transformando tipos (coerção)\n\nÀs vezes o Python guarda um número como texto (\"10\") e você precisa de número de verdade para calcular. Aí entram as funções de conversão:\n\n• int(\"10\") → vira o número 10\n• float(\"3.5\") → vira 3.5\n• str(42) → vira o texto \"42\"\n\n▶ Cuidado com essa armadilha!\n\n\"10\" * 2 resulta em \"1010\" (texto repetido), NÃO em 20.\n\nPara somar de verdade, converta antes:\nint(\"10\") * 2  →  20\n\n💡 Regra prática: vai fazer conta? Converta para int() ou float() primeiro."
+            "conteudo": "▶ Transformando tipos — a Alquimia do Python\n\nÀs vezes o Python guarda um número como texto. Isso acontece muito quando você lê dados de um formulário ou de um input(). O texto \"10\" parece número, mas para o Python é str — e str não soma como número.\n\nAs funções de conversão resolvem isso:\n\n• int(\"10\")   →  vira o número inteiro 10\n• float(\"3.5\") →  vira o decimal 3.5\n• str(42)      →  vira o texto \"42\"\n• bool(1)      →  vira True (qualquer valor ≠ 0 vira True)\n\n▶ A armadilha clássica — não caia nela!\n\n\"10\" * 2  →  \"1010\"\n\nO Python repetiu o texto duas vezes, não multiplicou números!\n\nPara somar de verdade:\nint(\"10\") * 2  →  20\n\nContexto: História de campo:\nUm goblin programador juntou \"10\" + \"10\" esperando 20 e ficou horas debugando. A lição? Sempre verifique o tipo antes de calcular.\n\nObjetivo: Regra prática:\n• Vai fazer conta? Converta para int() ou float() primeiro\n• Vai montar mensagem? Converta números com str() se for concatenar com +\n• Na dúvida, print(type(variavel)) e descubra o que você tem"
           },
           {
             "tipo": "video",
@@ -51,78 +59,100 @@
             "linkAssistir": "https://www.youtube.com/watch?v=hdDHg1p3YVc"
           },
           {
+            "tipo": "texto",
+            "conteudo": "Prática: Hora de praticar!\n\nVocê acabou de aprender os fundamentos. Agora é sua vez de escrever código de verdade no Campo de Treinamento abaixo.\n\nCada exercício tem três níveis de dificuldade:\n• Nível 1 — aquecimento\n• Nível 2 — consolidação\n• Nível 3 — desafio\n\nDica: Leia o enunciado com calma, use o editor e clique em Validar quando terminar. Errar faz parte — o importante é tentar de novo."
+          },
+          {
             "tipo": "exercicio",
             "id": "basico-bananas",
             "nivel": 1,
-            "icone": "⚔️",
-            "enunciado": "Desafio fácil — mostrar um número na tela.\n\n1. Crie a variável bananas com o valor 5\n2. Use print() para mostrar o conteúdo de bananas\n\nResultado esperado na tela: 5",
-            "codigoInicial": "bananas = 5\n# Use print() abaixo para mostrar bananas\n\n",
+            "enunciado": "Contrato do Mercador\n\nVocê chegou à vila e o mercador quer saber quantas bananas você carrega. Ele não aceita resposta verbal — só código Python.\n\nObjetivo:\n1. Crie a variável bananas com o valor 5\n2. Use print() para mostrar o conteúdo de bananas na tela\n\nSaída esperada:\n5\n\nDica: print(bananas) — sem aspas no nome da variável!",
+            "codigoInicial": "bananas = 5\n# Use print() abaixo para mostrar bananas\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "5\n" }
+              {
+                "stdin": "",
+                "expected_output": "5\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "basico-ficha-rpg",
             "nivel": 2,
-            "icone": "🛡️",
-            "enunciado": "Monte a ficha do seu personagem.\n\n1. Crie nome (texto) e idade (número)\n2. Imprima uma frase juntando os dois\n\nExemplo de saída:\nAventureiro tem 20 anos\n\n💡 Você pode juntar texto e número assim:\nprint(nome, \"tem\", idade, \"anos\")",
-            "codigoInicial": "nome = \"Aventureiro\"\nidade = 20\n# Imprima uma frase juntando nome e idade\n\n",
+            "enunciado": "Ficha de Personagem\n\nAntes de entrar na dungeon, o guardião exige sua ficha oficial. Monte-a com variáveis e exiba na tela.\n\nObjetivo:\n1. Crie nome (texto) e idade (número)\n2. Imprima uma frase juntando os dois\n\nSaída esperada:\nAventureiro tem 20 anos\n\nDica: Você pode juntar texto e número assim:\nprint(nome, \"tem\", idade, \"anos\")\n\nO print() aceita vários argumentos separados por vírgula — ele coloca um espaço entre eles automaticamente.",
+            "codigoInicial": "nome = \"Aventureiro\"\nidade = 20\n# Imprima uma frase juntando nome e idade\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "Aventureiro tem 20 anos\n" }
+              {
+                "stdin": "",
+                "expected_output": "Aventureiro tem 20 anos\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "basico-coercao",
             "nivel": 3,
-            "icone": "🔮",
-            "enunciado": "Bug de alquimia! 🧪\n\nO código abaixo deveria calcular 10 + 10 = 20, mas está saindo \"1010\".\n\nCorrija usando int() para que o resultado seja 20.",
+            "enunciado": "Bug de Alquimia\n\nO alquimista da guilda tentou calcular o dobro de poções, mas a poção estava registrada como texto no grimório. O resultado saiu errado: \"1010\" em vez de 20.\n\nObjetivo:\nCorrija o código usando int() para que o resultado seja 20.\n\nAtenção:\nquantidade = \"10\"  ← isso é texto, não número!\ntotal = quantidade * 2  ← multiplica texto, não número\n\nSaída esperada:\n20",
             "codigoInicial": "quantidade = \"10\"\ntotal = quantidade * 2\nprint(total)\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "20\n" }
+              {
+                "stdin": "",
+                "expected_output": "20\n"
+              }
             ]
           },
-          { "tipo": "flashcards" }
+          {
+            "tipo": "flashcards"
+          }
         ]
       }
     },
     {
       "ordem": 2,
       "titulo": "Matemática e Textos",
-      "conteudo": "Operadores goblínicos:\n• // — divisão inteira (corta o decimal)\n• % — resto da divisão\n\nMagia de textos:\n• \"Oi\" + \", Guerreiro\" = \"Oi, Guerreiro\"\n• \"Au\" * 3 = \"AuAuAu\"\n\nF-strings (Inscrições Rúnicas): coloque f antes das aspas para injetar variáveis.\nExemplo: f\"Eu tenho {bananas} bananas\"",
+      "conteudo": "## Capítulo 2 — Números e Palavras de Poder\n\nTodo jogo precisa de contas (dano, moedas, XP) e de textos (nomes, diálogos, mensagens). Neste capítulo você aprende operadores matemáticos, manipula strings e domina as f-strings — a forma mais elegante de montar frases.\n\nObjetivo: Ao final você será capaz de:\n• Usar +, -, *, /, // e % com confiança\n• Concatenar e repetir textos\n• Fatiar strings com slicing\n• Criar mensagens dinâmicas com f-strings\n\nFeitiços deste capítulo: operadores · strings · slicing · f-strings",
       "xpRecompensa": 50,
-      "prerequisitosOrdem": [1],
+      "prerequisitosOrdem": [
+        1
+      ],
       "flashcards": [
         {
           "frente": "A Espada e o Machado\nQual a diferença entre / e //?",
-          "verso": "/ devolve float (2.5), // corta o decimal e devolve int (2)."
+          "verso": "/ devolve float com decimal (10/3 = 3.333...)\n// corta o decimal e devolve int (10//3 = 3)\n\nUse // quando precisar de número inteiro — ex: dividir moedas entre goblins."
         },
         {
-          "frente": "O Poder do 'F'\nComo colocar uma variável chamada vida dentro de um texto?",
-          "verso": "Usando f-string: f\"Minha vida é {vida}\""
+          "frente": "A Moeda Sobra\nO que o operador % faz?",
+          "verso": "Devolve o RESTO da divisão.\n\n10 % 3 = 1 (sobra 1 moeda)\n\nÚtil para: par/ímpar (n % 2), ciclos, verificar divisibilidade."
+        },
+        {
+          "frente": "Lego de Palavras\nComo juntar \"Oi\" + \", Guerreiro\"?",
+          "verso": "Com o operador + entre strings:\n\"Oi\" + \", Guerreiro\" → \"Oi, Guerreiro\"\n\nTambém funciona repetir: \"Au\" * 3 → \"AuAuAu\""
+        },
+        {
+          "frente": "O Poder do 'F'\nComo colocar a variável vida dentro de um texto?",
+          "verso": "Com f-string:\nf\"Minha vida é {vida}\"\n\nSe vida = 80, imprime: Minha vida é 80"
         }
       ],
       "aula": {
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "Neste capítulo você aprende duas coisas que aparecem em todo jogo: contas (dano, moedas, vida) e textos (nomes, mensagens, diálogos).\n\nO Python funciona como uma calculadora superpoderosa — e também sabe brincar com palavras como se fossem blocos de Lego."
+            "conteudo": "## Capítulo 2 — Números e Palavras de Poder\n\nContexto:\n\nVocê dominou variáveis e tipos. Agora chegou a hora de fazer esses dados trabalharem por você — calculando dano, dividindo tesouros e montando diálogos épicos com NPCs.\n\nNeste capítulo você aprende duas habilidades que aparecem em literalmente todo programa: contas matemáticas e manipulação de textos.\n\nO Python funciona como uma calculadora superpoderosa — e também sabe brincar com palavras como blocos de Lego. Junte, repita, recorte e reforme textos até ficarem perfeitos.\n\nObjetivo: Ao terminar este capítulo, você montará mensagens dinâmicas como:\n\"O item custa R$ 49.90\" — com o preço vindo de uma variável, não escrito na mão."
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ Operadores matemáticos\n\nSímbolo | Nome | Exemplo | Resultado\n+ | soma | 5 + 3 | 8\n- | subtração | 5 - 3 | 2\n* | multiplicação | 5 * 3 | 15\n/ | divisão normal | 10 / 3 | 3.333...\n// | divisão inteira | 10 // 3 | 3 (joga fora o resto)\n% | resto da divisão | 10 % 3 | 1 (sobra 1 moeda)\n\n▶ Exemplo do saque\n\n10 moedas divididas por 3 goblins:\n• 10 // 3 = 3 moedas para cada um\n• 10 % 3 = 1 moeda sobrando\n\n💡 Use // quando precisar de número redondo (sem vírgula)."
+            "conteudo": "▶ Operadores matemáticos — a aritmética do aventureiro\n\nSímbolo | Nome              | Exemplo    | Resultado\n+       | soma              | 5 + 3      | 8\n-       | subtração         | 5 - 3      | 2\n*       | multiplicação     | 5 * 3      | 15\n/       | divisão normal    | 10 / 3     | 3.333...\n//      | divisão inteira   | 10 // 3    | 3\n%       | resto (módulo)    | 10 % 3     | 1\n**      | potência          | 2 ** 3     | 8\n\nContexto: Exemplo do saque goblínico:\n\nVocê derrotou 3 goblins e encontrou 10 moedas de ouro. Como dividir igualmente?\n\n10 // 3 = 3 moedas para cada goblin... ops, cada aventureiro!\n10 % 3 = 1 moeda sobrando no chão\n\nMestre:\n\"Use // quando precisar de número redondo — slots de inventário, páginas de livro, grupos de jogadores. Use % quando sobra importa — par ou ímpar, rodadas de turno, checksum.\"\n\nDica: Dica de combate: dano_total = ataque * multiplicador - defesa_inimigo"
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ Textos (strings) também somam e multiplicam!\n\n\"Oi\" + \", Guerreiro\"  →  \"Oi, Guerreiro\"\n\"Au\" * 3           →  \"AuAuAu\"\n\n▶ Fatiar texto (slicing)\n\nCada letra tem uma posição, começando do 0:\n\nPalavra:  E  S  T  U  D  A  R\nPosição:  0  1  2  3  4  5  6\n\n\"ESTUDAR\"[0:4] pega da posição 0 até antes da 4 → \"ESTU\"\n\n💡 Pense em [início:fim] como recortar um pedaço da palavra."
+            "conteudo": "▶ Textos (strings) — Lego de palavras\n\nStrings também obedecem operadores matemáticos, mas com significado diferente:\n\n\"Oi\" + \", Guerreiro\"  →  \"Oi, Guerreiro\"   (concatenação)\n\"Au\" * 3               →  \"AuAuAu\"            (repetição)\n\"-\" * 20               →  linha de separação\n\n▶ Fatiar texto (slicing) — recortando pedaços\n\nCada caractere de uma string tem uma posição, começando do ZERO (não do 1!):\n\nPalavra:  E  S  T  U  D  A  R\nPosição:  0  1  2  3  4  5  6\n\n\"ESTUDAR\"[0]     →  \"E\"       (primeiro caractere)\n\"ESTUDAR\"[0:4]   →  \"ESTU\"    (da pos 0 até antes da 4)\n\"ESTUDAR\"[-1]    →  \"R\"       (último caractere)\n\"ESTUDAR\"[2:]    →  \"TUDAR\"   (da pos 2 até o fim)\n\nDica: Pense em [início:fim] como recortar com tesoura — o fim NÃO entra no recorte.\n\nAtenção: Erro comum: \"Python\"[7] dá erro — a última posição válida é 5 (len-1)."
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ F-strings — a forma mais fácil de montar frases\n\nColoque a letra f antes das aspas e coloque variáveis entre chaves { }:\n\npreco = 49.9\nprint(f\"O item custa R$ {preco:.2f}\")\n\nSaída:\nO item custa R$ 49.90\n\nO :.2f formata o número com exatamente 2 casas depois da vírgula — perfeito para preços.\n\n💡 Sempre que quiser juntar texto + variável, prefira f-string. É mais legível que outras formas."
+            "conteudo": "▶ F-strings — Inscrições Rúnicas do Python\n\nA forma mais moderna e legível de montar frases com variáveis. Coloque f antes das aspas e variáveis entre chaves { }:\n\nnome = \"Luna\"\nnivel = 12\nprint(f\"{nome} alcançou o nível {nivel}!\")\n\nSaída: Luna alcançou o nível 12!\n\n▶ Formatando números dentro da f-string\n\npreco = 49.9\nprint(f\"O item custa R$ {preco:.2f}\")\n\nSaída: O item custa R$ 49.90\n\nO :.2f formata com exatamente 2 casas decimais — perfeito para preços, porcentagens e estatísticas.\n\nOutros formatos úteis:\n• {valor:.0f}  → sem decimais\n• {valor:>10}  → alinhado à direita em 10 chars\n• {nome:10}    → nome ocupa 10 chars\n\nObjetivo: Regra de ouro: sempre que quiser juntar texto + variável, prefira f-string. É mais legível que \"texto\" + str(variavel).\n\nContexto: Na prática: HUDs de jogos, recibos de loja, logs de sistema — tudo usa f-string."
           },
           {
             "tipo": "video",
@@ -137,74 +167,96 @@
             "linkAssistir": "https://www.youtube.com/watch?v=a7DH88vk2Sk"
           },
           {
+            "tipo": "texto",
+            "conteudo": "Prática: Campo de Treinamento — Matemática e Textos\n\nTrês desafios esperam por você. Cada um simula uma situação real de programação: dividir recursos, manipular strings e formatar preços.\n\nDica: Se travar, volte aos passos anteriores ou consulte os flashcards no final do capítulo."
+          },
+          {
             "tipo": "exercicio",
             "id": "math-divisao-inteira",
             "nivel": 1,
-            "icone": "⚔️",
-            "enunciado": "Divida o tesouro!\n\n10 moedas para 3 goblins. Use // (divisão inteira) e imprima quanto cada um recebe.\n\nResultado esperado: 3",
-            "codigoInicial": "# Calcule 10 // 3 e mostre com print()\n\n",
+            "enunciado": "Divisão do Tesouro\n\nApós a batalha, 10 moedas de ouro precisam ser divididas entre 3 goblins capturados (como troféu simbólico, claro).\n\nObjetivo:\nUse // (divisão inteira) para calcular quanto cada um recebe — sem centavos, sem frações.\n\nSaída esperada:\n3\n\nDica: 10 // 3 = ? (ignore o resto por enquanto)",
+            "codigoInicial": "# Calcule 10 // 3 e mostre com print()\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "3\n" }
+              {
+                "stdin": "",
+                "expected_output": "3\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "math-slicing-estu",
             "nivel": 2,
-            "icone": "🛡️",
-            "enunciado": "Recorte a palavra!\n\nNa palavra \"ESTUDAR\", use slicing para pegar só \"ESTU\" e imprima.\n\n💡 Lembre: [0:4] pega do início até antes da posição 4.",
-            "codigoInicial": "palavra = \"ESTUDAR\"\n# Use slicing e print\n\n",
+            "enunciado": "Runa Cortada\n\nNo templo antigo, a palavra sagrada \"ESTUDAR\" foi gravada em uma pedra. Você precisa extrair apenas as primeiras 4 letras para ativar o mecanismo.\n\nObjetivo:\nUse slicing na palavra \"ESTUDAR\" para pegar só \"ESTU\" e imprima.\n\nSaída esperada:\nESTU\n\nDica: [0:4] pega da posição 0 até ANTES da 4.",
+            "codigoInicial": "palavra = \"ESTUDAR\"\n# Use slicing e print\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "ESTU\n" }
+              {
+                "stdin": "",
+                "expected_output": "ESTU\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "math-fstring-preco",
             "nivel": 3,
-            "icone": "🔮",
-            "enunciado": "Etiqueta de preço no mercador.\n\nO item custa preco = 49.9. Use f-string para imprimir exatamente:\n\nO item custa R$ 49.90\n\n💡 Use {preco:.2f} dentro da f-string.",
-            "codigoInicial": "preco = 49.9\n# Escreva seu print com f-string abaixo\n\n",
+            "enunciado": "Etiqueta do Mercador\n\nO mercador exige que todo item tenha etiqueta formatada corretamente. O preço é 49.9, mas na etiqueta deve aparecer com duas casas decimais.\n\nObjetivo:\nUse f-string para imprimir exatamente:\nO item custa R$ 49.90\n\nDica: Use {preco:.2f} dentro da f-string para forçar 2 casas decimais.",
+            "codigoInicial": "preco = 49.9\n# Escreva seu print com f-string abaixo\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "O item custa R$ 49.90\n" }
+              {
+                "stdin": "",
+                "expected_output": "O item custa R$ 49.90\n"
+              }
             ]
           },
-          { "tipo": "flashcards" }
+          {
+            "tipo": "flashcards"
+          }
         ]
       }
     },
     {
       "ordem": 3,
       "titulo": "Condicionais",
-      "conteudo": "Uma aventura é feita de escolhas:\n• if — verifica se algo é verdadeiro\n• elif — segunda opção se a primeira falhar\n• else — caminho padrão\n\nSinais de comparação: == (igual?), != (diferente?)\nAtenção: = guarda valor, == compara valores.\n\nConectivos: and (E) / or (OU) juntam condições.",
+      "conteudo": "## Capítulo 3 — O Caminho se Bifurca\n\nProgramas lineares são previsíveis — e chatos. Condicionais dão ao seu código a capacidade de decidir: atacar ou fugir, liberar ou bloquear, comer ou dormir.\n\nObjetivo: Ao final você será capaz de:\n• Usar if, elif e else com confiança\n• Comparar valores com ==, !=, >, <\n• Combinar condições com and e or\n• Evitar a confusão clássica entre = e ==\n\nFeitiços deste capítulo: if · elif · else · and · or",
       "xpRecompensa": 50,
-      "prerequisitosOrdem": [2],
+      "prerequisitosOrdem": [
+        2
+      ],
       "flashcards": [
         {
           "frente": "Igualdade vs Atribuição\nQual a diferença entre = e ==?",
-          "verso": "= coloca um valor na variável. == compara se dois valores são iguais."
+          "verso": "= coloca um valor na variável (atribuição)\n== pergunta se dois valores são iguais (comparação)\n\nnome = \"Ana\"     ← guarda\nnome == \"Ana\"    ← pergunta (True ou False)"
         },
         {
-          "frente": "Condições Duplas\nComo checar se ouro é maior que 10 E chave é True?",
-          "verso": "if ouro > 10 and chave == True:"
+          "frente": "Condições Duplas\nComo checar se ouro > 10 E chave é True?",
+          "verso": "if ouro > 10 and chave == True:\n    print(\"Porta aberta!\")\n\nand exige que AMBAS sejam verdadeiras."
+        },
+        {
+          "frente": "Caminho Alternativo\nPara que serve o elif?",
+          "verso": "elif = \"else if\" — testa outra condição se o if anterior falhou.\n\nif nota >= 9:\n    print(\"A\")\nelif nota >= 7:\n    print(\"B\")\nelse:\n    print(\"C\")"
+        },
+        {
+          "frente": "Par ou Ímpar\nComo saber se um número é par?",
+          "verso": "if numero % 2 == 0:\n    print(\"Par\")\nelse:\n    print(\"Ímpar\")\n\nNúmeros pares divididos por 2 sobram 0."
         }
       ],
       "aula": {
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "Até aqui seu programa seguia uma linha reta — sempre as mesmas instruções.\n\nAgora ele aprende a decidir: \"Se isso for verdade, faça A; senão, faça B.\"\n\nIsso se chama condicional — a base de qualquer jogo (vida > 0? atacar ou fugir?), formulário (senha correta?) ou chatbot."
+            "conteudo": "## Capítulo 3 — O Caminho se Bifurca\n\nContexto: Até aqui, seu programa era uma estrada reta — sempre as mesmas instruções, na mesma ordem. Funcional, mas limitado.\n\nAgora você ensina o Python a decidir.\n\n\"Se a vida for maior que zero, atacar. Senão, game over.\"\n\"Se a senha estiver correta, liberar acesso. Senão, mostrar erro.\"\n\"Se tiver fome, comer. Senão, dormir.\"\n\nIsso se chama estrutura condicional — e é a base de qualquer jogo, formulário, chatbot ou sistema de login.\n\nObjetivo: Neste capítulo você domina if, elif, else e aprende a combinar condições com and e or.\n\nDica: Pense em condicionais como encruzilhadas na floresta: o Python olha a placa (condição) e escolhe qual caminho seguir."
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ if / else — o caminho se divide\n\nif CONDIÇÃO:\n    # roda só se for verdadeiro\nelse:\n    # roda se a condição for falsa\n\nExemplo:\nfome = True\nif fome:\n    print(\"Comer\")\nelse:\n    print(\"Dormir\")\n\n💡 Depois do if e do else, o código precisa estar indentado (com espaços à esquerda). O Python usa isso para saber o que pertence a cada bloco."
+            "conteudo": "▶ if / elif / else — a árvore de decisões\n\nif CONDIÇÃO:\n    # roda SÓ se a condição for True\nelif OUTRA_CONDIÇÃO:\n    # roda se a primeira falhou E esta for True\nelse:\n    # roda se NENHUMA condição acima foi True\n\nExemplo — sistema de fome:\n\nfome = True\nif fome:\n    print(\"Comer\")\nelse:\n    print(\"Dormir\")\n\nExemplo — classificação de dano:\n\ndano = 45\nif dano >= 50:\n    print(\"Crítico!\")\nelif dano >= 20:\n    print(\"Forte\")\nelse:\n    print(\"Fraco\")\n\nAtenção: Indentação é OBRIGATÓRIA!\nO código dentro do if/else precisa estar recuado (4 espaços ou 1 Tab). O Python usa indentação para saber o que pertence a cada bloco — diferente de outras linguagens que usam chaves { }.\n\nMestre:\n\"Um if mal indentado é o bug número 1 de iniciantes. Se o Python reclamar de IndentationError, conte os espaços.\""
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ Comparando valores\n\n==  igual a?        (5 == 5 → True)\n!=  diferente de?   (5 != 3 → True)\n>   maior que?\n<   menor que?\n>=  maior ou igual?\n<=  menor ou igual?\n\n⚠️ ATENÇÃO — erro clássico de iniciante:\n• = guarda valor na variável (nome = \"Ana\")\n• == pergunta se dois valores são iguais (nome == \"Ana\")\n\n▶ Juntando condições\n• and — as DUAS precisam ser verdadeiras\n• or — basta UMA ser verdadeira\n\nExemplo:\nif usuario == \"admin\" and senha == \"1234\":\n    print(\"Entrou!\")"
+            "conteudo": "▶ Operadores de comparação\n\n==   igual a?           5 == 5  → True\n!=   diferente de?      5 != 3  → True\n>    maior que?          10 > 3  → True\n<    menor que?          3 < 10  → True\n>=   maior ou igual?     5 >= 5  → True\n<=   menor ou igual?     3 <= 2  → False\n\nAtenção: ARMADILHA CLÁSSICA — grave isso:\n• = guarda valor na variável     →  nome = \"Ana\"\n• == compara se são iguais       →  nome == \"Ana\"  (True ou False)\n\nConfundir os dois é o erro mais comum de quem está começando.\n\n▶ Combinando condições — and e or\n\n• and — AMBAS precisam ser True\n• or  — basta UMA ser True\n• not — inverte True ↔ False\n\nExemplos:\n\nif ouro >= 100 and nivel >= 10:\n    print(\"Item lendário desbloqueado!\")\n\nif e_chave or e_arrombador:\n    print(\"Porta aberta!\")\n\nif not envenenado:\n    print(\"Vida normal regenerando\")\n\nContexto: No mundo real: login (usuario AND senha), permissões de admin, validação de formulários — tudo usa condicionais."
           },
           {
             "tipo": "video",
@@ -213,74 +265,96 @@
             "linkAssistir": "https://www.youtube.com/watch?v=K10u3XIf1-Q"
           },
           {
+            "tipo": "texto",
+            "conteudo": "Prática: Campo de Treinamento — Condicionais\n\nTrês cenários de decisão aguardam você: fome do personagem, paridade de números e login na fortaleza.\n\nDica: Em cada exercício, pergunte: \"qual condição preciso testar?\" antes de escrever o if."
+          },
+          {
             "tipo": "exercicio",
             "id": "cond-fome",
             "nivel": 1,
-            "icone": "⚔️",
-            "enunciado": "Seu personagem está com fome?\n\nA variável fome já vale True.\n\n• Se fome for True → imprima \"Comer\"\n• Senão → imprima \"Dormir\"\n\nResultado esperado: Comer",
-            "codigoInicial": "fome = True\n# Escreva if / else abaixo\n\n",
+            "enunciado": "Rotina do Aventureiro\n\nSeu personagem acordou na taverna. A variável fome já está definida como True.\n\nObjetivo:\n• Se fome for True → imprima \"Comer\"\n• Senão → imprima \"Dormir\"\n\nSaída esperada:\nComer\n\nDica: Estrutura básica:\nif fome:\n    print(\"Comer\")\nelse:\n    print(\"Dormir\")",
+            "codigoInicial": "fome = True\n# Escreva if / else abaixo\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "Comer\n" }
+              {
+                "stdin": "",
+                "expected_output": "Comer\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "cond-paridade",
             "nivel": 2,
-            "icone": "🛡️",
-            "enunciado": "Número par ou ímpar?\n\nUse numero = 7 e o operador % (resto da divisão).\n\n• Se numero % 2 == 0 → imprima \"Par\"\n• Senão → imprima \"Ímpar\"\n\n💡 7 dividido por 2 sobra 1, então é ímpar.",
-            "codigoInicial": "numero = 7\n# if / else para Par ou Ímpar\n\n",
+            "enunciado": "Oráculo dos Números\n\nO oráculo da torre pede que você classifique o número 7 como par ou ímpar.\n\nObjetivo:\nUse numero = 7 e o operador % (resto da divisão).\n• Se numero % 2 == 0 → imprima \"Par\"\n• Senão → imprima \"Ímpar\"\n\nSaída esperada:\nÍmpar\n\nDica: 7 ÷ 2 = 3 com resto 1. Como o resto não é 0, é ímpar.",
+            "codigoInicial": "numero = 7\n# if / else para Par ou Ímpar\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "Ímpar\n" }
+              {
+                "stdin": "",
+                "expected_output": "Ímpar\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "cond-login",
             "nivel": 3,
-            "icone": "🔮",
-            "enunciado": "Portão da fortaleza 🔐\n\nSó libere se usuario E senha estiverem corretos.\n\nAs variáveis já estão prontas no código. Imprima \"Acesso liberado\" quando os dois baterem.\n\n💡 Use and para exigir as duas condições.",
-            "codigoInicial": "usuario_db = \"heroi\"\nsenha_db = \"1234\"\nusuario_digitado = \"heroi\"\nsenha_digitada = \"1234\"\n# Verifique login e imprima Acesso liberado\n\n",
+            "enunciado": "Portão da Fortaleza\n\nA fortaleza só abre se usuario E senha estiverem corretos ao mesmo tempo. Um alone não basta — segurança em camadas.\n\nObjetivo:\nAs variáveis já estão no código. Imprima \"Acesso liberado\" quando os dois baterem.\n\nSaída esperada:\nAcesso liberado\n\nDica: Use and para exigir as duas condições:\nif usuario_digitado == usuario_db and senha_digitada == senha_db:",
+            "codigoInicial": "usuario_db = \"heroi\"\nsenha_db = \"1234\"\nusuario_digitado = \"heroi\"\nsenha_digitada = \"1234\"\n# Verifique login e imprima Acesso liberado\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "Acesso liberado\n" }
+              {
+                "stdin": "",
+                "expected_output": "Acesso liberado\n"
+              }
             ]
           },
-          { "tipo": "flashcards" }
+          {
+            "tipo": "flashcards"
+          }
         ]
       }
     },
     {
       "ordem": 4,
       "titulo": "Laços de Repetição",
-      "conteudo": "Feitiços de repetição (loops):\n• while — repete enquanto a condição for True (cuidado com loops infinitos!)\n• for — repete quantidade exata de vezes, item por item\n\nComandos especiais:\n• break — para o loop imediatamente\n• continue — pula para a próxima repetição",
+      "conteudo": "## Capítulo 4 — Feitiços de Repetição\n\nEscrever a mesma instrução 100 vezes? Só se você for masoquista. Loops repetem blocos de código por você — sem erro, sem cansaço, na velocidade da luz.\n\nObjetivo: Ao final você será capaz de:\n• Usar while para repetir enquanto uma condição for True\n• Usar for com range() e listas\n• Controlar loops com break e continue\n• Entender o else do for (bônus avançado)\n\nFeitiços deste capítulo: while · for · range · break · continue",
       "xpRecompensa": 50,
-      "prerequisitosOrdem": [2],
+      "prerequisitosOrdem": [
+        2
+      ],
       "flashcards": [
         {
-          "frente": "O Segredo do For\nPara que serve o \"else\" no \"for\"?",
-          "verso": "Só executa se o laço terminar naturalmente (sem ser parado por um break)."
+          "frente": "Enquanto Durar\nQuando usar while em vez de for?",
+          "verso": "while — quando NÃO sabe quantas vezes vai repetir (ex: \"enquanto vida > 0\")\nfor — quando sabe a quantidade ou tem uma lista (ex: \"para cada item na mochila\")"
         },
         {
           "frente": "Fuga Tática\nComo paro um loop while imediatamente?",
-          "verso": "Usando o comando break."
+          "verso": "Com break — sai do loop na hora, sem completar as repetições restantes.\n\nÚtil para: achar item e parar busca, cancelar operação."
+        },
+        {
+          "frente": "Pular Turno\nPara que serve o continue?",
+          "verso": "Pula a iteração ATUAL e vai direto para a próxima.\n\nEx: pular números ímpares, ignorar itens inválidos."
+        },
+        {
+          "frente": "O Segredo do For\nPara que serve o else no for?",
+          "verso": "Só executa se o loop terminou naturalmente — ou seja, sem break.\n\nÚtil para: \"busquei em toda a lista e não achei\"."
         }
       ],
       "aula": {
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "Imagina escrever \"Ataque!\" 100 vezes na mão. Cansativo, né?\n\nLoops (laços) fazem o computador repetir um bloco de código por você — dezenas, centenas ou milhares de vezes, sem erro e sem cansaço.\n\nExistem dois feitiços principais: while (enquanto) e for (para cada)."
+            "conteudo": "## Capítulo 4 — Feitiços de Repetição\n\nContexto: O Problema\n\nImagina escrever \"Ataque!\" 100 vezes na mão. Cansativo, lento e propenso a erros (na linha 47 você esquece o ponto de exclamação).\n\nLoops (laços) resolvem isso: você escreve o bloco UMA vez e manda repetir quantas vezes quiser.\n\nExistem dois feitiços principais:\n• while — \"enquanto isso for verdade, repita\"\n• for — \"para cada item, faça isso\"\n\nObjetivo: Onde loops aparecem na vida real:\n• Processar lista de usuários\n• Animar frames de um jogo\n• Validar entrada até o usuário acertar\n• Baixar páginas de uma API\n\nDica: Dominar loops é o que separa quem copia código de quem realmente programa."
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ while — repete ENQUANTO a condição for verdadeira\n\ncontador = 1\nwhile contador <= 5:\n    print(contador)\n    contador = contador + 1\n\nIsso imprime 1, 2, 3, 4, 5 — um por linha.\n\n⚠️ Sempre atualize a variável de controle dentro do while! Senão o loop nunca termina (loop infinito).\n\n▶ for — repete para cada item de uma sequência\n\nfor n in range(6):\n    print(n)\n\nImprime 0, 1, 2, 3, 4, 5.\n\n💡 range(6) gera números de 0 até 5."
+            "conteudo": "▶ while — repete ENQUANTO a condição for True\n\ncontador = 1\nwhile contador <= 5:\n    print(contador)\n    contador = contador + 1\n\nIsso imprime 1, 2, 3, 4, 5 — um por linha.\n\nO fluxo:\n1. Python testa: contador <= 5?\n2. Se True → executa o bloco indentado\n3. Volta ao passo 1\n4. Se False → sai do loop\n\nAtenção: PERIGO: loop infinito!\nSe você esquecer de atualizar a variável de controle, o while nunca termina.\n\nwhile True:\n    print(\"Socorro!\")  ← trava o programa\n\n▶ for — repete para cada item de uma sequência\n\nfor n in range(6):\n    print(n)\n\nImprime: 0, 1, 2, 3, 4, 5\n\nrange(6)       → 0 até 5\nrange(1, 6)    → 1 até 5\nrange(0, 11, 2) → 0, 2, 4, 6, 8, 10 (pula de 2 em 2)\n\nfor item in [\"espada\", \"escudo\", \"poção\"]:\n    print(item)\n\nMestre:\n\"Prefira for quando souber quantas vezes repetir. Use while quando depender de uma condição que muda durante a execução.\""
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ Comandos especiais dentro do loop\n\n• break — para tudo e sai do loop na hora\n• continue — pula só esta volta e vai para a próxima\n\nExemplo com break:\n\nfor item in [\"111\", \"segredo\", \"222\"]:\n    if item == \"segredo\":\n        print(\"Achei!\")\n        break\n\n▶ else no for (bônus)\n\nO else depois de um for só roda se o loop terminou sem break — útil em buscas."
+            "conteudo": "▶ break e continue — controle fino do loop\n\n• break — PARA TUDO e sai do loop imediatamente\n• continue — PULA esta volta e vai para a próxima\n\nExemplo com break — caça ao tesouro:\n\nfor item in [\"111\", \"segredo\", \"222\"]:\n    if item == \"segredo\":\n        print(\"Achei!\")\n        break\n\nSó imprime \"Achei!\" e para — não processa \"222\".\n\nExemplo com continue — só pares:\n\nfor n in range(5):\n    if n % 2 != 0:\n        continue\n    print(n)\n\nImprime: 0, 2, 4 (pula os ímpares)\n\n▶ else no for (bônus avançado)\n\nfor item in lista:\n    if item == alvo:\n        print(\"Encontrei!\")\n        break\nelse:\n    print(\"Não estava na lista.\")\n\nO else só roda se o loop terminou SEM break — perfeito para buscas.\n\nContexto: Padrão comum em jogos: while vida > 0: processar_turno()"
           },
           {
             "tipo": "video",
@@ -295,74 +369,97 @@
             "linkAssistir": "https://www.youtube.com/watch?v=LH6OIn2lBaI"
           },
           {
+            "tipo": "texto",
+            "conteudo": "Prática: Campo de Treinamento — Laços de Repetição\n\nContagem com while, pares com for e caça com break. Três padrões que você usará em praticamente todo projeto.\n\nDica: Antes de codar, trace no papel: quantas vezes o loop vai rodar?"
+          },
+          {
             "tipo": "exercicio",
             "id": "loop-while-contagem",
             "nivel": 1,
-            "icone": "⚔️",
-            "enunciado": "Contagem regressiva manual.\n\nUse while para imprimir os números de 1 a 5, um por linha.\n\n💡 Comece com contador = 1 e vá somando 1 a cada volta.",
-            "codigoInicial": "contador = 1\n# while: imprima de 1 a 5\n\n",
+            "enunciado": "Contagem Regressiva\n\nO portal mágico só abre após uma contagem de 1 a 5. Use while para imprimir cada número, um por linha.\n\nObjetivo:\nImprima 1, 2, 3, 4, 5 (cada um em sua linha)\n\nDica: Comece com contador = 1 e incremente com contador = contador + 1 a cada volta.\n\nAtenção: Não esqueça de atualizar o contador — senão loop infinito!",
+            "codigoInicial": "contador = 1\n# while: imprima de 1 a 5\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "1\n2\n3\n4\n5\n" }
+              {
+                "stdin": "",
+                "expected_output": "1\n2\n3\n4\n5\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "loop-for-pares",
             "nivel": 2,
-            "icone": "🛡️",
-            "enunciado": "Só os pares!\n\nUse for com range() para imprimir os pares de 0 a 10 (incluindo o 10), um por linha.\n\n💡 range(0, 11, 2) pula de 2 em 2.",
-            "codigoInicial": "# for + range: pares de 0 a 10\n\n",
+            "enunciado": "Runas Pares\n\nO ritual exige invocar apenas números pares de 0 a 10. Use for com range() para imprimi-los, um por linha.\n\nSaída esperada:\n0\n2\n4\n6\n8\n10\n\nDica: range(0, 11, 2) gera 0, 2, 4... 10 (início, fim exclusivo, passo).",
+            "codigoInicial": "# for + range: pares de 0 a 10\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "0\n2\n4\n6\n8\n10\n" }
+              {
+                "stdin": "",
+                "expected_output": "0\n2\n4\n6\n8\n10\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "loop-break-segredo",
             "nivel": 3,
-            "icone": "🔮",
-            "enunciado": "Caça ao tesouro.\n\nPercorra a lista [\"111\", \"segredo\", \"222\"].\n\nQuando encontrar \"segredo\", imprima \"Achei!\" e pare com break.",
+            "enunciado": "Caça ao Tesouro\n\nTrês passagens se abrem diante de você. Percorra a lista [\"111\", \"segredo\", \"222\"] até encontrar a palavra-chave.\n\nObjetivo:\nQuando encontrar \"segredo\", imprima \"Achei!\" e pare com break.\n\nSaída esperada:\nAchei!\n\nDica: break interrompe o loop na hora — não continue procurando depois de achar.",
             "codigoInicial": "passagens = [\"111\", \"segredo\", \"222\"]\nfor item in passagens:\n    pass\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "Achei!\n" }
+              {
+                "stdin": "",
+                "expected_output": "Achei!\n"
+              }
             ]
           },
-          { "tipo": "flashcards" }
+          {
+            "tipo": "flashcards"
+          }
         ]
       }
     },
     {
       "ordem": 5,
-      "titulo": "Listas, Tuplas e Boss Final",
-      "conteudo": "Equipamentos de armazenamento, proteção contra erros e a missão final: O Limpador de Registros.",
-      "xpRecompensa": 250,
-      "prerequisitosOrdem": [3, 4],
+      "titulo": "Listas e Tuplas",
+      "conteudo": "## Caminho Central — A Mochila do Mestre\n\nListas guardam vários itens; tuplas guardam dados imutáveis. Nesta etapa central você aprende estruturas de dados e try/except antes das vertentes e do confronto final.\n\nObjetivo:\n• Criar e modificar listas\n• Usar tuplas imutáveis\n• Proteger código com try/except\n\nFeitiços: listas · tuplas · try/except · split",
+      "xpRecompensa": 75,
+      "prerequisitosOrdem": [
+        3,
+        4
+      ],
       "flashcards": [
         {
-          "frente": "Identificação de Itens\nComo diferenciar uma Lista de uma Tupla pelo visual?",
-          "verso": "Listas usam colchetes [], Tuplas usam parênteses ()."
+          "frente": "Identificação de Itens\nComo diferenciar Lista de Tupla?",
+          "verso": "Listas usam colchetes [ ] — mutáveis (podem mudar)\nTuplas usam parênteses ( ) — imutáveis (não mudam)\n\nmochila = [\"poção\"]     ← lista\ncofre = (\"espada\",)      ← tupla (vírgula importa!)"
         },
         {
-          "frente": "O Escudo Try/Except\nO que acontece se o código der erro dentro do bloco try?",
-          "verso": "O Python pula para o bloco except em vez de explodir o programa inteiro."
+          "frente": "O Escudo Try/Except\nO que acontece se der erro dentro do try?",
+          "verso": "O Python pula para o except em vez de crashar o programa.\n\ntry:\n    perigoso()\nexcept ValueError:\n    print(\"Tratei o erro!\")"
+        },
+        {
+          "frente": "Contador de Itens\nComo saber quantos itens tem uma lista?",
+          "verso": "len(minha_lista)\n\nmochila = [\"poção\", \"poção\", \"poção\"]\nlen(mochila)  →  3"
+        },
+        {
+          "frente": "Cortar com Hífen\nComo quebrar \"a-b-c\" em pedaços?",
+          "verso": "texto.split(\"-\")  →  [\"a\", \"b\", \"c\"]\n\nEssencial para a missão final do Limpador de Registros!"
         }
       ],
       "aula": {
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "Você já sabe guardar UMA coisa numa variável (uma espada, uma poção).\n\nMas e guardar VÁRIAS coisas juntas — tipo uma mochila cheia de itens?\n\nPara isso existem listas e tuplas: \"caixas\" que cabem vários valores dentro, em ordem."
+            "conteudo": "## Caminho Central — A Mochila do Mestre\n\nContexto: Você dominou condicionais e laços. Agora aprende a guardar vários valores juntos.\n\nListas [ ] são flexíveis; tuplas ( ) são imutáveis. try/except protege seu código de entradas inválidas.\n\nObjetivo: Complete esta etapa e explore as vertentes de Funções (leste) e Dicionários (oeste) antes do miniboss."
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ Lista [ ] — mochila flexível\n\nVocê pode adicionar, remover e trocar itens quando quiser.\n\nmochila = [\"poção\", \"poção\", \"poção\"]\nmochila.append(\"veneno\")   # adiciona no final\nlen(mochila)                 # conta quantos itens tem → 4\n\n▶ Tupla ( ) — cofre trancado\n\nDepois de criada, NÃO muda mais. Ótima para dados que não podem ser alterados.\n\ncofre = (\"espada\", \"escudo\", \"poção\")\ncofre[0]   # lê o primeiro item → \"espada\"\n\n💡 Visual rápido: colchetes [ ] = lista | parênteses ( ) = tupla"
+            "conteudo": "▶ Lista [ ] — mochila flexível\n\nListas guardam vários itens e podem crescer, encolher e mudar:\n\nmochila = [\"poção\", \"poção\", \"poção\"]\nmochila.append(\"veneno\")    # adiciona no final\nmochila[0] = \"super poção\"  # troca o primeiro item\nlen(mochila)                  # conta itens → 4\n\nOperações úteis:\n• lista.append(item)   — adiciona no fim\n• lista.remove(item)   — remove primeira ocorrência\n• lista.pop()          — remove e retorna o último\n• len(lista)           — quantidade de itens\n• item in lista        — True se item existe\n\n▶ Tupla ( ) — cofre trancado\n\nTuplas são imutáveis — depois de criadas, NÃO mudam:\n\ncofre = (\"espada\", \"escudo\", \"poção\")\ncofre[0]   →  \"espada\"   (ler OK)\ncofre[0] = \"machado\"  →  ERRO! (não pode alterar)\n\nUse tuplas para: coordenadas (x, y), RGB de cor, dados que não devem mudar.\n\nDica: Visual rápido: [ ] = lista mutável | ( ) = tupla imutável"
           },
           {
             "tipo": "texto",
-            "conteudo": "▶ try / except — escudo contra erros\n\nÀs vezes o usuário digita \"abc\" quando você esperava um número. Sem proteção, o programa quebra.\n\nCom try/except, você tenta o código arriscado e, se der erro, trata com calma:\n\ntry:\n    numero = int(input())\n    print(\"Número válido:\", numero)\nexcept ValueError:\n    print(\"Erro: digite um número!\")\n\n💡 Pense no try como \"tentar fazer\" e no except como \"se der problema, faça isso aqui\"."
+            "conteudo": "▶ try / except — escudo contra erros\n\nProgramas reais recebem dados sujos: usuário digita \"abc\" quando você esperava número, arquivo não existe, rede cai. Sem proteção, seu programa crasha com traceback vermelho assustador.\n\nCom try/except, você tenta o código arriscado e trata erros com calma:\n\ntry:\n    numero = int(input())\n    print(\"Número válido:\", numero)\nexcept ValueError:\n    print(\"Erro: digite um número!\")\n\nFluxo:\n1. Python tenta executar o bloco try\n2. Se der erro do tipo ValueError → pula para except\n3. Se não der erro → except é ignorado\n\nErros comuns capturados:\n• ValueError — conversão inválida (int(\"abc\"))\n• IndexError — índice fora da lista\n• KeyError — chave inexistente em dicionário\n• ZeroDivisionError — divisão por zero\n\nMestre:\n\"try/except não é vergonha — é profissionalismo. Todo código de produção usa.\"\n\nContexto: Na missão final você usará .split() para quebrar strings — outra ferramenta essencial."
           },
           {
             "tipo": "video",
@@ -377,54 +474,267 @@
             "linkAssistir": "https://www.youtube.com/watch?v=0LB3FSfjvao"
           },
           {
+            "tipo": "texto",
+            "conteudo": "Prática: Campo de Treinamento — Listas e Proteção\n\nTrês exercícios para fixar mochila, cofre e escudo try/except.\n\nDepois siga para Funções ou Dicionários — ambas levam ao miniboss."
+          },
+          {
             "tipo": "exercicio",
             "id": "lista-append-len",
             "nivel": 1,
-            "icone": "⚔️",
-            "enunciado": "Organize a mochila.\n\n1. A lista mochila já tem 3 poções\n2. Use .append() para adicionar \"veneno\" no final\n3. Imprima len(mochila) — deve ser 4",
-            "codigoInicial": "mochila = [\"poção\", \"poção\", \"poção\"]\n# append veneno e print len\n\n",
+            "enunciado": "Organize a Mochila\n\nSua mochila já tem 3 poções. O alquimista te deu um frasco de veneno para guardar.\n\nObjetivo:\n1. Use .append() para adicionar \"veneno\" no final da lista\n2. Imprima len(mochila) — deve ser 4\n\nSaída esperada:\n4",
+            "codigoInicial": "mochila = [\"poção\", \"poção\", \"poção\"]\n# append veneno e print len\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "4\n" }
+              {
+                "stdin": "",
+                "expected_output": "4\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "tupla-cofre-espada",
             "nivel": 2,
-            "icone": "🛡️",
-            "enunciado": "Abra o cofre.\n\nA tupla cofre guarda (\"espada\", \"escudo\", \"poção\").\n\nLeia o primeiro item com cofre[0] e imprima \"espada\".",
-            "codigoInicial": "cofre = (\"espada\", \"escudo\", \"poção\")\n# Leia cofre[0] e imprima\n\n",
+            "enunciado": "Abra o Cofre\n\nO cofre antigo guarda três relíquias em ordem: espada, escudo, poção. Tuplas não mentem — a posição 0 é sempre a espada.\n\nObjetivo:\nLeia o primeiro item com cofre[0] e imprima \"espada\".\n\nDica: Índices começam em 0, não em 1!",
+            "codigoInicial": "cofre = (\"espada\", \"escudo\", \"poção\")\n# Leia cofre[0] e imprima\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "", "expected_output": "espada\n" }
+              {
+                "stdin": "",
+                "expected_output": "espada\n"
+              }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "try-except-valueerror",
             "nivel": 3,
-            "icone": "🔮",
-            "enunciado": "Proteja contra entrada inválida.\n\n1. Leia um dado com input()\n2. Tente converter com int()\n3. Se o usuário digitar letras, capture ValueError e imprima:\nErro: digite um número!\n\n💡 O teste automático vai simular a entrada \"abc\".",
-            "codigoInicial": "dado = input()\n# try int(dado) / except ValueError\n\n",
+            "enunciado": "Escudo do Guardião\n\nO guardião pede um número, mas visitantes teimosos digitam letras. Proteja seu código!\n\nObjetivo:\n1. Leia um dado com input()\n2. Tente converter com int()\n3. Se o usuário digitar letras, capture ValueError e imprima:\nErro: digite um número!\n\nDica: O teste automático simula a entrada \"abc\".",
+            "codigoInicial": "dado = input()\n# try int(dado) / except ValueError\n",
             "linguagem": "python",
             "testes": [
-              { "stdin": "abc", "expected_output": "Erro: digite um número!\n" }
+              {
+                "stdin": "abc",
+                "expected_output": "Erro: digite um número!\n"
+              }
             ]
           },
           {
+            "tipo": "flashcards"
+          }
+        ]
+      }
+    },
+    {
+      "ordem": 6,
+      "titulo": "Funções e Escopo",
+      "conteudo": "## Vertente Leste — Forjando Feitiços Reutilizáveis\n\nFunções são receitas nomeadas: você escreve uma vez e invoca quantas vezes quiser. Nesta vertente você aprende def, return e parâmetros — a base de todo código organizado.\n\nObjetivo:\n• Criar funções com def\n• Passar argumentos e receber return\n• Reutilizar lógica sem repetir código\n\nFeitiços: def · return · parâmetros · escopo local",
+      "xpRecompensa": 75,
+      "prerequisitosOrdem": [
+        4
+      ],
+      "flashcards": [
+        {
+          "frente": "Invocar um Feitiço\nComo declarar uma função chamada atacar?",
+          "verso": "def atacar():\n    print(\"Golpe!\")\n\nA palavra-chave def cria a função. Os dois pontos abrem o bloco indentado."
+        },
+        {
+          "frente": "Entrega de Resultado\nO que return faz?",
+          "verso": "Devolve um valor para quem chamou a função e encerra a execução.\n\ndef dobro(n):\n    return n * 2\n\ndobro(5)  →  10"
+        },
+        {
+          "frente": "Ingredientes\nO que são parâmetros?",
+          "verso": "Variáveis que a função recebe na chamada.\n\ndef curar(vida, pocao):\n    return vida + pocao\n\ncurar(80, 20)  →  100"
+        },
+        {
+          "frente": "Escopo Local\nVariável criada dentro da função existe fora?",
+          "verso": "Não. Variáveis dentro de def são locais — nascem e morrem com a função.\n\nIsso evita conflitos e deixa o código previsível."
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
             "tipo": "texto",
-            "conteudo": "🏆 MISSÃO FINAL: O Limpador de Registros\n\nVocê achou um pergaminho antigo coberto de sujeira. Precisa limpá-lo!\n\nEntrada (via input):\nxX_LAMA_Xx-Herolink-25-Guerreiros\n\nSaída esperada:\n*** Herolink *** tem 25 anos...\n\n▶ Passo a passo\n1. Leia a string com input()\n2. Use .split(\"-\") para quebrar em pedaços\n3. Ignore o pedaço 0 (a lama)\n4. Use partes[1] como nome e partes[2] como idade\n5. Monte a f-string com asteriscos decorando o nome\n\n💡 Exemplo: partes = dado.split(\"-\")"
+            "conteudo": "## Vertente Leste — Funções\n\nContexto: Até aqui você escreveu instruções soltas. Em projetos reais, repetir código é receita para bugs — muda em um lugar, esquece no outro.\n\nFunções resolvem isso: encapsulam um comportamento com nome claro.\n\nObjetivo: Ao final desta vertente você terá feitiços reutilizáveis prontos para o confronto contra a Serpente."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ def — declarando um feitiço\n\ndef cumprimentar(nome):\n    print(f\"Olá, {nome}!\")\n\ncumprimentar(\"Luna\")\n\nRegras:\n• def nome_da_funcao(parametros):\n• Corpo indentado com 4 espaços\n• Chame com nome_da_funcao(valor)\n\n▶ return — devolvendo resultado\n\ndef area_quadrado(lado):\n    return lado * lado\n\nresultado = area_quadrado(5)\nprint(resultado)  →  25\n\nSem return, a função devolve None implicitamente.\n\nDica: Nomes de função seguem a mesma regra de variáveis: snake_case, verbos quando possível — calcular_dano, purificar_nome."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "Prática: Três exercícios para fixar funções antes de seguir ao cruzamento das vertentes."
           },
           {
             "tipo": "exercicio",
-            "id": "boss-limpador-registros",
-            "nivel": 4,
-            "icone": "🐉",
-            "boss": true,
+            "id": "func-hello",
+            "nivel": 1,
+            "enunciado": "Feitiço de Boas-vindas\n\nCrie a função cumprimentar que recebe um nome e imprime Olá, <nome>!\n\nDepois chame cumprimentar(\"Aventureiro\").\n\nSaída esperada:\nOlá, Aventureiro!",
+            "codigoInicial": "def cumprimentar(nome):\n    pass\n\ncumprimentar(\"Aventureiro\")\n",
+            "linguagem": "python",
+            "testes": [
+              {
+                "stdin": "",
+                "expected_output": "Olá, Aventureiro!\n"
+              }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "func-dobro",
+            "nivel": 2,
+            "enunciado": "Amplificador de Poder\n\nCrie dobro(n) que retorna n multiplicado por 2.\n\nImprima dobro(7).\n\nSaída esperada:\n14",
+            "codigoInicial": "def dobro(n):\n    pass\n\nprint(dobro(7))\n",
+            "linguagem": "python",
+            "testes": [
+              {
+                "stdin": "",
+                "expected_output": "14\n"
+              }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "func-curar",
+            "nivel": 3,
+            "enunciado": "Poção de Cura\n\nCrie curar(vida, pocao) que retorna vida + pocao.\n\nImprima curar(60, 25).\n\nSaída esperada:\n85",
+            "codigoInicial": "def curar(vida, pocao):\n    pass\n\nprint(curar(60, 25))\n",
+            "linguagem": "python",
+            "testes": [
+              {
+                "stdin": "",
+                "expected_output": "85\n"
+              }
+            ]
+          },
+          {
+            "tipo": "flashcards"
+          }
+        ]
+      }
+    },
+    {
+      "ordem": 7,
+      "titulo": "Dicionários",
+      "conteudo": "## Vertente Oeste — Grimórios Indexados\n\nDicionários guardam pares chave → valor, como um inventário RPG: \"espada\" aponta para +15 de dano. Ideal para configs, fichas de personagem e registros nomeados.\n\nObjetivo:\n• Criar e ler dicts\n• Usar .get() com fallback\n• Iterar chaves e valores\n\nFeitiços: dict · chaves · valores · .get()",
+      "xpRecompensa": 75,
+      "prerequisitosOrdem": [
+        3
+      ],
+      "flashcards": [
+        {
+          "frente": "Grimório Indexado\nComo criar um dicionário de herói?",
+          "verso": "heroi = {\"nome\": \"Kira\", \"classe\": \"Maga\", \"nivel\": 5}\n\nChaves entre aspas, separadas por vírgula."
+        },
+        {
+          "frente": "Consulta Rápida\nComo ler heroi[\"classe\"]?",
+          "verso": "Retorna \"Maga\".\n\nSe a chave não existir → KeyError.\nUse .get(\"chave\", padrao) para evitar crash."
+        },
+        {
+          "frente": "Valor Seguro\nO que heroi.get(\"ouro\", 0) faz?",
+          "verso": "Retorna o valor de \"ouro\" se existir.\nSe não existir, retorna 0 (valor padrão)."
+        },
+        {
+          "frente": "Atualizar Ficha\nComo subir o nível?",
+          "verso": "heroi[\"nivel\"] = 6\n\nAtribuir em chave existente atualiza.\nAtribuir em chave nova adiciona o par."
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
+            "tipo": "texto",
+            "conteudo": "## Vertente Oeste — Dicionários\n\nContexto: Listas usam posição numérica (0, 1, 2). Dicionários usam rótulos legíveis — perfeito quando você quer buscar \"nome\" em vez de lembrar que nome está na posição 1.\n\nObjetivo: Dominar dicts para desbloquear o cruzamento das três vertentes antes do miniboss."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Criando e lendo\n\nficha = {\"nome\": \"Rex\", \"hp\": 100, \"classe\": \"Tank\"}\nprint(ficha[\"nome\"])   →  Rex\nprint(ficha.get(\"mp\", 0))  →  0 (chave mp não existe)\n\n▶ Modificando\n\nficha[\"hp\"] = 85\nficha[\"mp\"] = 40\n\n▶ Percorrendo\n\nfor chave in ficha:\n    print(chave, ficha[chave])\n\nDica: dicts são mutáveis — diferente de tuplas, você pode alterar valores livremente."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "Prática: Organize fichas de heróis e prepare-se para purificar registros corrompidos no miniboss."
+          },
+          {
+            "tipo": "exercicio",
+            "id": "dict-criar",
+            "nivel": 1,
+            "enunciado": "Ficha do Recruta\n\nCrie item = {\"nome\": \"Espada Longa\", \"dano\": 15} e imprima item[\"dano\"].\n\nSaída esperada:\n15",
+            "codigoInicial": "# Crie o dicionário e imprima o dano\n",
+            "linguagem": "python",
+            "testes": [
+              {
+                "stdin": "",
+                "expected_output": "15\n"
+              }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "dict-get",
+            "nivel": 2,
+            "enunciado": "Baú Misterioso\n\nheroi = {\"nome\": \"Luna\"}\n\nUse .get para imprimir ouro com padrão 0 (heroi não tem ouro).\n\nSaída esperada:\n0",
+            "codigoInicial": "heroi = {\"nome\": \"Luna\"}\n# print com .get\n",
+            "linguagem": "python",
+            "testes": [
+              {
+                "stdin": "",
+                "expected_output": "0\n"
+              }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "dict-update",
+            "nivel": 3,
+            "enunciado": "Level Up\n\nficha = {\"nome\": \"Kira\", \"nivel\": 4}\n\nAtualize nivel para 5 e imprima ficha[\"nivel\"].\n\nSaída esperada:\n5",
+            "codigoInicial": "ficha = {\"nome\": \"Kira\", \"nivel\": 4}\n# Atualize e imprima\n",
+            "linguagem": "python",
+            "testes": [
+              {
+                "stdin": "",
+                "expected_output": "5\n"
+              }
+            ]
+          },
+          {
+            "tipo": "flashcards"
+          }
+        ]
+      }
+    },
+    {
+      "ordem": 8,
+      "titulo": "Miniboss: O Limpador de Registros",
+      "conteudo": "## Cruzamento — Guardião dos Arquivos\n\nAs três vertentes convergem aqui. O Limpador de Registros corrompeu os arquivos da guilda — use split, f-strings e tudo que aprendeu para purificar um registro.\n\nObjetivo: Vencer o miniboss antes de enfrentar a Serpente Ascendente.",
+      "xpRecompensa": 100,
+      "prerequisitosOrdem": [
+        5,
+        6,
+        7
+      ],
+      "flashcards": [
+        {
+          "frente": "Registro Sujo\nEntrada: xX_LAMA_Xx-Hero-25-Guerreiro\nQual parte é o nome?",
+          "verso": "partes = dado.split(\"-\")\nnome = partes[1]  →  \"Hero\"\n\npartes[0] é lixo — ignore sempre."
+        },
+        {
+          "frente": "Purificação\nFormato final esperado?",
+          "verso": "*** Hero *** tem 25 anos...\n\nMonte com f-string e partes[1], partes[2]."
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
+            "tipo": "texto",
+            "conteudo": "## Miniboss — O Limpador de Registros\n\nContexto: Você completou Listas, Funções e Dicionários. O guardião dos arquivos aceita apenas código limpo.\n\nEntrada crua:\nxX_LAMA_Xx-Herolink-25-Guerreiros\n\nSaída purificada:\n*** Herolink *** tem 25 anos...\n\nPassos:\n1. dado = input()\n2. partes = dado.split(\"-\")\n3. nome = partes[1], idade = partes[2]\n4. print(f\"*** {nome} *** tem {idade} anos...\")\n\nEste é um miniboss — teste médio antes do confronto final."
+          },
+          {
+            "tipo": "exercicio",
+            "id": "miniboss-limpador",
+            "nivel": 3,
+            "miniboss": true,
             "titulo": "O Limpador de Registros",
-            "enunciado": "Boss final! 🐉\n\nPurifique o registro sujo lido com input().\n\nEntrada: xX_LAMA_Xx-Herolink-25-Guerreiros\nSaída: *** Herolink *** tem 25 anos...\n\nDica:\npartes = dado.split(\"-\")\nnome = partes[1]\nidade = partes[2]\n# monte a f-string com ***",
-            "codigoInicial": "dado = input()\n# Purifique o registro abaixo\n\n",
+            "enunciado": "Miniboss: O Limpador de Registros\n\nPurifique o registro lido com input().\n\nEntrada:\nxX_LAMA_Xx-Herolink-25-Guerreiros\n\nSaída:\n*** Herolink *** tem 25 anos...\n\nObjetivo:\n1. Leia com input()\n2. Quebre com split(\"-\")\n3. Use partes[1] e partes[2] na f-string\n\nAtenção: ignore partes[0].",
+            "codigoInicial": "dado = input()\n# Purifique abaixo\n",
             "linguagem": "python",
             "testes": [
               {
@@ -433,7 +743,55 @@
               }
             ]
           },
-          { "tipo": "flashcards" }
+          {
+            "tipo": "flashcards"
+          }
+        ]
+      }
+    },
+    {
+      "ordem": 9,
+      "titulo": "Boss Final: A Serpente Ascendente",
+      "conteudo": "## Câmara Final — O Caminho se Completa\n\nA Serpente Ascendente guarda o título de Iniciado. Processe vários registros corrompidos em loop, purifique cada linha e reporte o total — tudo que a trilha ensinou, em um único desafio.\n\nObjetivo: Derrotar o boss e concluir O Caminho da Serpente.",
+      "xpRecompensa": 200,
+      "prerequisitosOrdem": [
+        8
+      ],
+      "flashcards": [
+        {
+          "frente": "Múltiplos Registros\nComo ler N linhas após saber N?",
+          "verso": "n = int(input())\nfor _ in range(n):\n    linha = input()\n    # processe linha"
+        },
+        {
+          "frente": "Contador\nComo contar quantos heróis purificou?",
+          "verso": "total = 0\n# a cada sucesso:\ntotal += 1\nprint(f\"Total: {total} heróis\")"
+        }
+      ],
+      "aula": {
+        "blocos": [
+          {
+            "tipo": "texto",
+            "conteudo": "## Boss Final — A Serpente Ascendente\n\nContexto: O Limpador era só o guardião. A Serpente corrompeu um lote inteiro de fichas.\n\nFormato de entrada:\n• Linha 1: número N de registros\n• Próximas N linhas: xX_LAMA_Xx-Nome-Idade-Classe\n\nFormato de saída (uma linha por registro, depois total):\n*** Nome *** · Classe · Idade anos\n...\nTotal: N heróis\n\nCombine: input, int(), for range, split, f-string e contador.\n\nMestre: Se passar aqui, você completou a primeira trilha de Python. Parabéns, Serpente Iniciada."
+          },
+          {
+            "tipo": "exercicio",
+            "id": "boss-serpente",
+            "nivel": 4,
+            "boss": true,
+            "titulo": "A Serpente Ascendente",
+            "enunciado": "Boss Final: A Serpente Ascendente\n\nLeia N (primeira linha), depois N registros sujos.\n\nPara cada registro, imprima:\n*** Nome *** · Classe · Idade anos\n\nAo final, imprima:\nTotal: N heróis\n\nExemplo entrada:\n2\nxX_LAMA_Xx-Kira-19-Maga\nxX_LAMA_Xx-Rex-24-Tank\n\nSaída:\n*** Kira *** · Maga · 19 anos\n*** Rex *** · Tank · 24 anos\nTotal: 2 heróis",
+            "codigoInicial": "n = int(input())\nfor _ in range(n):\n    pass\n",
+            "linguagem": "python",
+            "testes": [
+              {
+                "stdin": "2\nxX_LAMA_Xx-Kira-19-Maga\nxX_LAMA_Xx-Rex-24-Tank",
+                "expected_output": "*** Kira *** · Maga · 19 anos\n*** Rex *** · Tank · 24 anos\nTotal: 2 heróis\n"
+              }
+            ]
+          },
+          {
+            "tipo": "flashcards"
+          }
         ]
       }
     }

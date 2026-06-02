@@ -7,6 +7,7 @@ export interface User {
   totalXp: number
   currentStreak: number
   maxStreak: number
+  emailVerified: boolean
 }
 
 export interface UserStats extends User {
@@ -42,7 +43,7 @@ export interface No {
 export type AulaBloco =
   | { tipo: 'texto'; titulo?: string; conteudo: string }
   | { tipo: 'video'; titulo: string; url: string; linkAssistir?: string }
-  | { tipo: 'exercicio'; id: string; nivel: number; icone: string; titulo?: string; boss?: boolean; enunciado: string; codigoInicial: string; linguagem: string; testes: { stdin?: string; expected_output: string }[] }
+  | { tipo: 'exercicio'; id: string; nivel: number; icone?: string; titulo?: string; boss?: boolean; miniboss?: boolean; enunciado: string; codigoInicial: string; linguagem: string; testes: { stdin?: string; expected_output: string }[] }
   | { tipo: 'flashcards' }
 
 export interface ValidarCodigoResult {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyquest.nos.No;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,10 +45,37 @@ public record NoResponse(
             if (blocos instanceof List<?> list) {
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> typed = (List<Map<String, Object>>) list;
-                return typed;
+                return typed.stream().map(NoResponse::sanitizeBloco).toList();
             }
         } catch (Exception ignored) {
         }
         return List.of();
+    }
+
+    private static Map<String, Object> sanitizeBloco(Map<String, Object> bloco) {
+        Map<String, Object> copy = new HashMap<>(bloco);
+        copy.remove("icone");
+        if ("exercicio".equals(copy.get("tipo"))) {
+            Object enunciado = copy.get("enunciado");
+            if (enunciado instanceof String s) {
+                copy.put("enunciado", stripEmojis(s));
+            }
+        }
+        return copy;
+    }
+
+    private static String stripEmojis(String text) {
+        StringBuilder sb = new StringBuilder(text.length());
+        text.codePoints()
+                .filter(cp -> !isEmojiCodePoint(cp))
+                .forEach(cp -> sb.appendCodePoint(cp));
+        return sb.toString();
+    }
+
+    /** Compatível com JDK sem suporte a \\p{Extended_Pictographic} em regex. */
+    private static boolean isEmojiCodePoint(int cp) {
+        return cp == 0xFE0F || cp == 0x200D
+                || (cp >= 0x2600 && cp <= 0x27BF)
+                || (cp >= 0x1F000 && cp <= 0x1FFFF);
     }
 }

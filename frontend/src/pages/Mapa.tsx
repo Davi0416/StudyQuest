@@ -10,16 +10,23 @@ import {
   createMapEngine, drawMinimap, HTML_DECO, tileCenter, TPX, WORLD_H, WORLD_W, type MapEngineState,
 } from '../lib/mapEngine';
 
-// Layout do mapa para a trilha "O Caminho da Serpente" (5 capítulos + boss na aula 5)
+// Layout do mapa — O Caminho da Serpente (9 nós, vertentes + miniboss + boss)
 const STATIC_NODES = [
   { biome: 'grass', icon: '🐍', tile: [6, 31], prereqsIdx: [] },
   { biome: 'grass', icon: '📜', tile: [14, 27], prereqsIdx: [0] },
-  { biome: 'grass', icon: '🔀', tile: [9, 21], prereqsIdx: [1] },
+  { biome: 'grass', icon: '🔀', tile: [7, 21], prereqsIdx: [1] },
   { biome: 'stone', icon: '🔄', tile: [21, 26], prereqsIdx: [1] },
-  { biome: 'cave', icon: '🐉', tile: [29, 20], prereqsIdx: [2, 3] },
+  { biome: 'forest', icon: '🎒', tile: [14, 16], prereqsIdx: [2, 3] },
+  { biome: 'stone', icon: '⚙️', tile: [24, 19], prereqsIdx: [3] },
+  { biome: 'grass', icon: '🗝️', tile: [5, 15], prereqsIdx: [2] },
+  { biome: 'mountain', icon: '👹', tile: [14, 10], prereqsIdx: [4, 5, 6], miniboss: true },
+  { biome: 'cave', icon: '🐉', tile: [14, 4], prereqsIdx: [7], boss: true },
 ];
 
-const EDGES = [[0, 1], [1, 2], [1, 3], [2, 4], [3, 4]];
+const EDGES = [
+  [0, 1], [1, 2], [1, 3], [2, 4], [3, 4], [3, 5], [2, 6],
+  [4, 7], [5, 7], [6, 7], [7, 8],
+];
 
 const NODE_THEME: Record<string, { plat: string; frame: string }> = {
   grass: { plat: '#2c5e38', frame: '#3a7a45' },
@@ -40,6 +47,8 @@ export function Mapa() {
   const [activeTrilha, setActiveTrilha] = useState<Trilha | null>(null);
   const [nodes, setNodes] = useState<No[]>([]);
   const [catalogo, setCatalogo] = useState<Trilha[]>([]);
+  const [semTrilhasNoServidor, setSemTrilhasNoServidor] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsEnrollment, setNeedsEnrollment] = useState(false);
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
@@ -66,7 +75,7 @@ export function Mapa() {
 
   useEffect(() => {
     if (!terrainRef.current) return;
-    mapEngineRef.current = createMapEngine(terrainRef.current, nodeTiles, EDGES);
+    mapEngineRef.current = createMapEngine(terrainRef.current, nodeTiles, EDGES, STATIC_NODES.map(s => s.biome));
 
     const interval = setInterval(() => {
       const engine = mapEngineRef.current;
@@ -153,46 +162,75 @@ export function Mapa() {
     });
   };
 
+  const loadNodesForTrilha = async (trilha: Trilha) => {
+    setActiveTrilha(trilha);
+    setNeedsEnrollment(false);
+    centeredRef.current = false;
+    const nosRes = await api.get(`/nos?trilhaId=${trilha.id}`);
+    const nosData = unwrap(nosRes) as No[];
+    const sorted = nosData.sort((a, b) => a.ordem - b.ordem);
+    setNodes(sorted);
+    const activeNode = sorted.find(n => n.status === 'EM_PROGRESSO')
+      || sorted.find(n => n.status === 'DISPONIVEL')
+      || sorted[0];
+    setSelectedNodeId(activeNode?.id ?? null);
+  };
+
   const fetchMap = async (trilhaId?: number) => {
     setLoading(true);
+    setFetchError(null);
+    setNeedsEnrollment(false);
     try {
-      const [trilhasRes, catalogoRes] = await Promise.all([
-        api.get('/trilhas/ativas'),
-        api.get('/trilhas'),
-      ]);
-      const trilhas = unwrap(trilhasRes) as Trilha[];
+      const catalogoRes = await api.get('/trilhas');
       const todas = unwrap(catalogoRes) as Trilha[];
-      const activeIds = new Set(trilhas.map(t => t.id));
-      setCatalogo(todas.filter(t => !activeIds.has(t.id)));
+      setSemTrilhasNoServidor(todas.length === 0);
 
-      if (trilhas.length === 0) {
+      if (todas.length === 0) {
         setActiveTrilha(null);
         setNodes([]);
         setSelectedNodeId(null);
-        setNeedsEnrollment(todas.length > 0);
+        setCatalogo([]);
         return;
       }
 
-      setNeedsEnrollment(false);
-      centeredRef.current = false;
-      const trilha = trilhaId
-        ? trilhas.find(t => t.id === trilhaId) ?? trilhas[0]
-        : trilhas[0];
+      const ativasRes = await api.get('/trilhas/ativas');
+      const trilhas = (unwrap(ativasRes) as Trilha[]).filter(t =>
+        todas.some(c => c.id === t.id)
+      );
+      const activeIds = new Set(trilhas.map(t => t.id));
+      setCatalogo(todas.filter(t => !activeIds.has(t.id)));
 
-      setActiveTrilha(trilha);
-      const nosRes = await api.get(`/nos?trilhaId=${trilha.id}`);
-      const nosData = unwrap(nosRes) as No[];
-      const sorted = nosData.sort((a, b) => a.ordem - b.ordem);
-      setNodes(sorted);
+      if (trilhas.length > 0) {
+        const trilha = trilhaId
+          ? trilhas.find(t => t.id === trilhaId) ?? trilhas[0]
+          : trilhas[0];
+        await loadNodesForTrilha(trilha);
+        return;
+      }
 
-      const activeNode = sorted.find(n => n.status === 'EM_PROGRESSO')
-        || sorted.find(n => n.status === 'DISPONIVEL')
-        || sorted[0];
-      setSelectedNodeId(activeNode?.id ?? null);
+      const alvo = trilhaId ? todas.find(t => t.id === trilhaId) ?? todas[0] : todas[0];
+      try {
+        await api.post(`/trilhas/${alvo.id}/matricular`);
+      } catch (err: unknown) {
+        const status = (err as { response?: { status?: number } })?.response?.status;
+        if (status !== 409) {
+          setActiveTrilha(null);
+          setNodes([]);
+          setSelectedNodeId(null);
+          setNeedsEnrollment(true);
+          return;
+        }
+      }
+
+      await loadNodesForTrilha(alvo);
     } catch (err) {
       console.error('Failed to fetch map data', err);
       setActiveTrilha(null);
       setNodes([]);
+      setSemTrilhasNoServidor(false);
+      const data = (err as { response?: { data?: { message?: string; error?: string } } })?.response?.data;
+      const msg = data?.message ?? data?.error ?? (err as Error)?.message ?? 'Erro ao carregar o mapa';
+      setFetchError(msg);
     } finally {
       setLoading(false);
     }
@@ -260,7 +298,7 @@ export function Mapa() {
 
           <div 
             ref={scrollRef}
-            className="absolute inset-0 overflow-auto cursor-grab scrollbar-thin"
+            className="absolute inset-0 overflow-auto cursor-grab scrollbar-none"
           >
             <div className="relative" style={{ width: WORLD_W, height: WORLD_H }}>
               <canvas
@@ -282,16 +320,44 @@ export function Mapa() {
                       </div>
                     );
                   }
-                  return (
-                    <div key={i} className="absolute" style={{ left: x, top: y, transform: 'translate(-50%, -100%)' }}>
-                      <div className="relative w-[18px]">
-                        <div className="w-[3px] h-[26px] ml-0.5 bg-[#8a8f98]" />
-                        <div className="absolute top-px left-1 w-3.5 h-2.5 bg-green origin-left animate-pulse" style={{ clipPath: 'polygon(0 0,100% 0,100% 100%,0 100%,4px 50%)' }} />
+                  if (d.type === 'bridge') {
+                    return (
+                      <div key={i} className="absolute" style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}>
+                        <div className="flex gap-3 items-end">
+                          <div className="w-1 h-4 bg-[#3d2812]" />
+                          <div className="w-5 h-1 bg-[#6b4a2a] -mb-3" />
+                          <div className="w-1 h-4 bg-[#3d2812]" />
+                        </div>
                       </div>
-                    </div>
-                  );
+                    );
+                  }
+                  if (d.type === 'flag') {
+                    return (
+                      <div key={i} className="absolute" style={{ left: x, top: y, transform: 'translate(-50%, -100%)' }}>
+                        <div className="relative w-[18px]">
+                          <div className="w-[3px] h-[26px] ml-0.5 bg-[#8a8f98]" />
+                          <div className="absolute top-px left-1 w-3.5 h-2.5 bg-green origin-left animate-pulse" style={{ clipPath: 'polygon(0 0,100% 0,100% 100%,0 100%,4px 50%)' }} />
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
                 })}
               </div>
+
+              {!loading && !activeTrilha && !needsEnrollment && (semTrilhasNoServidor || fetchError) && (
+                <div className="absolute inset-0 z-20 grid place-items-center bg-[#080a0e]/85">
+                  <div className="max-w-md mx-6 p-8 rounded-lg bg-surface border border-border text-center">
+                    <h2 className="font-cinzel font-bold text-xl mb-2">Nenhuma trilha disponível</h2>
+                    <p className="text-text-dim text-sm">
+                      {fetchError
+                        ? fetchError
+                        : 'O servidor ainda não carregou as trilhas. Aguarde o backend terminar de iniciar e tente novamente.'}
+                    </p>
+                    <Button className="mt-4" onClick={() => fetchMap()}>Tentar novamente</Button>
+                  </div>
+                </div>
+              )}
 
               {!loading && needsEnrollment && (
                 <div className="absolute inset-0 z-20 grid place-items-center bg-[#080a0e]/85">
@@ -322,7 +388,9 @@ export function Mapa() {
                 const x = (s.tile[0] + 0.5) * TPX;
                 const y = (s.tile[1] + 0.5) * TPX;
                 const isSelected = selectedNodeId === n.id;
-                const isBoss = i === STATIC_NODES.length - 1;
+                const isBoss = !!s.boss;
+                const isMiniboss = !!s.miniboss;
+                const nodeSize = isBoss ? 'w-16 h-16 text-[38px]' : isMiniboss ? 'w-[54px] h-[54px] text-[30px]' : 'w-[46px] h-[46px] text-[26px]';
                 
                 return (
                   <div 
@@ -333,11 +401,13 @@ export function Mapa() {
                     onClick={() => setSelectedNodeId(n.id)}
                   >
                     <div 
-                      className={`relative grid place-items-center leading-none ${isBoss ? 'w-16 h-16 text-[38px]' : 'w-[46px] h-[46px] text-[26px]'}`}
+                      className={`relative grid place-items-center leading-none ${nodeSize}`}
                       style={{ 
                         background: NODE_THEME[s.biome].plat, 
                         boxShadow: isBoss
                           ? `0 0 0 3px #0b0e13, 0 0 0 6px ${NODE_THEME[s.biome].frame}, 0 0 0 7px #0b0e13, 0 8px 0 7px rgba(0,0,0,.5)`
+                          : isMiniboss
+                          ? `0 0 0 3px #0b0e13, 0 0 0 6px #c45c26, 0 0 0 7px #0b0e13, 0 7px 0 7px rgba(0,0,0,.5)`
                           : `0 0 0 3px #0b0e13, 0 0 0 6px ${NODE_THEME[s.biome].frame}, 0 0 0 7px #0b0e13, 0 7px 0 7px rgba(0,0,0,.45)`,
                         outline: isSelected ? '2px solid var(--gold)' : 'none',
                         outlineOffset: isSelected ? '9px' : '0',
@@ -346,11 +416,14 @@ export function Mapa() {
                     >
                       <span className={n.status === 'BLOQUEADO' ? 'grayscale opacity-50' : ''}>{s.icon}</span>
                       {n.status === 'CONCLUIDO' && <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-[18px] h-[18px] bg-green text-[#0b1f12] grid place-items-center border-2 border-[#0b0e13] text-xs"><IconCheck size={12}/></div>}
-                      {(n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL') && !isBoss && (
+                      {(n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL') && !isBoss && !isMiniboss && (
                         <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-[12px] border-l-transparent border-r-transparent border-t-blue animate-bounce" />
                       )}
                       {n.status === 'BLOQUEADO' && <div className="absolute inset-0 grid place-items-center bg-[#080a0e]/35 text-[#cfd6df] text-xl shadow-[0_1px_2px_#000]"><IconLock size={16}/></div>}
                       {isBoss && n.status === 'BLOQUEADO' && <div className="absolute -top-3 -right-3 text-base"><IconLock size={16}/></div>}
+                      {isMiniboss && n.status !== 'CONCLUIDO' && (
+                        <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 font-mono text-[6px] px-1 py-0.5 bg-[#c45c26] text-[#1a0f08] border border-[#0b0e13] whitespace-nowrap">MINI</div>
+                      )}
                     </div>
                     <div className="font-mono text-[8px] leading-[1.4] text-text text-center whitespace-nowrap px-2 py-1 bg-[#080a0e]/80 border-[0.5px] border-border rounded shadow-[1px_1px_0_#000]" style={{ fontFamily: "'Press Start 2P', monospace" }}>
                       {n.titulo}
@@ -438,7 +511,7 @@ export function Mapa() {
 
                 {selectedNode.status === 'DISPONIVEL' ? (
                   <Button className="w-full gap-2" onClick={handleStartMission} disabled={starting}>
-                    <IconSword size={18} /> {selectedNode.temMissao ? 'Iniciar Missão' : selectedNode.ordem === 5 ? 'Iniciar Capítulo Final' : 'Estudar Conteúdo'}
+                    <IconSword size={18} /> {selectedNode.temMissao ? 'Iniciar Missão' : (selectedNode.ordem >= 8 ? 'Iniciar Confronto' : 'Estudar Conteúdo')}
                   </Button>
                 ) : selectedNode.status === 'EM_PROGRESSO' && selectedNode.temMissao ? (
                   <Button className="w-full gap-2" onClick={handleStartMission} disabled={starting}>

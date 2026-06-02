@@ -6,6 +6,8 @@ import api, { unwrap } from '../lib/api';
 
 import type { AulaBloco, ValidarCodigoResult } from '../types';
 
+import { AulaRichText } from './AulaRichText';
+
 import { Button } from './ui/Button';
 
 import { IconCheck, IconCode } from '@tabler/icons-react';
@@ -13,15 +15,10 @@ import { IconCheck, IconCode } from '@tabler/icons-react';
 
 
 const NIVEL_LABEL: Record<number, string> = {
-
-  1: 'Escudeiro',
-
-  2: 'Cavaleiro',
-
-  3: 'Arcanista',
-
-  4: 'Boss Final',
-
+  1: 'Iniciante',
+  2: 'Intermediário',
+  3: 'Avançado',
+  4: 'Desafio final',
 };
 
 
@@ -130,19 +127,21 @@ export function AulaExercicio({ bloco, codigoSalvo, aprovado, onAprovado, onCodi
 
   return (
 
-    <div className={`rounded-lg border overflow-hidden ${aprovado ? 'border-green/40 bg-green/5' : bloco.boss ? 'border-red/40 bg-red/5' : 'border-border bg-surface'}`}>
+    <div className={`rounded-lg border overflow-hidden ${aprovado ? 'border-green/40 bg-green/5' : bloco.boss ? 'border-red/40 bg-red/5' : bloco.miniboss ? 'border-orange-500/40 bg-orange-500/5' : 'border-border bg-surface'}`}>
 
-      <div className={`flex items-center justify-between gap-3 px-4 py-3 border-b border-border ${bloco.boss ? 'bg-red/10' : 'bg-surface-2'}`}>
+      <div className={`flex items-center justify-between gap-3 px-4 py-3 border-b border-border ${bloco.boss ? 'bg-red/10' : bloco.miniboss ? 'bg-orange-500/10' : 'bg-surface-2'}`}>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
 
-          <span className="text-xl">{bloco.icone}</span>
+          <div className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 font-cinzel text-xs font-bold ${bloco.boss ? 'bg-red/20 text-red border border-red/30' : bloco.miniboss ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-gold/10 text-gold border border-gold/25'}`}>
+            {bloco.boss ? 'IV' : bloco.miniboss ? 'III' : bloco.nivel}
+          </div>
 
           <div>
 
-            <div className={`text-[10px] uppercase tracking-widest font-semibold ${bloco.boss ? 'text-red' : 'text-gold'}`}>
+            <div className={`text-[10px] uppercase tracking-widest font-semibold ${bloco.boss ? 'text-red' : bloco.miniboss ? 'text-orange-400' : 'text-gold'}`}>
 
-              {bloco.boss ? 'Missão Final' : `Nível ${bloco.nivel} · ${NIVEL_LABEL[bloco.nivel] || 'Desafio'}`}
+              {bloco.boss ? 'Boss final' : bloco.miniboss ? 'Miniboss' : `Nível ${bloco.nivel} · ${NIVEL_LABEL[bloco.nivel] || 'Exercício'}`}
 
             </div>
 
@@ -150,7 +149,7 @@ export function AulaExercicio({ bloco, codigoSalvo, aprovado, onAprovado, onCodi
 
               <IconCode size={14} className="text-text-mute" />
 
-              {bloco.titulo || 'Campo de Treinamento'}
+              {bloco.titulo || `Exercício ${bloco.nivel}`}
 
             </div>
 
@@ -172,15 +171,15 @@ export function AulaExercicio({ bloco, codigoSalvo, aprovado, onAprovado, onCodi
 
 
 
-      <div className="p-4 border-b border-border">
+      <div className="p-4 border-b border-border bg-surface/50">
 
-        <p className="text-text-dim text-sm leading-relaxed whitespace-pre-wrap">{bloco.enunciado}</p>
+        <AulaRichText conteudo={bloco.enunciado} compact />
 
       </div>
 
 
 
-      <div className={`border-b border-border ${bloco.boss ? 'h-[320px]' : 'h-[220px]'}`}>
+      <div className={`border-b border-border ${bloco.boss ? 'h-[320px]' : bloco.miniboss ? 'h-[280px]' : 'h-[220px]'}`}>
 
         <Editor
 
