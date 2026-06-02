@@ -1,0 +1,11 @@
+# Electron
+electron/node_modules/
+electron/dist-electron/
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+
+# Misc
+.DS_Store
+*.db
