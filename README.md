@@ -156,22 +156,33 @@ cd ../electron && npx electron .
 
 ## Build de Produção (executável sem dependências)
 
+```powershell
+# Windows — gera o instalador .exe (JRE + Python embutidos)
+.\scripts\build-desktop.ps1
+
+# Opcional: binário GraalVM nativo (requer Docker Desktop rodando)
+.\scripts\build-desktop.ps1 -Native
+```
+
 ```bash
 # Linux / macOS
 bash scripts/build-desktop.sh
-
-# Windows (PowerShell)
-.\scripts\build-desktop.ps1
 ```
 
 O script executa automaticamente:
-1. `mvn package -Pnative` → binário nativo via GraalVM
-2. `vite build` → React estático
-3. `electron-builder` → instalador final
+1. Chaves JWT (se ainda não existirem)
+2. Build do backend Quarkus (+ JRE 21 embutido, ou GraalVM com `-Native`)
+3. Python embeddable para exercícios offline
+4. `vite build` → React estático
+5. `electron-builder` → instalador final
 
-**Saída:** `electron/dist-electron/StudyQuest Setup x.x.x.exe` (Windows) / `.dmg` / `.AppImage`
+**Saída:** `electron/dist-electron/StudyQuest Setup 1.0.0.exe`
 
-O instalador não exige Java, Node ou qualquer runtime na máquina do usuário.
+O instalador **não exige** Java, Node, Python ou PostgreSQL na máquina do usuário. Tudo roda embutido:
+- Electron (interface)
+- JRE 21 + Quarkus (API local em `127.0.0.1:8080`)
+- Python 3.12 embeddable (validação de código)
+- SQLite em `%APPDATA%/StudyQuest/data/` (perfil `desktop`)
 
 ---
 
