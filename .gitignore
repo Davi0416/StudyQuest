@@ -15,6 +15,12 @@ frontend/.vite/
 # JWT (gerado localmente pelo script)
 api/src/main/resources/privateKey.pem
 
+# Secrets — NUNCA commitar
+api/.env
+.env
+*.env
+electron/mail.config.js
+
 # Misc
 .DS_Store
 *.db

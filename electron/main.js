@@ -4,6 +4,15 @@ const { spawn } = require('child_process')
 const fs = require('fs')
 const http = require('http')
 
+function loadMailConfig() {
+  const configPath = path.join(__dirname, 'mail.config.js')
+  if (fs.existsSync(configPath)) {
+    try { return require(configPath) } catch (_) {}
+  }
+  // Fallback: sem e-mail real (usa mock do perfil desktop)
+  return { MAIL_PROVIDER: 'mock' }
+}
+
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }
 ])
@@ -73,14 +82,8 @@ function buildBackendEnv() {
     STUDYQUEST_DATA_DIR: dataDir,
     JWT_PRIVATE_KEY_LOCATION: path.join(backendDir, 'privateKey.pem'),
     CORS_ORIGINS: '*',
-    // E-mail SMTP (Gmail)
-    MAIL_PROVIDER: 'smtp',
-    MAIL_FROM: '***REDACTED***',
-    SMTP_HOST: 'smtp.gmail.com',
-    SMTP_PORT: '587',
-    SMTP_USER: '***REDACTED***',
-    SMTP_PASSWORD: '***REDACTED***',
-    SMTP_STARTTLS: 'REQUIRED',
+    // E-mail SMTP — carregado de mail.config.js (gitignored)
+    ...loadMailConfig(),
   }
 
   const python = bundledPythonPath()
