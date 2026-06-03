@@ -4,6 +4,10 @@ const { spawn } = require('child_process')
 const fs = require('fs')
 const http = require('http')
 
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'app', privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }
+])
+
 const isDev = !app.isPackaged
 
 const resourcesPath = isDev
@@ -28,8 +32,20 @@ const jvmJava = process.platform === 'win32'
 
 const quarkusRunJar = path.join(backendDir, 'quarkus-app', 'quarkus-run.jar')
 
-const API_PORT = 8080
-const API_HEALTH = `http://127.0.0.1:${API_PORT}/q/health/live`
+let API_PORT = 8080
+let API_HEALTH = `http://127.0.0.1:${API_PORT}/q/health/live`
+
+function getFreePort() {
+  return new Promise((resolve, reject) => {
+    const nodeNet = require('net')
+    const srv = nodeNet.createServer()
+    srv.listen(0, '127.0.0.1', () => {
+      const port = srv.address().port
+      srv.close(() => resolve(port))
+    })
+    srv.on('error', reject)
+  })
+}
 
 let backendProcess = null
 
@@ -57,6 +73,14 @@ function buildBackendEnv() {
     STUDYQUEST_DATA_DIR: dataDir,
     JWT_PRIVATE_KEY_LOCATION: path.join(backendDir, 'privateKey.pem'),
     CORS_ORIGINS: '*',
+    // E-mail SMTP (Gmail)
+    MAIL_PROVIDER: 'smtp',
+    MAIL_FROM: '***REDACTED***',
+    SMTP_HOST: 'smtp.gmail.com',
+    SMTP_PORT: '587',
+    SMTP_USER: '***REDACTED***',
+    SMTP_PASSWORD: '***REDACTED***',
+    SMTP_STARTTLS: 'REQUIRED',
   }
 
   const python = bundledPythonPath()
@@ -72,7 +96,17 @@ function resolveBackendLaunch() {
     return { cmd: nativeBinary, args: [], cwd: backendDir }
   }
   if (fs.existsSync(jvmJava) && fs.existsSync(quarkusRunJar)) {
-    return { cmd: jvmJava, args: ['-jar', quarkusRunJar], cwd: backendDir }
+    const dataDir = ensureDataDir()
+    return {
+      cmd: jvmJava,
+      args: [
+        '-Dquarkus.profile=desktop',
+        `-Dstudyquest.data.dir=${dataDir}`,
+        '-Dstudyquest.bypass.verification=true',
+        '-jar', quarkusRunJar,
+      ],
+      cwd: backendDir,
+    }
   }
   return null
 }
@@ -152,21 +186,22 @@ function waitForApi(retries = 80, delayMs = 500) {
 
 function registerAppProtocol() {
   protocol.handle('app', (request) => {
-    let urlPath = request.url.slice('app://'.length)
+    let urlPath = request.url.slice('app://local/'.length)
     urlPath = urlPath.split('?')[0].split('#')[0]
     if (urlPath.startsWith('/')) urlPath = urlPath.slice(1)
 
     const filePath = path.join(frontendDist, urlPath)
+    const { pathToFileURL } = require('url')
 
     if (urlPath && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-      return net.fetch(`file://${filePath}`)
+      return net.fetch(pathToFileURL(filePath).toString())
     }
 
-    return net.fetch(`file://${path.join(frontendDist, 'index.html')}`)
+    return net.fetch(pathToFileURL(path.join(frontendDist, 'index.html')).toString())
   })
 }
 
-function createWindow() {
+function createWindow(splash) {
   const win = new BrowserWindow({
     width: 1280,
     height: 800,
@@ -175,6 +210,7 @@ function createWindow() {
     title: 'StudyQuest',
     backgroundColor: '#0d1117',
     autoHideMenuBar: true,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -182,7 +218,14 @@ function createWindow() {
     },
   })
 
-  win.loadURL('app://index.html')
+  win.loadURL(`app://local/index.html?apiPort=${API_PORT}`)
+
+  win.once('ready-to-show', () => {
+    if (splash && !splash.isDestroyed()) {
+      splash.close()
+    }
+    win.show()
+  })
 
   if (isDev) win.webContents.openDevTools({ mode: 'detach' })
 }
@@ -190,29 +233,80 @@ function createWindow() {
 app.isQuitting = false
 
 app.whenReady().then(async () => {
+  API_PORT = await getFreePort()
+  API_HEALTH = `http://127.0.0.1:${API_PORT}/q/health/live`
+
   registerAppProtocol()
   startBackend()
 
+  const iconBase64 = fs.existsSync(path.join(__dirname, 'icons', 'icon.png')) 
+    ? fs.readFileSync(path.join(__dirname, 'icons', 'icon.png')).toString('base64')
+    : '';
+  const imgSrc = iconBase64 ? `data:image/png;base64,${iconBase64}` : '';
+
   const splash = new BrowserWindow({
-    width: 400,
-    height: 260,
+    width: 420,
+    height: 300,
     frame: false,
     resizable: false,
-    backgroundColor: '#0d1117',
+    transparent: true,
     webPreferences: { contextIsolation: true },
   })
   splash.loadURL(`data:text/html,
-    <html><body style="margin:0;background:#0d1117;display:flex;flex-direction:column;
-      align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#e6edf3;">
-      <h2 style="margin:0 0 8px;font-family:Georgia,serif">StudyQuest</h2>
-      <p style="margin:0;font-size:13px;color:#8b949e">Iniciando…</p>
+    <html><head><style>
+      body {
+        margin:0; padding:0;
+        background: linear-gradient(135deg, #1c2330 0%, #0c1016 100%);
+        border: 1px solid rgba(240,192,96,0.2);
+        border-radius: 12px;
+        display:flex; flex-direction:column; align-items:center; justify-content:center;
+        height:100vh; box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:#e6edf3;
+        overflow: hidden; user-select: none;
+      }
+      .logo {
+        width: 80px; height: 80px; margin-bottom: 24px;
+        animation: pulse 2s infinite ease-in-out;
+        filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+      }
+      @keyframes pulse {
+        0% { transform: scale(0.95); opacity: 0.9; }
+        50% { transform: scale(1.05); opacity: 1; }
+        100% { transform: scale(0.95); opacity: 0.9; }
+      }
+      h2 {
+        margin: 0 0 16px; font-size: 24px; font-weight: 600; letter-spacing: 1px;
+        background: linear-gradient(90deg, #ffe39b, #f0c060);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      }
+      .loading-bar {
+        width: 160px; height: 4px; background: rgba(255,255,255,0.1);
+        border-radius: 4px; overflow: hidden; position: relative;
+      }
+      .loading-bar::after {
+        content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 40%;
+        background: linear-gradient(90deg, #f0c060, #ffe39b);
+        border-radius: 4px; animation: load 1.5s infinite ease-in-out;
+      }
+      @keyframes load {
+        0% { left: -40%; }
+        100% { left: 100%; }
+      }
+      .text { font-size: 13px; color: #8b949e; margin-top: 16px; font-weight: 500; }
+    </style></head>
+    <body>
+      <img class="logo" src="${imgSrc}" alt="Logo" onerror="this.style.display='none'" />
+      <h2>StudyQuest</h2>
+      <div class="loading-bar"></div>
+      <div class="text">Despertando o servidor...</div>
     </body></html>
   `)
 
   try {
     await waitForApi()
-    splash.close()
-    createWindow()
+    // Atualizar o texto da splash (opcional, pode ser muito rápido)
+    splash.webContents.executeJavaScript(`document.querySelector('.text').innerText = 'Preparando interface...'`).catch(() => {})
+    createWindow(splash)
   } catch (err) {
     splash.close()
     dialog.showErrorBox('Erro de inicialização', err.message)
