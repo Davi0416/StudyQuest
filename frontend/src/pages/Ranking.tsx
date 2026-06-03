@@ -6,21 +6,9 @@ import api, { unwrap } from '../lib/api';
 import type { RankingResponse, RankingItem } from '../types';
 import {
   IconCrown, IconTrophy, IconListNumbers, IconBolt,
-  IconArrowUpRight, IconArrowDownRight, IconMinus, IconCalendarWeek, IconClockHour4,
+  IconCalendarWeek, IconClockHour4,
 } from '@tabler/icons-react';
 
-const MOCK_TOP10: RankingItem[] = [
-  { posicao: 1, userName: 'Marina R.', avatarUrl: null, xpSemana: 3240, isCurrentUser: false },
-  { posicao: 2, userName: 'Rafael F.', avatarUrl: null, xpSemana: 2980, isCurrentUser: false },
-  { posicao: 3, userName: 'Letícia M.', avatarUrl: null, xpSemana: 2510, isCurrentUser: false },
-  { posicao: 4, userName: 'Bruno A.', avatarUrl: null, xpSemana: 2180, isCurrentUser: false },
-  { posicao: 5, userName: 'Camila S.', avatarUrl: null, xpSemana: 1940, isCurrentUser: false },
-  { posicao: 6, userName: 'Thiago P.', avatarUrl: null, xpSemana: 1760, isCurrentUser: false },
-  { posicao: 7, userName: 'Júlia C.', avatarUrl: null, xpSemana: 1520, isCurrentUser: false },
-  { posicao: 8, userName: 'Gabriel N.', avatarUrl: null, xpSemana: 1310, isCurrentUser: false },
-  { posicao: 9, userName: 'Larissa V.', avatarUrl: null, xpSemana: 1180, isCurrentUser: false },
-  { posicao: 10, userName: 'Pedro H.', avatarUrl: null, xpSemana: 1040, isCurrentUser: false },
-];
 
 const AVATAR_GRADS = [
   'from-gold to-[#caa244]', 'from-[#aab4bf] to-[#6e7b89]', 'from-[#b87a4b] to-[#8a5a35]',
@@ -45,7 +33,7 @@ export function Ranking() {
       .catch(() => {});
   }, []);
 
-  const top10 = ranking?.top10?.length ? ranking.top10 : MOCK_TOP10;
+  const top10 = ranking?.top10 ?? [];
   const me = ranking?.posicaoAtual;
   const [p1, p2, p3] = [top10[0], top10[1], top10[2]];
 
@@ -76,8 +64,8 @@ export function Ranking() {
               <span><b className="text-text">Semana atual</b></span>
             </div>
             <div className="flex items-center gap-2 text-[12.5px] text-text-mute">
-              <IconClockHour4 size={15} className="text-red" />
-              Encerra em <b className="text-red ml-1">1 dia 14 h</b>
+              <IconClockHour4 size={15} className="text-text-dim" />
+              Placar zera toda segunda-feira
             </div>
           </div>
         </section>
@@ -90,14 +78,19 @@ export function Ranking() {
             <IconTrophy size={17} className="text-gold" /> Pódio da Semana
           </div>
 
-          <div className="grid grid-cols-3 gap-4 max-w-[760px] mx-auto items-end">
-            {/* 2º */}
-            <PodiumPlace player={p2} rank={2} />
-            {/* 1º */}
-            <PodiumPlace player={p1} rank={1} highlight />
-            {/* 3º */}
-            <PodiumPlace player={p3} rank={3} />
-          </div>
+          {top10.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center text-text-mute gap-2">
+              <IconCrown size={32} className="text-text-dim mb-1" />
+              <span className="text-[14px]">O pódio está vazio</span>
+              <span className="text-[12px] text-text-dim">Seja o primeiro a entrar no ranking!</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-4 max-w-[760px] mx-auto items-end">
+              <PodiumPlace player={p2} rank={2} />
+              <PodiumPlace player={p1} rank={1} highlight />
+              <PodiumPlace player={p3} rank={3} />
+            </div>
+          )}
         </Card>
 
         {/* LISTA TOP 10 */}
@@ -106,10 +99,17 @@ export function Ranking() {
             <h2 className="font-cinzel font-semibold text-lg flex items-center gap-2">
               <IconListNumbers size={18} className="text-gold" /> Classificação Geral
             </h2>
-            <span className="text-[13px] text-text-mute">Top 10 · 1.284 jogadores na liga</span>
+            <span className="text-[13px] text-text-mute">Top 10</span>
           </div>
 
           <div className="bg-surface border border-border rounded-xl overflow-hidden">
+            {top10.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-16 text-center text-text-mute gap-2">
+                <IconTrophy size={36} className="text-text-dim mb-1" />
+                <span className="text-[14px]">Nenhum dado de ranking ainda</span>
+                <span className="text-[12px] text-text-dim">Acumule XP para aparecer no placar semanal.</span>
+              </div>
+            )}
             {top10.map((item, i) => (
               <div
                 key={item.posicao}
@@ -124,7 +124,7 @@ export function Ranking() {
                     {item.userName}
                     {item.isCurrentUser && <span className="text-[10px] font-bold text-[#1a1206] bg-gradient-to-r from-gold to-[#d8a945] rounded px-1.5 py-0.5">VOCÊ</span>}
                   </div>
-                  <div className="text-xs text-text-mute">Nível {10 + i} · Aventureiro</div>
+                  <div className="text-xs text-text-mute">Aventureiro</div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="font-cinzel font-bold text-base text-gold flex items-center gap-1 justify-end">
@@ -155,9 +155,6 @@ export function Ranking() {
               <div className="text-[12px] text-text-dim">
                 Faltam <b className="text-gold">{(top10[9]?.xpSemana ?? 1040) - me.xpSemana} XP</b> para entrar no Top 10
               </div>
-            </div>
-            <div className="flex items-center gap-1 text-green text-sm font-bold shrink-0">
-              <IconArrowUpRight size={16} /> 3
             </div>
             <div className="text-right shrink-0">
               <div className="font-cinzel font-bold text-lg text-gold flex items-center gap-1 justify-end">

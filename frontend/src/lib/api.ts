@@ -1,6 +1,10 @@
 import axios, { type AxiosResponse } from 'axios'
 
-const api = axios.create({ baseURL: 'http://localhost:8080/api' })
+const urlParams = new URLSearchParams(window.location.search)
+const portFromUrl = urlParams.get('apiPort')
+if (portFromUrl) sessionStorage.setItem('apiPort', portFromUrl)
+const apiPort = sessionStorage.getItem('apiPort') || '8080'
+const api = axios.create({ baseURL: `http://127.0.0.1:${apiPort}/api` })
 
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('accessToken')
@@ -11,12 +15,13 @@ api.interceptors.request.use(config => {
 api.interceptors.response.use(
   res => res,
   async error => {
-    if (error.response?.status === 401 && !error.config._retry) {
+    const isAuthEndpoint = error.config?.url?.includes('/auth/')
+    if (error.response?.status === 401 && !error.config._retry && !isAuthEndpoint) {
       error.config._retry = true
       try {
         const refresh = localStorage.getItem('refreshToken')
         const { data } = await axios.post(
-          `http://localhost:8080/api/auth/refresh?token=${refresh}`
+          `http://127.0.0.1:${apiPort}/api/auth/refresh?token=${refresh}`
         )
         localStorage.setItem('accessToken', data.data.accessToken)
         localStorage.setItem('refreshToken', data.data.refreshToken)

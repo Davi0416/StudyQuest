@@ -60,6 +60,10 @@ export function Login() {
       }
 
       const res = await api.post('/auth/register', { name, email, password });
+      if (res.data.data && res.data.data.accessToken) {
+        await finishLogin(res.data.data.accessToken, res.data.data.refreshToken);
+        return;
+      }
       setInfo(res.data.message || 'Enviamos um código para o seu e-mail.');
       setCode('');
       setMode('verify');
