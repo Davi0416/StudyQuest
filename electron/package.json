@@ -48,6 +48,10 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "mail.config.js",
+        "to": "mail.config.js"
       }
     ],
     "win": {

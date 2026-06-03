@@ -5,11 +5,19 @@ const fs = require('fs')
 const http = require('http')
 
 function loadMailConfig() {
-  const configPath = path.join(__dirname, 'mail.config.js')
-  if (fs.existsSync(configPath)) {
-    try { return require(configPath) } catch (_) {}
+  const candidates = [
+    path.join(__dirname, 'mail.config.js'),
+    path.join(app.isPackaged ? process.resourcesPath : __dirname, 'mail.config.js'),
+  ]
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      try {
+        // require() cacheia pelo path, então deleta antes para forçar releitura
+        delete require.cache[require.resolve(p)]
+        return require(p)
+      } catch (_) {}
+    }
   }
-  // Fallback: sem e-mail real (usa mock do perfil desktop)
   return { MAIL_PROVIDER: 'mock' }
 }
 
