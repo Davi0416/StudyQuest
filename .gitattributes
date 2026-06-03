@@ -1,7 +1,4 @@
-# Linguist — garante que Java seja a linguagem principal detectada
-frontend/src/**/*.ts  linguist-detectable=false
-frontend/src/**/*.tsx linguist-detectable=false
-frontend/src/**/*.css linguist-detectable=false
+# Linguist — arquivos gerados/vendored não contam nas estatísticas
 frontend/**/*.js      linguist-vendored
 electron/**/*.js      linguist-vendored
 scripts/**/*.ps1      linguist-documentation
