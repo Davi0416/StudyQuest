@@ -1,0 +1,20 @@
+# Electron
+electron/node_modules/
+electron/dist-electron/
+electron/resources/python-win/
+electron/resources/jre/
+
+# Backend bundle (gerado pelo build desktop)
+api/target/backend/
+
+# Frontend build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# JWT (gerado localmente pelo script)
+api/src/main/resources/privateKey.pem
+
+# Misc
+.DS_Store
+*.db
