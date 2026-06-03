@@ -88,8 +88,8 @@ export function Conquistas() {
 
   useEffect(() => {
     if (!ringRef.current) return;
-    const total = conquistas.length || 24;
-    const unlocked = conquistas.filter(c => c.desbloqueada).length || 8;
+    const total = conquistas.length;
+    const unlocked = conquistas.filter(c => c.desbloqueada).length;
     const pct = unlocked / total;
     const circ = 2 * Math.PI * 55;
     setTimeout(() => {
@@ -99,8 +99,8 @@ export function Conquistas() {
 
   if (!user) return null;
 
-  const total = conquistas.length || 24;
-  const unlocked = conquistas.filter(c => c.desbloqueada).length || 8;
+  const total = conquistas.length;
+  const unlocked = conquistas.filter(c => c.desbloqueada).length;
 
   const visible = conquistas.filter(c => {
     const m = getMeta(c);

@@ -279,54 +279,9 @@ export function Hub() {
               </div>
               <div className="flex flex-col gap-3">
                 {(!ranking?.top10 || ranking.top10.length === 0) ? (
-                  <>
-                    <div className="flex items-center gap-3 p-3 rounded-md border border-border bg-surface-2 transition-all hover:translate-x-1">
-                      <div className="w-5 text-center font-cinzel font-bold text-base text-gold">1</div>
-                      <div className="w-10 h-10 rounded-md shrink-0 relative grid place-items-center font-cinzel font-bold text-sm text-[#0d1117] bg-gradient-to-br from-gold to-[#caa244]">
-                        <IconCrown size={16} className="absolute -top-3 left-1/2 -translate-x-1/2 rotate-12 text-gold" />
-                        MR
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm flex items-center gap-2">Marina R.</div>
-                        <div className="text-xs text-text-dim">Nível 18 · Maga do Código</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-sm text-gold">3.240</div>
-                        <small className="block text-[11px] text-text-mute">XP semana</small>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 rounded-md border border-gold/45 bg-gold/5 transition-all hover:translate-x-1">
-                      <div className="w-5 text-center font-cinzel font-bold text-base text-text-mute">2</div>
-                      <div className="w-10 h-10 rounded-md shrink-0 relative grid place-items-center font-cinzel font-bold text-sm text-text-dim bg-surface">
-                        {user.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm flex items-center gap-2">
-                          {user.name}
-                          <span className="text-[10px] font-bold text-gold border-[0.5px] border-gold/50 rounded-sm px-1 tracking-wide">VOCÊ</span>
-                        </div>
-                        <div className="text-xs text-text-dim">Nível {user.lvl} · Aprendiz</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-sm text-gold">2.980</div>
-                        <small className="block text-[11px] text-text-mute">XP semana</small>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 rounded-md border border-border bg-surface-2 transition-all hover:translate-x-1">
-                      <div className="w-5 text-center font-cinzel font-bold text-base text-text-mute">3</div>
-                      <div className="w-10 h-10 rounded-md shrink-0 relative grid place-items-center font-cinzel font-bold text-sm text-text-dim bg-surface">
-                        RF
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm flex items-center gap-2">Rafael F.</div>
-                        <div className="text-xs text-text-dim">Nível 14 · Caçador de Bugs</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-sm text-gold">2.510</div>
-                        <small className="block text-[11px] text-text-mute">XP semana</small>
-                      </div>
-                    </div>
-                  </>
+                  <div className="text-center py-6 text-text-mute text-sm">
+                    Nenhum jogador no ranking ainda.<br/>Acumule XP para ser o primeiro!
+                  </div>
                 ) : (
                   (ranking?.top10?.slice(0, 3) || []).map((item, idx) => (
                     <div key={idx} className={`flex items-center gap-3 p-3 rounded-md border transition-all hover:translate-x-1 ${item.isCurrentUser ? 'border-gold/45 bg-gold/5' : 'border-border bg-surface-2'}`}>
@@ -362,21 +317,21 @@ export function Hub() {
                 </a>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                {/* Dummy ones if empty or mapping */}
-                <div className="flex-none w-[158px] p-4 rounded-md bg-surface border border-border text-center transition-all hover:-translate-y-1 hover:border-gold/45">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full grid place-items-center text-2xl text-gold border-[0.5px] border-gold/40" style={{ background: 'linear-gradient(155deg, rgba(240,192,96,.2), rgba(240,192,96,.04))' }}>
-                    <IconFlame size={24} />
+                {conquistas.length === 0 ? (
+                  <div className="text-center py-6 w-full text-text-mute text-sm">
+                    Nenhuma conquista desbloqueada ainda.<br/>Complete missões para ganhar insígnias!
                   </div>
-                  <div className="font-semibold text-[13.5px]">Maratonista</div>
-                  <div className="text-[11.5px] text-text-mute mt-1">7 dias seguidos</div>
-                </div>
-                <div className="flex-none w-[158px] p-4 rounded-md bg-surface border border-border text-center transition-all hover:-translate-y-1 hover:border-gold/45">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full grid place-items-center text-2xl text-green border-[0.5px] border-green/40" style={{ background: 'linear-gradient(155deg, rgba(126,231,135,.18), rgba(126,231,135,.03))' }}>
-                    <IconRepeat size={24} />
-                  </div>
-                  <div className="font-semibold text-[13.5px]">Mestre dos Loops</div>
-                  <div className="text-[11.5px] text-text-mute mt-1">Módulo 3</div>
-                </div>
+                ) : (
+                  conquistas.map((c, i) => (
+                    <div key={i} className="flex-none w-[158px] p-4 rounded-md bg-surface border border-border text-center transition-all hover:-translate-y-1 hover:border-gold/45">
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full grid place-items-center text-2xl text-gold border-[0.5px] border-gold/40" style={{ background: 'linear-gradient(155deg, rgba(240,192,96,.2), rgba(240,192,96,.04))' }}>
+                        <IconAward size={24} />
+                      </div>
+                      <div className="font-semibold text-[13.5px] line-clamp-1">{c.titulo}</div>
+                      <div className="text-[11.5px] text-text-mute mt-1 line-clamp-2">{c.descricao}</div>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
           </div>
