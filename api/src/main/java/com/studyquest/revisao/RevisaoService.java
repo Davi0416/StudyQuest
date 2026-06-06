@@ -35,9 +35,15 @@ public class RevisaoService {
                 .setParameter("hoje", LocalDate.now())
                 .getResultList());
 
+        if (pendentes.isEmpty()) return new RevisaoHojeResponse(0, Map.of());
+
+        List<Long> flashcardIds = pendentes.stream().map(LeitnerCard::getFlashcardId).distinct().toList();
+        Map<Long, Flashcard> flashcardsMap = flashcardRepository.list("id IN ?1", flashcardIds)
+                .stream().collect(Collectors.toMap(Flashcard::getId, f -> f));
+
         Map<Integer, List<RevisaoHojeResponse.CardRevisao>> porCaixa = pendentes.stream()
                 .map(lc -> {
-                    Flashcard f = flashcardRepository.findById(lc.getFlashcardId());
+                    Flashcard f = flashcardsMap.get(lc.getFlashcardId());
                     if (f == null) return null;
                     return new RevisaoHojeResponse.CardRevisao(
                             lc.getId(), f.getId(), f.getFrente(), f.getVerso(), lc.getCaixa());
@@ -80,14 +86,14 @@ public class RevisaoService {
 
     public void adicionarCard(UUID userId, Long flashcardId) {
         localDb.write(em -> {
-            boolean existe = !em.createQuery(
-                            "SELECT lc FROM LeitnerCard lc WHERE lc.userId = :uid AND lc.flashcardId = :fid",
-                            LeitnerCard.class)
+            Long count = em.createQuery(
+                            "SELECT COUNT(lc) FROM LeitnerCard lc WHERE lc.userId = :uid AND lc.flashcardId = :fid",
+                            Long.class)
                     .setParameter("uid", userId)
                     .setParameter("fid", flashcardId)
-                    .getResultList().isEmpty();
+                    .getSingleResult();
 
-            if (!existe) {
+            if (count == 0) {
                 em.persist(LeitnerCard.builder()
                         .userId(userId)
                         .flashcardId(flashcardId)
