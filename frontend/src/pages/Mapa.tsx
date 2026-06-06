@@ -244,8 +244,8 @@ export function Mapa() {
   const trailIcon = nodes.length > 0 ? CAVE_STATIC_NODES[0].icon : '🐍';
 
   // ── Progresso ─────────────────────────────────────────────────────────────
-  const progressPct = activeTrilha && activeTrilha.xpTotal > 0 && activeTrilha.nosConcluidosCount != null
-    ? Math.round((activeTrilha.nosConcluidosCount / (activeTrilha.xpTotal / 100)) * 100)
+  const progressPct = activeTrilha && activeTrilha.xpTotal > 0
+    ? Math.min(100, Math.round(((activeTrilha.xpGanho ?? 0) / activeTrilha.xpTotal) * 100))
     : 0;
 
   return (

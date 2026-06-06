@@ -75,12 +75,12 @@ export const CAVE_STATIC_NODES: Array<{
   { id: 'exc',     icon: '🦎', tile: [7,  18] as [number,number], biome: 'fungal'   },
   { id: 'files',   icon: '🐊', tile: [14, 15] as [number,number], biome: 'fungal'   },
   { id: 'mods',    icon: '🐊', tile: [26, 13] as [number,number], biome: 'lava'     },
-  { id: 'iters',   icon: '🦖', tile: [37, 11] as [number,number], biome: 'lava'     },
-  { id: 'regex',   icon: '🦎', tile: [45, 9]  as [number,number], biome: 'lava'     },
-  { id: 'tests',   icon: '🐍', tile: [50, 7]  as [number,number], biome: 'lava'     },
-  { id: 'boss',    icon: '🐍', tile: [49, 6]  as [number,number], biome: 'lava',   boss: true    },
-  // project em [49,5] = centro exato do capuz da Naja (boss em [49,6], hoodH=24px)
-  { id: 'project', icon: '⭐', tile: [49, 5]  as [number,number], biome: 'summit', project: true },
+  { id: 'iters',   icon: '🦖', tile: [33, 11] as [number,number], biome: 'lava'     },
+  { id: 'regex',   icon: '🦎', tile: [39, 10] as [number,number], biome: 'lava'     },
+  { id: 'tests',   icon: '🐍', tile: [45, 8]  as [number,number], biome: 'lava'     },
+  { id: 'boss',    icon: '🐍', tile: [50, 6]  as [number,number], biome: 'lava',   boss: true    },
+  // project posicionado acima do boss com espaçamento adequado para evitar sobreposição
+  { id: 'project', icon: '⭐', tile: [50, 2]  as [number,number], biome: 'summit', project: true },
 ];
 
 export const CAVE_EDGES: [number,number][] = [
