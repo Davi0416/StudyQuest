@@ -9,6 +9,6 @@ import java.util.List;
 public class NoRepository implements PanacheRepository<No> {
 
     public List<No> findByTrilha(Long trilhaId) {
-        return list("trilhaId", trilhaId);
+        return list("trilhaId = ?1 ORDER BY ordem ASC", trilhaId);
     }
 }
