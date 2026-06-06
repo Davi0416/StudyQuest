@@ -92,11 +92,13 @@ POST /api/auth/refresh?token=<refreshToken>
 ### Logout
 
 ```
-POST /api/auth/logout
-Authorization: Bearer <token>
+POST /api/auth/logout?token=<refreshToken>
+Authorization: Bearer <accessToken>
 ```
 
-O JWT é stateless — o backend não invalida tokens. O frontend deve descartar os tokens do storage.
+O refresh token é **revogado** no backend — mesmo que vazado, não pode mais ser usado para emitir novos tokens. O frontend também deve descartar ambos os tokens do storage.
+
+> Passe o `refreshToken` como query param `token`. Se omitido, o logout ainda funciona localmente (tokens descartados), mas sem revogação remota.
 
 ---
 
@@ -623,12 +625,16 @@ Authorization: Bearer <token>
       "avatarUrl": null,
       "xpSemana": 620,
       "isCurrentUser": true
-    }
+    },
+    "cached": false,
+    "cachedAt": null
   }
 }
 ```
 
 > `posicaoAtual` é `null` se o usuário não entrou no top 10. Mostre mesmo assim a posição fora da lista.
+
+> **Modo offline:** quando sem conexão, `cached: true` e `cachedAt` contém o timestamp ISO da última atualização. Mostre um aviso discreto tipo "Dados do ranking podem estar desatualizados".
 
 ---
 
@@ -708,11 +714,25 @@ Toda resposta da API segue este envelope:
 | HTTP | `error` | Causa | O que fazer no front |
 |---|---|---|---|
 | 400 | `ERRO` | Body inválido ou campo faltando | Mostrar mensagem de validação |
-| 401 | `ERRO` | Token ausente, expirado ou inválido | Tentar refresh; se falhar, redirecionar para login |
+| 401 | `ERRO` | Token ausente, expirado, inválido ou revogado | Tentar refresh; se falhar, redirecionar para login |
 | 403 | `NO_BLOQUEADO` | Nó com pré-requisitos não concluídos | Mostrar quais pré-requisitos faltam |
 | 404 | `NAO_ENCONTRADO` | Recurso não existe | Mostrar tela de erro ou redirecionar |
-| 409 | `ERRO` | Conflito (ex: email já cadastrado, já matriculado) | Mostrar mensagem específica |
+| 409 | `ERRO` | Conflito explícito: email já cadastrado, já matriculado na trilha, e-mail já verificado | Mostrar mensagem específica |
+| 409 | `DUPLICATE_ENTRY` | Registro duplicado detectado pelo banco (race condition em inserção de flashcard no Leitner) | Ignorar silenciosamente ou avisar "Card já adicionado" |
+| 429 | `RATE_LIMIT` | Muitas requisições para Judge0 (10/min) ou Groq (20/min) | Ler header `Retry-After` (segundos) e aguardar antes de retentar. Mostrar mensagem ao usuário |
+| 503 | `ERRO` | Operação requer internet (registro, login com senha) | Mostrar "Sem conexão. Conecte-se à internet para continuar." |
 | 500 | `ERRO_INTERNO` | Erro inesperado no servidor | Mostrar erro genérico, reportar |
+
+### Comportamento offline
+
+| Endpoint | Offline? | Comportamento |
+|----------|----------|---------------|
+| `POST /auth/register` | ❌ | 503 — registro exige internet |
+| `POST /auth/login` | ❌ | 503 — login com senha exige internet na primeira vez |
+| `POST /auth/refresh` | ✅ | Valida JWT localmente + carrega perfil do cache SQLite |
+| `POST /auth/logout` | ✅ | Descarta tokens localmente; revogação remota é best-effort |
+| `GET /gamificacao/ranking/semanal` | ✅ | Retorna cache local com `cached: true` |
+| Demais endpoints | ✅/❌ | Depende do perfil: desktop = SQLite local (sempre OK); neon = PostgreSQL (falha se sem rede) |
 
 ---
 
