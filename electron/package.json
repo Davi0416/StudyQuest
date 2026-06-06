@@ -10,6 +10,9 @@
     "dist:linux": "electron-builder --linux",
     "dist": "electron-builder"
   },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
   "devDependencies": {
     "electron": "^36.9.5",
     "electron-builder": "^26.0.0",
@@ -20,12 +23,19 @@
     "appId": "com.studyquest.app",
     "productName": "StudyQuest",
     "copyright": "Copyright © 2026 StudyQuest",
+    "publish": {
+      "provider": "github",
+      "owner": "Davi0416",
+      "repo": "StudyQuest"
+    },
     "directories": {
       "output": "dist-electron"
     },
     "files": [
       "main.js",
-      "preload.js"
+      "preload.js",
+      "node_modules/**/*",
+      "package.json"
     ],
     "extraResources": [
       {
@@ -48,6 +58,10 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "mail.config.js",
+        "to": "mail.config.js"
       }
     ],
     "win": {
