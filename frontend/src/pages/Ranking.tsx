@@ -124,7 +124,8 @@ export function Ranking() {
                     {item.userName}
                     {item.isCurrentUser && <span className="text-[10px] font-bold text-[#1a1206] bg-gradient-to-r from-gold to-[#d8a945] rounded px-1.5 py-0.5">VOCÊ</span>}
                   </div>
-                  <div className="text-xs text-text-mute">Aventureiro</div>
+                  {/* TODO: O backend deve retornar nível e título no ranking */}
+                  <div className="text-xs text-text-mute">{(item as any).cargo ?? 'Aventureiro'}</div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="font-cinzel font-bold text-base text-gold flex items-center gap-1 justify-end">
@@ -153,7 +154,8 @@ export function Ranking() {
                 <span className="text-[10px] font-bold text-[#1a1206] bg-gradient-to-r from-gold to-[#d8a945] rounded px-1.5 py-0.5">VOCÊ</span>
               </div>
               <div className="text-[12px] text-text-dim">
-                Faltam <b className="text-gold">{(top10[9]?.xpSemana ?? 1040) - me.xpSemana} XP</b> para entrar no Top 10
+                {/* Usando 0 se o ranking tiver menos de 10 pessoas */}
+                Faltam <b className="text-gold">{Math.max(0, (top10[9]?.xpSemana ?? 0) - me.xpSemana)} XP</b> para entrar no Top 10
               </div>
             </div>
             <div className="text-right shrink-0">
@@ -198,7 +200,8 @@ function PodiumPlace({ player, rank, highlight }: { player: RankingItem; rank: n
         {initials(player.userName)}
       </div>
       <div className={`font-bold mt-3 text-center ${highlight ? 'text-[16.5px]' : 'text-[15px]'}`}>{player.userName}</div>
-      <div className="text-xs text-text-mute mt-0.5 text-center">Nível {rank === 1 ? 18 : rank === 2 ? 16 : 15}</div>
+      {/* TODO: O backend deve retornar nível e título no ranking */}
+      <div className="text-xs text-text-mute mt-0.5 text-center">Nível {(player as any).nivel ?? '-'}</div>
       <div className={`flex items-center gap-1.5 mt-2.5 font-cinzel font-bold text-gold ${highlight ? 'text-[19px]' : 'text-base'}`}>
         <IconBolt size={14} />{player.xpSemana.toLocaleString('pt-BR')}
         <span className="font-sans font-medium text-[10.5px] text-text-mute tracking-wide">XP</span>

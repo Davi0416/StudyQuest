@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider, useUser } from './context/UserContext';
+import { UpdateManager } from './components/UpdateManager';
 import { Login } from './pages/Login';
 import { Hub } from './pages/Hub';
 import { Mapa } from './pages/Mapa';
@@ -24,6 +25,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <UserProvider>
+        <UpdateManager />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<ProtectedRoute><Hub /></ProtectedRoute>} />

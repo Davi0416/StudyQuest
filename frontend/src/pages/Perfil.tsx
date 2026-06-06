@@ -50,11 +50,27 @@ export function Perfil() {
     api.get('/gamificacao/conquistas')
       .then(r => setConquistas(unwrap(r)))
       .catch(() => {});
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    // TODO: O backend deveria retornar o XP base do nível atual e o XP limite (ex: user.xpAtualNoNivel, user.xpProximoNivel)
+    const xpForLvl = (user as any).xpProximoNivel ?? 5500;
+    const xpCur = (user as any).xpAtualNoNivel ?? (user.totalXp % xpForLvl);
+    const pct = Math.min(100, Math.round(xpCur / xpForLvl * 100));
     setTimeout(() => {
-      if (lvlBarRef.current) lvlBarRef.current.style.width = '88%';
-      if (achBarRef.current) achBarRef.current.style.width = '33%';
+      if (lvlBarRef.current) lvlBarRef.current.style.width = `${pct}%`;
     }, 350);
   }, [user]);
+
+  useEffect(() => {
+    if (conquistas.length === 0) return;
+    const unlocked = conquistas.filter(c => c.desbloqueada).length;
+    const pct = Math.round(unlocked / conquistas.length * 100);
+    setTimeout(() => {
+      if (achBarRef.current) achBarRef.current.style.width = `${pct}%`;
+    }, 350);
+  }, [conquistas]);
 
   if (!user) return null;
 
@@ -62,8 +78,9 @@ export function Perfil() {
   const unlockedConquistas = conquistas.filter(c => c.desbloqueada);
   const achTotal = conquistas.length;
   const achUnlocked = unlockedConquistas.length;
-  const xpForLevel = 5500;
-  const xpCurrent = user.totalXp % xpForLevel;
+  // TODO: Novamente, backend deve fornecer a progressão exata dentro do nível atual
+  const xpForLevel = (user as any).xpProximoNivel ?? 5500;
+  const xpCurrent = (user as any).xpAtualNoNivel ?? (user.totalXp % xpForLevel);
   const xpPct = Math.round(xpCurrent / xpForLevel * 100);
 
   async function handleResetAndLogout() {
@@ -120,7 +137,8 @@ export function Perfil() {
             {/* Identidade */}
             <div className="flex-1 min-w-0 pb-1 pt-6">
               <div className="text-[12px] text-gold font-semibold tracking-[1.5px] uppercase flex items-center gap-2 mb-1.5">
-                Caçador de Conhecimento
+                {/* TODO: Cargo do usuário deve vir do backend */}
+                {(user as any).cargo ?? 'Caçador de Conhecimento'}
               </div>
               <h1 className="font-cinzel font-bold text-[32px] leading-[1.1]">{displayName}</h1>
               <div className="flex items-center gap-2.5 flex-wrap mt-2.5">
@@ -209,6 +227,7 @@ export function Perfil() {
                 <IconHistory size={14} /> Últimos 7 dias
               </span>
             </div>
+            {/* TODO: endpoint pendente para histórico de atividade (/users/me/historico) */}
             <div className="flex flex-col items-center justify-center py-10 text-center text-text-mute gap-2">
               <IconHistory size={32} className="text-text-dim mb-1" />
               <span className="text-[14px]">Nenhuma atividade recente</span>
@@ -300,7 +319,7 @@ export function Perfil() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[rgba(8,10,14,.66)] backdrop-blur-[4px]"
              onClick={e => { if (e.target === e.currentTarget) setModalOpen(false); }}>
           <div className="w-full max-w-[480px] bg-surface border border-border rounded-xl shadow-[0_24px_60px_-20px_rgba(0,0,0,.8)] overflow-hidden">
-            <div className="flex items-center justify-between gap-3 px-6 py-4.5 border-b border-border">
+            <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border">
               <h3 className="font-cinzel font-bold text-lg flex items-center gap-2">
                 <IconPencil size={18} className="text-gold" /> Editar Perfil
               </h3>
@@ -318,7 +337,8 @@ export function Perfil() {
                 </div>
                 <div>
                   <b className="font-cinzel font-bold text-[17px] block">{draftName.trim() || 'Aventureiro'}</b>
-                  <small className="text-text-mute text-[12px]">Nível {user.lvl} · Aprendiz</small>
+                  {/* TODO: Cargo do usuário deve vir do backend */}
+                  <small className="text-text-mute text-[12px]">Nível {user.lvl} · {(user as any).cargo ?? 'Aprendiz'}</small>
                 </div>
               </div>
 

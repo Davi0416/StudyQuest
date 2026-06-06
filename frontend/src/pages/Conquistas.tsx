@@ -45,28 +45,28 @@ interface BadgeMeta {
 const BADGE_META: Record<string, BadgeMeta> = {
   'Primeira Chama':       { cat: 'constancia', rarity: 'comum',    icon: <IconFlame size={33} /> },
   'Maratonista':          { cat: 'constancia', rarity: 'comum',    icon: <IconRun size={33} /> },
-  'Imparável':            { cat: 'constancia', rarity: 'raro',     icon: <IconBolt size={33} />, prog: [14, 21, '14 / 21 dias'] },
+  'Imparável':            { cat: 'constancia', rarity: 'raro',     icon: <IconBolt size={33} /> },
   'Lenda Viva':           { cat: 'constancia', rarity: 'lendario', icon: <IconFlame size={33} /> },
   'Primeiros Passos':     { cat: 'maestria',   rarity: 'comum',    icon: <IconRun size={33} /> },
   'Mestre dos Loops':     { cat: 'maestria',   rarity: 'raro',     icon: <IconRepeat size={33} /> },
-  'Arquiteto Spring':     { cat: 'maestria',   rarity: 'epico',    icon: <IconShieldCheck size={33} />, prog: [64, 100, '64% concluído'] },
+  'Arquiteto Spring':     { cat: 'maestria',   rarity: 'epico',    icon: <IconShieldCheck size={33} /> },
   'Poliglota':            { cat: 'maestria',   rarity: 'epico',    icon: <IconBooks size={33} /> },
   'Grão-Mestre':          { cat: 'maestria',   rarity: 'lendario', icon: <IconCrown size={33} /> },
   'Colecionador':         { cat: 'colecao',    rarity: 'comum',    icon: <IconCards size={33} /> },
   'Centurião':            { cat: 'colecao',    rarity: 'raro',     icon: <IconCards size={33} /> },
-  'Bibliotecário':        { cat: 'colecao',    rarity: 'epico',    icon: <IconBooks size={33} />, prog: [184, 500, '184 / 500 dominados'] },
+  'Bibliotecário':        { cat: 'colecao',    rarity: 'epico',    icon: <IconBooks size={33} /> },
   'Memória de Elefante':  { cat: 'colecao',    rarity: 'raro',     icon: <IconCards size={33} /> },
   'Caça-Bugs':            { cat: 'combate',    rarity: 'comum',    icon: <IconBug size={33} /> },
   'Perfeccionista':       { cat: 'combate',    rarity: 'raro',     icon: <IconTrophy size={33} /> },
   'Sem Sustos':           { cat: 'combate',    rarity: 'raro',     icon: <IconShieldCheck size={33} /> },
   'Velocista':            { cat: 'combate',    rarity: 'epico',    icon: <IconBolt size={33} /> },
-  'Gladiador':            { cat: 'combate',    rarity: 'epico',    icon: <IconSwords size={33} />, prog: [23, 50, '23 / 50 desafios'] },
+  'Gladiador':            { cat: 'combate',    rarity: 'epico',    icon: <IconSwords size={33} /> },
   'Pioneiro':             { cat: 'especiais',  rarity: 'raro',     icon: <IconRocket size={33} /> },
   'Madrugador':           { cat: 'especiais',  rarity: 'comum',    icon: <IconFlame size={33} /> },
   'Coruja':               { cat: 'especiais',  rarity: 'comum',    icon: <IconFlame size={33} /> },
   'Guerreiro de Fim de Semana': { cat: 'especiais', rarity: 'comum', icon: <IconShieldCheck size={33} /> },
   'Explorador':           { cat: 'especiais',  rarity: 'comum',    icon: <IconRocket size={33} /> },
-  'Colossal':             { cat: 'especiais',  rarity: 'lendario', icon: <IconDiamond size={33} />, prog: [4820, 10000, '4.820 / 10.000 XP'] },
+  'Colossal':             { cat: 'especiais',  rarity: 'lendario', icon: <IconDiamond size={33} /> },
 };
 
 function getMeta(c: Conquista): BadgeMeta {
@@ -87,7 +87,7 @@ export function Conquistas() {
   }, []);
 
   useEffect(() => {
-    if (!ringRef.current) return;
+    if (!ringRef.current || conquistas.length === 0) return;
     const total = conquistas.length;
     const unlocked = conquistas.filter(c => c.desbloqueada).length;
     const pct = unlocked / total;
@@ -163,7 +163,7 @@ export function Conquistas() {
               <b className="text-gold">{unlocked}</b> de {total} conquistas desbloqueadas
             </div>
             <div className="text-text-dim text-[13.5px] mt-1 mb-4">
-              Você completou {Math.round(unlocked / total * 100)}% da galeria · {total - unlocked} ainda aguardam.
+              Você completou {total > 0 ? Math.round(unlocked / total * 100) : 0}% da galeria · {total - unlocked} ainda aguardam.
             </div>
             <div className="flex gap-2.5 flex-wrap">
               {Object.entries(CAT_META).map(([key, m]) => (
@@ -253,14 +253,15 @@ function BadgeCard({ conquista: c }: { conquista: Conquista }) {
             Conquistada em {c.desbloqueadaEm ? new Date(c.desbloqueadaEm).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
           </span>
         </div>
-      ) : m.prog ? (
+      ) : (c as any).progressoTotal ? (
         <div className="mt-3.5 pt-3 border-t border-border w-full">
+          {/* TODO: backend precisa enviar progressoAtual e progressoMaximo nas conquistas */}
           <div className="flex items-center justify-between text-[11px] text-text-mute mb-1.5">
-            <span>Progresso</span><b className="text-text-dim font-bold">{m.prog[2]}</b>
+            <span>Progresso</span><b className="text-text-dim font-bold">{(c as any).progressoAtual ?? 0} / {(c as any).progressoTotal}</b>
           </div>
           <div className="h-1.5 rounded-full bg-surface-2 border border-border overflow-hidden">
             <div className={`h-full rounded-full bg-gradient-to-r from-text-mute to-text-dim`}
-                 style={{ width: `${Math.round(m.prog[0] / m.prog[1] * 100)}%`, transition: 'width 1.4s cubic-bezier(.2,.7,.2,1)' }} />
+                 style={{ width: `${Math.round(((c as any).progressoAtual ?? 0) / ((c as any).progressoTotal || 1) * 100)}%`, transition: 'width 1.4s cubic-bezier(.2,.7,.2,1)' }} />
           </div>
         </div>
       ) : (

@@ -7,7 +7,7 @@ import type {  RevisaoHoje, Trilha, RankingResponse, Conquista  } from "../types
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { ProgressBar } from '../components/ui/ProgressBar';
-import { IconStack2, IconSparkles, IconTargetArrow, IconCards, IconFlame, IconBolt, IconCircleCheck, IconAward, IconTrendingUp, IconLock, IconSword, IconHelpCircle, IconMap2, IconPlus, IconTrophy, IconChevronRight, IconCrown, IconRepeat, IconBug, IconCoffee, IconPlayerPlayFilled } from '@tabler/icons-react';
+import { IconStack2, IconSparkles, IconTargetArrow, IconCards, IconFlame, IconBolt, IconCircleCheck, IconAward, IconTrendingUp, IconLock, IconSword, IconHelpCircle, IconMap2, IconTrophy, IconChevronRight, IconCrown, IconCoffee, IconPlayerPlayFilled } from '@tabler/icons-react';
 
 export function Hub() {
   const { user } = useUser();
@@ -18,6 +18,9 @@ export function Hub() {
   const [revisao, setRevisao] = useState<RevisaoHoje | null>(null);
   const [ranking, setRanking] = useState<RankingResponse | null>(null);
   const [conquistas, setConquistas] = useState<Conquista[]>([]);
+  // TODO: endpoint pendente para estatísticas gerais (missões, flashcards dominados, xp hoje, etc)
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,14 +38,24 @@ export function Hub() {
         setRevisao(unwrap(revRes));
         setRanking(unwrap(rankRes));
         setConquistas(unwrap(conqRes).slice(0, 4)); // Get latest 4
+
+        // TODO: endpoint pendente para /users/me/stats
+        try {
+          const statsRes = await api.get('/users/me/stats');
+          setStats(unwrap(statsRes));
+        } catch (e) {
+          console.warn("Stats endpoint not available yet");
+        }
       } catch (err) {
         console.error("Failed to fetch hub data", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
 
-  if (!user) return null;
+  if (!user || loading) return <div className="min-h-screen bg-bg grid place-items-center">Carregando...</div>;
 
   const activeTrilha = trilhas.length > 0 ? trilhas[0] : null;
   const activeIds = new Set(trilhas.map(t => t.id));
@@ -58,7 +71,9 @@ export function Hub() {
       console.error('Failed to enroll in trail', err);
     }
   };
-  const progressPct = activeTrilha && activeTrilha.nosConcluidosCount !== null && activeTrilha.xpTotal > 0 ? Math.round((activeTrilha.nosConcluidosCount / (activeTrilha.xpTotal / 100)) * 100) : 0; // approximate since totalNos is not in Trilha interface, wait `nosConcluidosCount` is present.
+  const progressPct = activeTrilha && activeTrilha.xpTotal > 0
+    ? Math.min(100, Math.round(((activeTrilha.xpGanho ?? 0) / activeTrilha.xpTotal) * 100))
+    : 0;
 
   return (
     <div className="min-h-screen">
@@ -69,7 +84,7 @@ export function Hub() {
         <section className="flex items-end justify-between gap-7 flex-wrap mb-8 reveal" style={{ '--d': '.02s' } as any}>
           <div>
             <div className="text-[13px] text-gold font-semibold tracking-[1.5px] uppercase flex items-center gap-2">
-              <IconSparkles size={16} /> Quarta-feira · 1 de junho
+              <IconSparkles size={16} /> {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
             </div>
             <h1 className="font-cinzel font-bold text-[34px] leading-[1.15] my-3">
               Bem-vindo de volta, <span className="text-gold">{user.name}</span>
@@ -77,7 +92,7 @@ export function Hub() {
             <div className="flex gap-3 flex-wrap mt-2">
               <div className="flex items-center gap-3 py-2 px-3.5 rounded-sm bg-surface border border-border">
                 <IconTargetArrow size={18} className="text-gold" />
-                <span className="text-text-dim text-[13px]"><b className="font-bold text-text">3</b> missões pendentes</span>
+                <span className="text-text-dim text-[13px]"><b className="font-bold text-text">{stats?.missoesPendentes ?? '-'}</b> missões pendentes</span>
               </div>
               <div className="flex items-center gap-3 py-2 px-3.5 rounded-sm bg-surface border border-border">
                 <IconCards size={18} className="text-blue" />
@@ -103,27 +118,27 @@ export function Hub() {
             <div className="font-cinzel font-bold text-[30px] leading-none">{user.totalXp}</div>
             <div className="text-text-dim text-[13px] mt-1.5">XP Total</div>
             <div className="mt-3 text-[12.5px] font-semibold flex items-center gap-1 text-green">
-              <IconTrendingUp size={16} /> +120 XP hoje
+              <IconTrendingUp size={16} /> +{stats?.xpHoje ?? '-'} XP hoje
             </div>
           </Card>
           <Card className="p-5 reveal border-t-[3px] border-t-green" style={{ '--d': '.12s' } as any}>
             <div className="w-10 h-10 rounded-md grid place-items-center text-green bg-green/10 border-[0.5px] border-green/25 mb-4">
               <IconCircleCheck size={20} />
             </div>
-            <div className="font-cinzel font-bold text-[30px] leading-none">37</div>
+            <div className="font-cinzel font-bold text-[30px] leading-none">{stats?.missoesConcluidas ?? '-'}</div>
             <div className="text-text-dim text-[13px] mt-1.5">Missões Concluídas</div>
             <div className="mt-3 text-[12.5px] font-semibold flex items-center gap-1 text-green">
-              <IconTrendingUp size={16} /> +2 esta semana
+              <IconTrendingUp size={16} /> +{stats?.missoesConcluidasSemana ?? '-'} esta semana
             </div>
           </Card>
           <Card className="p-5 reveal border-t-[3px] border-t-blue" style={{ '--d': '.18s' } as any}>
             <div className="w-10 h-10 rounded-md grid place-items-center text-blue bg-blue/10 border-[0.5px] border-blue/25 mb-4">
               <IconCards size={20} />
             </div>
-            <div className="font-cinzel font-bold text-[30px] leading-none">184</div>
+            <div className="font-cinzel font-bold text-[30px] leading-none">{stats?.flashcardsDominados ?? '-'}</div>
             <div className="text-text-dim text-[13px] mt-1.5">Flashcards Dominados</div>
             <div className="mt-3 text-[12.5px] font-semibold flex items-center gap-1 text-green">
-              <IconTrendingUp size={16} /> +12 hoje
+              <IconTrendingUp size={16} /> +{stats?.flashcardsDominadosHoje ?? '-'} hoje
             </div>
           </Card>
           <Card className="p-5 reveal border-t-[3px] border-t-red" style={{ '--d': '.24s' } as any}>
@@ -159,24 +174,27 @@ export function Hub() {
                 </div>
                 <div className="text-right">
                   <div className="font-cinzel font-bold text-2xl text-green">{progressPct}%</div>
-                  <small className="block text-text-mute text-[11px]">{activeTrilha?.nosConcluidosCount || 16} / 25 nós</small>
+                  {/* TODO: O backend precisa enviar o total de nós da trilha atual e os nós concluídos */}
+                  <small className="block text-text-mute text-[11px]">{activeTrilha?.nosConcluidosCount || 0} / {stats?.totalNosTrilha ?? '-'} nós</small>
                 </div>
               </div>
 
               <ProgressBar progress={progressPct} />
               <div className="flex justify-between mt-3 text-[12.5px] text-text-mute">
-                <span>{activeTrilha?.xpGanho || 1280} XP conquistados nesta trilha</span>
-                <span>720 XP até o próximo nível</span>
+                <span>{activeTrilha?.xpGanho || 0} XP conquistados nesta trilha</span>
+                {/* TODO: Endpoint precisa enviar quanto XP falta para o próximo nível */}
+                <span>{stats?.xpProximoNivel ?? '-'} XP até o próximo nível</span>
               </div>
 
-              <div className="flex items-center justify-between gap-4 mt-5 pt-4.5 border-t border-border flex-wrap">
+              <div className="flex items-center justify-between gap-4 mt-5 pt-5 border-t border-border flex-wrap">
                 <div className="flex items-center gap-3">
                   <div className="w-[42px] h-[42px] rounded-md grid place-items-center bg-surface-2 border border-border text-text-dim">
                     <IconLock size={20} />
                   </div>
                   <div>
                     <small className="block text-text-mute text-[11px] uppercase tracking-wide">Próximo nó a desbloquear</small>
-                    <b className="font-semibold text-[14.5px]">Injeção de Dependências (DI)</b>
+                    {/* TODO: Endpoint precisa enviar o título do próximo nó */}
+                    <b className="font-semibold text-[14.5px]">{stats?.proximoNoTitulo ?? 'Não disponível'}</b>
                   </div>
                 </div>
                 <Button className="gap-2" onClick={() => activeTrilha ? navigate('/mapa') : trilhasDisponiveis[0] && handleMatricular(trilhasDisponiveis[0].id)} disabled={!activeTrilha && trilhasDisponiveis.length === 0}>
@@ -231,7 +249,9 @@ export function Hub() {
 
               <div className="flex items-center justify-between gap-4">
                 <div className="text-[13px] text-text-dim">
-                  <b className="text-text font-bold">{revisao?.totalPendentes || 0} cards</b> · tempo estimado ~8 min
+                  <b className="text-text font-bold">{revisao?.totalPendentes || 0} cards</b>
+                  {/* TODO: Backend deve calcular tempo estimado ou usar uma constante por card */}
+                  {stats?.tempoRevisaoMin && <span> · tempo estimado ~{stats.tempoRevisaoMin} min</span>}
                 </div>
                 <Button className="gap-2" onClick={() => navigate('/revisao')}>
                   <IconPlayerPlayFilled size={18} /> Iniciar Revisão
@@ -250,8 +270,8 @@ export function Hub() {
                   <div><b className="block font-semibold text-sm">Explorar Mapa</b><small className="text-text-mute text-xs">Veja sua jornada completa</small></div>
                 </button>
                 <button className="flex items-center gap-3 p-4 rounded-md bg-surface-2 border border-border text-left transition-all hover:-translate-y-1 hover:border-[#3d444d] hover:bg-[#222936]" onClick={() => navigate('/revisao')}>
-                  <div className="w-9 h-9 rounded-md grid place-items-center text-blue bg-blue/10 shrink-0"><IconPlus size={18} /></div>
-                  <div><b className="block font-semibold text-sm">Criar Flashcard</b><small className="text-text-mute text-xs">Adicione um novo card</small></div>
+                  <div className="w-9 h-9 rounded-md grid place-items-center text-blue bg-blue/10 shrink-0"><IconCards size={18} /></div>
+                  <div><b className="block font-semibold text-sm">Iniciar Revisão</b><small className="text-text-mute text-xs">Revise seus flashcards de hoje</small></div>
                 </button>
                 <button className="flex items-center gap-3 p-4 rounded-md bg-surface-2 border border-border text-left transition-all hover:-translate-y-1 hover:border-[#3d444d] hover:bg-[#222936]">
                   <div className="w-9 h-9 rounded-md grid place-items-center text-green bg-green/10 shrink-0"><IconCards size={18} /></div>
@@ -273,9 +293,9 @@ export function Hub() {
                 <h2 className="font-cinzel font-semibold text-lg tracking-wide flex items-center gap-2">
                   <IconCrown size={20} className="text-gold" /> Ranking Semanal
                 </h2>
-                <a href="/ranking" className="text-[13px] text-text-dim flex items-center gap-1 hover:text-blue transition-colors">
+                <button onClick={() => navigate('/ranking')} className="text-[13px] text-text-dim flex items-center gap-1 hover:text-blue transition-colors">
                   Ver tudo <IconChevronRight size={16} />
-                </a>
+                </button>
               </div>
               <div className="flex flex-col gap-3">
                 {(!ranking?.top10 || ranking.top10.length === 0) ? (
@@ -295,6 +315,8 @@ export function Hub() {
                           {item.userName}
                           {item.isCurrentUser && <span className="text-[10px] font-bold text-gold border-[0.5px] border-gold/50 rounded-sm px-1 tracking-wide">VOCÊ</span>}
                         </div>
+                        {/* TODO: O backend precisa enviar o cargo/título no RankingItem */}
+                        <div className="text-xs text-text-mute">{stats?.cargo ?? 'Aventureiro'}</div>
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-sm text-gold">{item.xpSemana}</div>
@@ -312,9 +334,9 @@ export function Hub() {
                 <h2 className="font-cinzel font-semibold text-lg tracking-wide flex items-center gap-2">
                   <IconAward size={20} className="text-gold" /> Conquistas Recentes
                 </h2>
-                <a href="/conquistas" className="text-[13px] text-text-dim flex items-center gap-1 hover:text-blue transition-colors">
+                <button onClick={() => navigate('/conquistas')} className="text-[13px] text-text-dim flex items-center gap-1 hover:text-blue transition-colors">
                   Galeria <IconChevronRight size={16} />
-                </a>
+                </button>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
                 {conquistas.length === 0 ? (
