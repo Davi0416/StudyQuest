@@ -13,16 +13,37 @@ function TextoBloco({ conteudo }: { conteudo: string }) {
   return <AulaRichText conteudo={conteudo} />;
 }
 
+function toYoutubeEmbedUrl(url: string): string {
+  if (!url) return url;
+  // Already embed format
+  if (url.includes('youtube.com/embed/') || url.includes('youtube.com/videoseries')) return url;
+  // Standard watch URL: youtube.com/watch?v=ID
+  const watchMatch = url.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+  if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
+  // Short URL: youtu.be/ID
+  const shortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+  if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}`;
+  // Playlist URL
+  const listMatch = url.match(/list=([^&]+)/);
+  if (listMatch) return `https://www.youtube.com/embed/videoseries?list=${listMatch[1]}`;
+  return url;
+}
+
 function youtubeAssistirUrl(url: string, linkAssistir?: string): string {
   if (linkAssistir) return linkAssistir;
   const idMatch = url.match(/embed\/([A-Za-z0-9_-]{11})/);
   if (idMatch) return `https://www.youtube.com/watch?v=${idMatch[1]}`;
+  const watchMatch = url.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+  if (watchMatch) return `https://www.youtube.com/watch?v=${watchMatch[1]}`;
+  const shortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+  if (shortMatch) return `https://www.youtube.com/watch?v=${shortMatch[1]}`;
   const listMatch = url.match(/list=([^&]+)/);
   if (listMatch) return `https://www.youtube.com/playlist?list=${listMatch[1]}`;
   return url;
 }
 
 function VideoBloco({ titulo, url, linkAssistir }: { titulo: string; url: string; linkAssistir?: string }) {
+  const embedUrl = toYoutubeEmbedUrl(url);
   const assistirUrl = youtubeAssistirUrl(url, linkAssistir);
 
   return (
@@ -33,10 +54,11 @@ function VideoBloco({ titulo, url, linkAssistir }: { titulo: string; url: string
       </div>
       <div className="aspect-video bg-black">
         <iframe
-          src={url}
+          src={embedUrl}
           title={titulo}
           className="w-full h-full"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
           allowFullScreen
         />
       </div>
