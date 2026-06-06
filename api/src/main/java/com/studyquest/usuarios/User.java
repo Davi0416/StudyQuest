@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+        uniqueConstraints = @UniqueConstraint(name = "uc_users_provider_id", columnNames = {"provider", "providerId"}))
 @Builder
 @Getter
 @Setter
@@ -20,6 +21,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(nullable = false)
     private String name;
 
     @Column(unique = true, nullable = false)
@@ -50,4 +52,9 @@ public class User {
 
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Builder.Default
+    private boolean emailVerified = false;
+
+    private LocalDateTime emailVerifiedAt;
 }
