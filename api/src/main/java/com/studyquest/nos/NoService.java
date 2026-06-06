@@ -88,6 +88,19 @@ public class NoService {
 
             userNo.setStatus("CONCLUIDO");
             userNo.setConcluidoEm(LocalDateTime.now());
+
+            java.util.List<com.studyquest.offline.UserTrilha> uts = em.createQuery(
+                    "SELECT ut FROM UserTrilha ut WHERE ut.userId = :uid AND ut.trilhaId = :tid",
+                    com.studyquest.offline.UserTrilha.class)
+                .setParameter("uid", userId)
+                .setParameter("tid", no.getTrilhaId())
+                .setMaxResults(1)
+                .getResultList();
+            if (!uts.isEmpty()) {
+                com.studyquest.offline.UserTrilha ut = uts.get(0);
+                ut.setNosConcluidosCount(ut.getNosConcluidosCount() + 1);
+                ut.setXpGanho(ut.getXpGanho() + no.getXpRecompensa());
+            }
         });
 
         syncService.enqueue(userId, "NODE_COMPLETED", Map.of(

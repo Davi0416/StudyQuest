@@ -1,5 +1,7 @@
 package com.studyquest.trilhas;
 
+import com.studyquest.nos.No;
+import com.studyquest.nos.NoRepository;
 import com.studyquest.offline.UserTrilha;
 import com.studyquest.shared.db.LocalDb;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
@@ -22,6 +24,9 @@ public class TrilhaService {
 
     @Inject
     TrilhaRepository trilhaRepository;
+
+    @Inject
+    NoRepository noRepository;
 
     @Inject
     TrilhaSeedLoader trilhaSeedLoader;
@@ -63,7 +68,55 @@ public class TrilhaService {
                 .map(ut -> {
                     Trilha t = trilhasMap.get(ut.getTrilhaId());
                     if (t == null) return null;
-                    return TrilhaResponse.of(t, ut.getXpGanho(), ut.getNosConcluidosCount());
+                    
+                    // Fallback para corrigir estados antigos dessincronizados do BD local:
+                    // Calcula dinamicamente o XP e nós baseados no status real dos nós do usuário.
+                    // No e UserNo vivem em datasources diferentes (principal vs local SQLite),
+                    // por isso a lógica é dividida em duas etapas.
+
+                    // Etapa 1: busca os nós da trilha no datasource principal
+                    List<No> nos = noRepository.findByTrilha(t.getId());
+                    List<Long> noIds = nos.stream().map(No::getId).toList();
+
+                    int nosConcluidosCount = 0;
+                    int xpGanho = 0;
+
+                    if (!noIds.isEmpty()) {
+                        // Etapa 2: conta e soma XP dos nós concluídos no SQLite local
+                        List<Long> noIdsCopy = noIds; // efetivamente final para lambda
+                        List<Long> concluidosIds = localDb.read(em ->
+                            em.createQuery(
+                                "SELECT un.noId FROM UserNo un WHERE un.userId = :uid AND un.noId IN :noIds AND un.status = 'CONCLUIDO'",
+                                Long.class)
+                            .setParameter("uid", userId)
+                            .setParameter("noIds", noIdsCopy)
+                            .getResultList()
+                        );
+
+                        nosConcluidosCount = concluidosIds.size();
+                        if (!concluidosIds.isEmpty()) {
+                            Map<Long, Integer> xpPorNo = nos.stream()
+                                .collect(Collectors.toMap(No::getId, No::getXpRecompensa));
+                            xpGanho = concluidosIds.stream()
+                                .mapToInt(id -> xpPorNo.getOrDefault(id, 0))
+                                .sum();
+                        }
+                    }
+                    
+                    // Update the local database object with the correct recalculation
+                    final int finalNosCount = nosConcluidosCount;
+                    final int finalXpGanho = xpGanho;
+                    if (ut.getNosConcluidosCount() != finalNosCount || ut.getXpGanho() != finalXpGanho) {
+                        localDb.write(em -> {
+                            UserTrilha u = em.find(UserTrilha.class, ut.getId());
+                            if (u != null) {
+                                u.setNosConcluidosCount(finalNosCount);
+                                u.setXpGanho(finalXpGanho);
+                            }
+                        });
+                    }
+
+                    return TrilhaResponse.of(t, xpGanho, nosConcluidosCount);
                 })
                 .filter(t -> t != null)
                 .toList();
