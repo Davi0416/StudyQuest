@@ -1,6 +1,7 @@
 package com.studyquest.shared.exception;
 
 import com.studyquest.shared.response.ApiResponse;
+import jakarta.persistence.PersistenceException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
@@ -11,6 +12,12 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable ex) {
+        if (ex instanceof TooManyRequestsException e) {
+            return Response.status(429)
+                    .header("Retry-After", String.valueOf(e.getRetryAfterSeconds()))
+                    .entity(ApiResponse.error("RATE_LIMIT", e.getMessage()))
+                    .build();
+        }
         if (ex instanceof NoBloqueadoException e) {
             return Response.status(Response.Status.FORBIDDEN)
                     .entity(ApiResponse.error("NO_BLOQUEADO", e.getMessage()))
@@ -26,8 +33,25 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
                     .entity(ApiResponse.error("ERRO", e.getMessage()))
                     .build();
         }
+        if (isConstraintViolation(ex)) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity(ApiResponse.error("DUPLICATE_ENTRY", "Registro já existe."))
+                    .build();
+        }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(ApiResponse.error("ERRO_INTERNO", ex.getMessage()))
                 .build();
+    }
+
+    private boolean isConstraintViolation(Throwable ex) {
+        Throwable cause = ex;
+        while (cause != null) {
+            if (cause instanceof org.hibernate.exception.ConstraintViolationException
+                    || cause instanceof java.sql.SQLIntegrityConstraintViolationException) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 }
