@@ -12,8 +12,10 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class TrilhaService {
@@ -51,11 +53,20 @@ public class TrilhaService {
                         .getResultList()
         );
 
-        return userTrilhas.stream().map(ut -> {
-            Trilha t = trilhaRepository.findById(ut.getTrilhaId());
-            if (t == null) return null;
-            return TrilhaResponse.of(t, ut.getXpGanho(), ut.getNosConcluidosCount());
-        }).filter(t -> t != null).toList();
+        if (userTrilhas.isEmpty()) return List.of();
+
+        List<Long> trilhaIds = userTrilhas.stream().map(UserTrilha::getTrilhaId).toList();
+        Map<Long, Trilha> trilhasMap = trilhaRepository.list("id IN ?1", trilhaIds)
+                .stream().collect(Collectors.toMap(Trilha::getId, t -> t));
+
+        return userTrilhas.stream()
+                .map(ut -> {
+                    Trilha t = trilhasMap.get(ut.getTrilhaId());
+                    if (t == null) return null;
+                    return TrilhaResponse.of(t, ut.getXpGanho(), ut.getNosConcluidosCount());
+                })
+                .filter(t -> t != null)
+                .toList();
     }
 
     public TrilhaResponse matricular(Long trilhaId, UUID userId) {
