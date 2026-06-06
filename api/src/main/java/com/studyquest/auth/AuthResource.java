@@ -54,7 +54,8 @@ public class AuthResource {
 
     @POST
     @Path("/logout")
-    public ApiResponse<Void> logout() {
+    public ApiResponse<Void> logout(@QueryParam("token") String refreshToken) {
+        authService.logout(refreshToken);
         return ApiResponse.ok(null, "Logout realizado");
     }
 }
