@@ -21,9 +21,9 @@ public class AuthResource {
     @POST
     @Path("/register")
     public Response register(@Valid RegisterRequest req) {
-        RegisterResponse result = authService.register(req);
+        TokenResponse tokens = authService.register(req);
         return Response.status(Response.Status.CREATED)
-                .entity(ApiResponse.ok(result, result.message()))
+                .entity(ApiResponse.ok(tokens, "Conta criada com sucesso!"))
                 .build();
     }
 

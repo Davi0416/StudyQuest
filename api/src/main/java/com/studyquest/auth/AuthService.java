@@ -40,7 +40,7 @@ public class AuthService {
     @Inject RevokedTokenRepository revokedTokenRepository;
 
     @Transactional
-    public RegisterResponse register(RegisterRequest req) {
+    public TokenResponse register(RegisterRequest req) {
         if (!connectivityChecker.isOnline()) {
             throw new WebApplicationException(
                     "Registro requer conexão com a internet. Conecte-se e tente novamente.",
@@ -56,15 +56,14 @@ public class AuthService {
                 .email(req.email())
                 .passwordHash(BcryptUtil.bcryptHash(req.password()))
                 .avatarUrl(req.avatarUrl())
-                .emailVerified(false)
+                .emailVerified(true)
                 .build();
 
         userRepository.persist(user);
-        emailVerificationService.sendCode(user);
 
-        return new RegisterResponse(
-                user.getEmail(),
-                "Enviamos um código de 6 dígitos para o seu e-mail. Confirme para entrar na aventura.");
+        TokenResponse tokens = generateTokens(user);
+        cacheSession(user, tokens.refreshToken());
+        return tokens;
     }
 
     @Transactional
