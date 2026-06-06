@@ -38,6 +38,9 @@ export interface No {
   status: 'BLOQUEADO' | 'DISPONIVEL' | 'EM_PROGRESSO' | 'CONCLUIDO'
   temMissao: boolean
   aulaBlocos: AulaBloco[]
+  xpConcedido?: number
+  novoTotalXp?: number
+  novoStreak?: number
 }
 
 export type AulaBloco =
@@ -97,6 +100,13 @@ export interface LeitnerCardRevisao {
   frente: string
   verso: string
   caixa: number
+  proximaRevisao?: number
+  ultimaRevisao?: number
+}
+
+export interface RevisaoTodos {
+  total: number
+  porCaixa: Record<number, LeitnerCardRevisao[]>
 }
 
 export interface RevisaoHoje {

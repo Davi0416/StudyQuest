@@ -2,6 +2,7 @@ package com.studyquest.revisao;
 
 import com.studyquest.revisao.dto.ResponderRevisaoRequest;
 import com.studyquest.revisao.dto.RevisaoHojeResponse;
+import com.studyquest.revisao.dto.TodosCardsResponse;
 import com.studyquest.shared.response.ApiResponse;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -43,6 +44,12 @@ public class RevisaoResource {
     @Path("/stats")
     public ApiResponse<Map<Integer, Long>> stats() {
         return ApiResponse.ok(revisaoService.stats(userId()));
+    }
+
+    @GET
+    @Path("/todos")
+    public ApiResponse<TodosCardsResponse> todos() {
+        return ApiResponse.ok(revisaoService.todos(userId()));
     }
 
     private UUID userId() {

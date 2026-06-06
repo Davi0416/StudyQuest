@@ -5,12 +5,14 @@ import com.studyquest.flashcards.FlashcardRepository;
 import com.studyquest.offline.LeitnerCard;
 import com.studyquest.revisao.dto.ResponderRevisaoRequest;
 import com.studyquest.revisao.dto.RevisaoHojeResponse;
+import com.studyquest.revisao.dto.TodosCardsResponse;
 import com.studyquest.shared.db.LocalDb;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +21,8 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class RevisaoService {
 
-    private static final int[] INTERVALOS = {0, 1, 2, 4, 7, 14};
+    // índice = número da caixa (0 não usado); caixa 1=1d, 2=3d, 3=7d, 4=14d, 5=30d
+    private static final int[] INTERVALOS = {0, 1, 3, 7, 14, 30};
 
     @Inject
     LocalDb localDb;
@@ -28,30 +31,37 @@ public class RevisaoService {
     FlashcardRepository flashcardRepository;
 
     public RevisaoHojeResponse hoje(UUID userId) {
-        List<LeitnerCard> pendentes = localDb.read(em -> em.createQuery(
-                        "SELECT lc FROM LeitnerCard lc WHERE lc.userId = :uid AND lc.proximaRevisao <= :hoje",
-                        LeitnerCard.class)
-                .setParameter("uid", userId)
-                .setParameter("hoje", LocalDate.now())
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
+        long startOfTomorrow = LocalDate.now().plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = localDb.read(em -> (List<Object[]>) em.createNativeQuery(
+                        "SELECT id, flashcardId, caixa FROM leitner_cards " +
+                        "WHERE hex(userId) = :uid AND proximaRevisao < :startOfTomorrow")
+                .setParameter("uid", uidHex)
+                .setParameter("startOfTomorrow", startOfTomorrow)
                 .getResultList());
 
-        if (pendentes.isEmpty()) return new RevisaoHojeResponse(0, Map.of());
+        if (rows.isEmpty()) return new RevisaoHojeResponse(0, Map.of());
 
-        List<Long> flashcardIds = pendentes.stream().map(LeitnerCard::getFlashcardId).distinct().toList();
+        List<Long> flashcardIds = rows.stream().map(r -> ((Number) r[1]).longValue()).distinct().toList();
         Map<Long, Flashcard> flashcardsMap = flashcardRepository.list("id IN ?1", flashcardIds)
                 .stream().collect(Collectors.toMap(Flashcard::getId, f -> f));
 
-        Map<Integer, List<RevisaoHojeResponse.CardRevisao>> porCaixa = pendentes.stream()
-                .map(lc -> {
-                    Flashcard f = flashcardsMap.get(lc.getFlashcardId());
+        Map<Integer, List<RevisaoHojeResponse.CardRevisao>> porCaixa = rows.stream()
+                .map(r -> {
+                    Long leitnerCardId = ((Number) r[0]).longValue();
+                    Long flashcardId = ((Number) r[1]).longValue();
+                    int caixa = ((Number) r[2]).intValue();
+                    Flashcard f = flashcardsMap.get(flashcardId);
                     if (f == null) return null;
-                    return new RevisaoHojeResponse.CardRevisao(
-                            lc.getId(), f.getId(), f.getFrente(), f.getVerso(), lc.getCaixa());
+                    return new RevisaoHojeResponse.CardRevisao(leitnerCardId, f.getId(), f.getFrente(), f.getVerso(), caixa);
                 })
                 .filter(c -> c != null)
                 .collect(Collectors.groupingBy(RevisaoHojeResponse.CardRevisao::caixa));
 
-        return new RevisaoHojeResponse(pendentes.size(), porCaixa);
+        return new RevisaoHojeResponse(rows.size(), porCaixa);
     }
 
     public void responder(Long leitnerCardId, UUID userId, ResponderRevisaoRequest req) {
@@ -62,36 +72,78 @@ public class RevisaoService {
             }
 
             switch (req.resultado()) {
-                case "facil" -> lc.setCaixa(Math.min(5, lc.getCaixa() + 1));
+                case "facil"   -> lc.setCaixa(Math.min(5, lc.getCaixa() + 1));
+                case "ok"      -> { /* caixa não muda */ }
                 case "dificil" -> lc.setCaixa(1);
             }
 
             lc.setUltimaRevisao(LocalDate.now());
-            lc.setProximaRevisao(LocalDate.now().plusDays(INTERVALOS[lc.getCaixa()]));
+            int diasAteProxima = req.resultado().equals("dificil") ? 0 : INTERVALOS[lc.getCaixa()];
+            lc.setProximaRevisao(LocalDate.now().plusDays(diasAteProxima));
         });
     }
 
     public Map<Integer, Long> stats(UUID userId) {
-        List<Object[]> rows = localDb.read(em -> em.createQuery(
-                        "SELECT lc.caixa, COUNT(lc) FROM LeitnerCard lc WHERE lc.userId = :uid GROUP BY lc.caixa",
-                        Object[].class)
-                .setParameter("uid", userId)
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = localDb.read(em -> (List<Object[]>) em.createNativeQuery(
+                        "SELECT caixa, COUNT(*) FROM leitner_cards WHERE hex(userId) = :uid GROUP BY caixa")
+                .setParameter("uid", uidHex)
                 .getResultList());
 
         return rows.stream().collect(Collectors.toMap(
-                r -> (Integer) r[0],
-                r -> (Long) r[1]
+                r -> ((Number) r[0]).intValue(),
+                r -> ((Number) r[1]).longValue()
         ));
     }
 
+    public TodosCardsResponse todos(UUID userId) {
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
+        @SuppressWarnings("unchecked")
+        List<Object[]> rows = localDb.read(em -> (List<Object[]>) em.createNativeQuery(
+                        "SELECT id, flashcardId, caixa, proximaRevisao, ultimaRevisao FROM leitner_cards " +
+                        "WHERE hex(userId) = :uid ORDER BY caixa, proximaRevisao")
+                .setParameter("uid", uidHex)
+                .getResultList());
+
+        if (rows.isEmpty()) return new TodosCardsResponse(0, Map.of());
+
+        List<Long> flashcardIds = rows.stream().map(r -> ((Number) r[1]).longValue()).distinct().toList();
+        Map<Long, Flashcard> flashcardsMap = flashcardRepository.list("id IN ?1", flashcardIds)
+                .stream().collect(Collectors.toMap(Flashcard::getId, f -> f));
+
+        Map<Integer, List<TodosCardsResponse.CardDetalhe>> porCaixa = rows.stream()
+                .map(r -> {
+                    Long leitnerCardId = ((Number) r[0]).longValue();
+                    Long flashcardId   = ((Number) r[1]).longValue();
+                    int caixa          = ((Number) r[2]).intValue();
+                    long proxRevisao   = toEpochMillis(r[3]);
+                    long ultRevisao    = toEpochMillis(r[4]);
+                    Flashcard f = flashcardsMap.get(flashcardId);
+                    if (f == null) return null;
+                    return new TodosCardsResponse.CardDetalhe(leitnerCardId, f.getId(), f.getFrente(), f.getVerso(), caixa, proxRevisao, ultRevisao);
+                })
+                .filter(c -> c != null)
+                .collect(Collectors.groupingBy(TodosCardsResponse.CardDetalhe::caixa));
+
+        return new TodosCardsResponse(rows.size(), porCaixa);
+    }
+
+    private static long toEpochMillis(Object val) {
+        if (val == null) return 0L;
+        if (val instanceof Number n) return n.longValue();
+        if (val instanceof LocalDate ld) return ld.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return 0L;
+    }
+
     public void adicionarCard(UUID userId, Long flashcardId) {
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
         localDb.write(em -> {
-            Long count = em.createQuery(
-                            "SELECT COUNT(lc) FROM LeitnerCard lc WHERE lc.userId = :uid AND lc.flashcardId = :fid",
-                            Long.class)
-                    .setParameter("uid", userId)
+            Long count = ((Number) em.createNativeQuery(
+                            "SELECT COUNT(*) FROM leitner_cards WHERE hex(userId) = :uid AND flashcardId = :fid")
+                    .setParameter("uid", uidHex)
                     .setParameter("fid", flashcardId)
-                    .getSingleResult();
+                    .getSingleResult()).longValue();
 
             if (count == 0) {
                 em.persist(LeitnerCard.builder()

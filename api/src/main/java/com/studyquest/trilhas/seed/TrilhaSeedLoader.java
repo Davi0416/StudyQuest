@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyquest.flashcards.Flashcard;
 import com.studyquest.flashcards.FlashcardRepository;
+import com.studyquest.shared.db.LocalDb;
 import com.studyquest.missoes.Missao;
 import com.studyquest.missoes.MissaoRepository;
 import com.studyquest.nos.No;
@@ -50,6 +51,9 @@ public class TrilhaSeedLoader {
     ObjectMapper objectMapper;
 
     @Inject
+    LocalDb localDb;
+
+    @Inject
     EntityManager em;
 
     @Inject
@@ -57,6 +61,7 @@ public class TrilhaSeedLoader {
 
     void onStart(@Observes StartupEvent event) {
         self.get().syncFromJson();
+        limparLeitnerOrfaos();
     }
 
     /** Sincroniza JSON → banco na subida (sempre idempotente). */
@@ -69,6 +74,20 @@ public class TrilhaSeedLoader {
         } catch (IOException e) {
             throw new IllegalStateException("Falha ao carregar trilhas do JSON", e);
         }
+    }
+
+    private void limparLeitnerOrfaos() {
+        List<Long> idsValidos = flashcardRepository.findAll().list()
+                .stream().map(Flashcard::getId).toList();
+        if (idsValidos.isEmpty()) return;
+        String inClause = idsValidos.stream().map(Object::toString)
+                .collect(java.util.stream.Collectors.joining(","));
+        localDb.write(em -> {
+            int deleted = em.createNativeQuery(
+                    "DELETE FROM leitner_cards WHERE flashcardId NOT IN (" + inClause + ")")
+                    .executeUpdate();
+            if (deleted > 0) LOG.infof("Removidos %d leitner_cards orfaos", deleted);
+        });
     }
 
     /** Garante catálogo completo antes de listar (ex.: hot reload sem StartupEvent). */
@@ -167,15 +186,28 @@ public class TrilhaSeedLoader {
                 no.setAulaJson(aulaJson);
             }
 
-            flashcardRepository.find("noId", no.getId()).list().forEach(flashcardRepository::delete);
+            // Upsert: preserva IDs existentes para não quebrar leitner_cards
+            List<Flashcard> existingFcs = flashcardRepository.find("noId", no.getId()).list();
+            Map<String, Flashcard> existingByFrente = existingFcs.stream()
+                    .collect(java.util.stream.Collectors.toMap(Flashcard::getFrente, f -> f, (a, b) -> a));
+            Set<String> jsonFrentes = noDto.flashcards() != null
+                    ? noDto.flashcards().stream().map(FlashcardSeedDto::frente).collect(java.util.stream.Collectors.toSet())
+                    : java.util.Set.of();
+            existingFcs.stream().filter(f -> !jsonFrentes.contains(f.getFrente()))
+                    .forEach(flashcardRepository::delete);
             if (noDto.flashcards() != null) {
                 for (FlashcardSeedDto fc : noDto.flashcards()) {
-                    flashcardRepository.persist(Flashcard.builder()
-                            .trilhaId(trilha.getId())
-                            .noId(no.getId())
-                            .frente(fc.frente())
-                            .verso(fc.verso())
-                            .build());
+                    Flashcard existing = existingByFrente.get(fc.frente());
+                    if (existing == null) {
+                        flashcardRepository.persist(Flashcard.builder()
+                                .trilhaId(trilha.getId())
+                                .noId(no.getId())
+                                .frente(fc.frente())
+                                .verso(fc.verso())
+                                .build());
+                    } else {
+                        existing.setVerso(fc.verso());
+                    }
                 }
             }
 
