@@ -8,7 +8,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "ranking_semanal",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "semana"}))
+        uniqueConstraints = @UniqueConstraint(name = "uc_ranking_user_semana", columnNames = {"userId", "semana"}),
+        indexes = @Index(name = "idx_ranking_semana_xp", columnList = "semana, xpSemana"))
 @Getter
 @Setter
 @NoArgsConstructor
