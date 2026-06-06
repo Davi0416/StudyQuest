@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol, net, dialog, ipcMain } = require('electron')
+const { app, BrowserWindow, protocol, net, dialog, ipcMain, session } = require('electron')
 const path = require('path')
 const { spawn } = require('child_process')
 const fs = require('fs')
@@ -307,6 +307,18 @@ app.isQuitting = false
 app.whenReady().then(async () => {
   API_PORT = await getFreePort()
   API_HEALTH = `http://127.0.0.1:${API_PORT}/q/health/live`
+
+  // Corrige erro 153 do YouTube: substitui Origin app:// por uma origem HTTPS válida
+  // antes de cada requisição ao YouTube/nocookie, para que o player aceite o embed.
+  session.defaultSession.webRequest.onBeforeSendHeaders(
+    { urls: ['*://*.youtube-nocookie.com/*', '*://*.youtube.com/*', '*://*.ytimg.com/*', '*://*.googlevideo.com/*'] },
+    (details, callback) => {
+      const headers = { ...details.requestHeaders }
+      headers['Origin'] = 'https://www.youtube-nocookie.com'
+      headers['Referer'] = 'https://www.youtube-nocookie.com/'
+      callback({ requestHeaders: headers })
+    }
+  )
 
   registerAppProtocol()
   startBackend()
