@@ -1,4 +1,4 @@
-const { app, BrowserWindow, protocol, net, dialog } = require('electron')
+const { app, BrowserWindow, protocol, net, dialog, ipcMain } = require('electron')
 const path = require('path')
 const { spawn } = require('child_process')
 const fs = require('fs')
@@ -65,6 +65,7 @@ function getFreePort() {
 }
 
 let backendProcess = null
+let mainWindow = null
 
 function ensureDataDir() {
   const dataDir = path.join(app.getPath('userData'), 'data')
@@ -212,8 +213,67 @@ function registerAppProtocol() {
   })
 }
 
+// ─── Auto Updater ────────────────────────────────────────────────────────────
+
+function setupAutoUpdater() {
+  // Não verificar atualizações em desenvolvimento — o app não está empacotado
+  if (isDev) return
+
+  const { autoUpdater } = require('electron-updater')
+
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = false
+
+  autoUpdater.on('update-available', async (info) => {
+    // Tenta buscar o body do release no GitHub para verificar [CRITICAL]
+    let releaseNotes = ''
+    let critical = false
+
+    try {
+      const response = await net.fetch(
+        `https://api.github.com/repos/Davi0416/StudyQuest/releases/tags/v${info.version}`,
+        { headers: { 'User-Agent': 'StudyQuest-Updater/1.0' } }
+      )
+      if (response.ok) {
+        const data = await response.json()
+        releaseNotes = data.body || ''
+        critical = /\[critical\]/i.test(releaseNotes)
+      }
+    } catch (_) {
+      // Fallback: usa releaseNotes do próprio evento (pode ser string ou array)
+      const raw = info.releaseNotes
+      releaseNotes = typeof raw === 'string'
+        ? raw
+        : Array.isArray(raw) ? raw.map(r => r.note || '').join('\n') : ''
+      critical = /\[critical\]/i.test(releaseNotes)
+    }
+
+    // Remove a tag interna antes de exibir ao usuário
+    releaseNotes = releaseNotes.replace(/\[critical\]\s*/gi, '').trim()
+
+    mainWindow?.webContents.send('update-available', {
+      version: info.version,
+      critical,
+      releaseNotes,
+    })
+  })
+
+  autoUpdater.on('update-downloaded', () => {
+    mainWindow?.webContents.send('update-ready')
+  })
+
+  ipcMain.on('install-update', () => {
+    autoUpdater.quitAndInstall(false, false)
+  })
+
+  // Verifica silenciosamente — erros (sem internet, sem release) são ignorados
+  autoUpdater.checkForUpdates().catch(() => {})
+}
+
+// ─── Window ───────────────────────────────────────────────────────────────────
+
 function createWindow(splash) {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 900,
@@ -229,16 +289,17 @@ function createWindow(splash) {
     },
   })
 
-  win.loadURL(`app://local/index.html?apiPort=${API_PORT}`)
+  mainWindow.loadURL(`app://local/index.html?apiPort=${API_PORT}`)
 
-  win.once('ready-to-show', () => {
+  mainWindow.once('ready-to-show', () => {
     if (splash && !splash.isDestroyed()) {
       splash.close()
     }
-    win.show()
+    mainWindow.show()
+    setupAutoUpdater()
   })
 
-  if (isDev) win.webContents.openDevTools({ mode: 'detach' })
+  if (isDev) mainWindow.webContents.openDevTools({ mode: 'detach' })
 }
 
 app.isQuitting = false
@@ -250,7 +311,7 @@ app.whenReady().then(async () => {
   registerAppProtocol()
   startBackend()
 
-  const iconBase64 = fs.existsSync(path.join(__dirname, 'icons', 'icon.png')) 
+  const iconBase64 = fs.existsSync(path.join(__dirname, 'icons', 'icon.png'))
     ? fs.readFileSync(path.join(__dirname, 'icons', 'icon.png')).toString('base64')
     : '';
   const imgSrc = iconBase64 ? `data:image/png;base64,${iconBase64}` : '';
