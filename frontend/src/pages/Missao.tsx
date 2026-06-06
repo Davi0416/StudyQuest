@@ -3,14 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 import { Topbar } from '../components/Topbar';
 import api, { unwrap } from '../lib/api';
-import type {  Missao as MissaoType  } from "../types";
+import type {  Missao as MissaoType, No  } from "../types";
 import Editor from '@monaco-editor/react';
 import { Button } from '../components/ui/Button';
 
 export function Missao() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addXp } = useUser();
+  const { addXp, setUser } = useUser();
   
   const [missao, setMissao] = useState<MissaoType | null>(null);
   const [codigo, setCodigo] = useState('');
@@ -45,7 +45,11 @@ export function Missao() {
           addXp(missao.xpRecompensa);
         }
         try {
-          await api.post(`/nos/${missao.noId}/concluir`);
+          const concluirRes = await api.post(`/nos/${missao.noId}/concluir`);
+          const concluido = unwrap(concluirRes) as No;
+          if (concluido.novoTotalXp !== undefined && concluido.novoStreak !== undefined) {
+            setUser(prev => prev ? { ...prev, totalXp: concluido.novoTotalXp!, currentStreak: concluido.novoStreak! } : prev);
+          }
         } catch (err) {
           console.error('Failed to complete node after mission', err);
         }

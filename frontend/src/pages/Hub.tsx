@@ -20,25 +20,28 @@ export function Hub() {
   const [conquistas, setConquistas] = useState<Conquista[]>([]);
   // TODO: endpoint pendente para estatísticas gerais (missões, flashcards dominados, xp hoje, etc)
   const [stats, setStats] = useState<any>(null);
+  const [leitnerStats, setLeitnerStats] = useState<Record<number, number>>({});
   const [activeNos, setActiveNos] = useState<No[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [trilhasRes, revRes, rankRes, conqRes, allTrilhasRes] = await Promise.all([
+        const [trilhasRes, revRes, rankRes, conqRes, allTrilhasRes, leitnerRes] = await Promise.all([
           api.get('/trilhas/ativas'),
           api.get('/revisao/hoje'),
           api.get('/gamificacao/ranking/semanal'),
           api.get('/gamificacao/conquistas'),
           api.get('/trilhas'),
+          api.get('/revisao/stats'),
         ]);
-        
+
         setTrilhas(unwrap(trilhasRes));
         setCatalogo(unwrap(allTrilhasRes));
         setRevisao(unwrap(revRes));
         setRanking(unwrap(rankRes));
         setConquistas(unwrap(conqRes).slice(0, 4)); // Get latest 4
+        setLeitnerStats(unwrap(leitnerRes) ?? {});
 
         // TODO: endpoint pendente para /users/me/stats
         try {
@@ -265,7 +268,7 @@ export function Hub() {
                   <div key={caixa} className="border border-border rounded-md p-4 bg-surface-2 relative overflow-hidden transition-all hover:-translate-y-1 hover:border-gold/50">
                     <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${caixa === 1 ? 'bg-red' : caixa === 2 ? 'bg-gold' : 'bg-green'}`} />
                     <div className="text-[11px] uppercase tracking-wide text-text-mute font-semibold">Caixa {caixa}</div>
-                    <div className="font-cinzel font-bold text-[28px] my-1">{revisao?.porCaixa?.[caixa]?.length || 0}</div>
+                    <div className="font-cinzel font-bold text-[28px] my-1">{leitnerStats[caixa] || 0}</div>
                     <div className="text-xs text-text-dim">{caixa === 1 ? 'revisão diária' : caixa === 2 ? 'a cada 3 dias' : 'a cada 7 dias'}</div>
                   </div>
                 ))}

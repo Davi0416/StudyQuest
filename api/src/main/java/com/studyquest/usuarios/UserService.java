@@ -1,7 +1,5 @@
 package com.studyquest.usuarios;
 
-import com.studyquest.missoes.SubmissaoRepository;
-import com.studyquest.missoes.MissaoRepository;
 import com.studyquest.nos.NoRepository;
 import com.studyquest.shared.db.LocalDb;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
@@ -16,6 +14,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
+import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,8 +26,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    @Inject SubmissaoRepository submissaoRepository;
-    @Inject MissaoRepository missaoRepository;
     @Inject NoRepository noRepository;
     @Inject LocalDb localDb;
 
@@ -87,37 +84,51 @@ public class UserService {
         LocalDateTime inicioDia = hoje.atStartOfDay();
         LocalDateTime inicioSemana = hoje.with(DayOfWeek.MONDAY).atStartOfDay();
 
-        // Missões concluídas (datasource principal)
-        long missoesConcluidas = submissaoRepository.countConcluidas(userId);
-        long missoesConcluidasSemana = submissaoRepository.countConcluidasDesde(userId, inicioSemana);
-        long totalMissoes = missaoRepository.count();
-        long missoesPendentes = Math.max(0, totalMissoes - missoesConcluidas);
+        // UUID armazenado como BLOB no SQLite — hex() garante comparação correta
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
+
+        // Nós concluídos (SQLite local) — métrica principal de progresso
+        long missoesConcluidas = ((Number) localDb.read(em ->
+            em.createNativeQuery("SELECT COUNT(*) FROM user_nos WHERE hex(userId) = :uidHex AND status = 'CONCLUIDO'")
+            .setParameter("uidHex", uidHex)
+            .getSingleResult())).longValue();
+
+        long missoesConcluidasSemana = ((Number) localDb.read(em ->
+            em.createNativeQuery("SELECT COUNT(*) FROM user_nos WHERE hex(userId) = :uidHex AND status = 'CONCLUIDO' AND concluidoEm >= :inicio")
+            .setParameter("uidHex", uidHex)
+            .setParameter("inicio", Timestamp.valueOf(inicioSemana))
+            .getSingleResult())).longValue();
+
+        long totalNos = noRepository.count();
+        long missoesPendentes = Math.max(0, totalNos - missoesConcluidas);
 
         // Flashcards dominados (caixa 5 no Leitner — SQLite local)
-        long flashcardsDominados = localDb.read(em ->
-            em.createQuery("SELECT COUNT(l) FROM LeitnerCard l WHERE l.userId = :uid AND l.caixa = 5", Long.class)
-            .setParameter("uid", userId)
-            .getSingleResult());
+        long flashcardsDominados = ((Number) localDb.read(em ->
+            em.createNativeQuery("SELECT COUNT(*) FROM leitner_cards WHERE hex(userId) = :uidHex AND caixa = 5")
+            .setParameter("uidHex", uidHex)
+            .getSingleResult())).longValue();
 
-        long flashcardsDominadosHoje = localDb.read(em ->
-            em.createQuery("SELECT COUNT(l) FROM LeitnerCard l WHERE l.userId = :uid AND l.caixa = 5 AND l.ultimaRevisao = :hoje", Long.class)
-            .setParameter("uid", userId)
-            .setParameter("hoje", hoje)
-            .getSingleResult());
+        long flashcardsDominadosHoje = ((Number) localDb.read(em ->
+            em.createNativeQuery("SELECT COUNT(*) FROM leitner_cards WHERE hex(userId) = :uidHex AND caixa = 5 AND ultimaRevisao = :hoje")
+            .setParameter("uidHex", uidHex)
+            .setParameter("hoje", hoje.toString())
+            .getSingleResult())).longValue();
 
         // XP hoje: nós concluídos hoje no SQLite local → busca xpRecompensa no datasource principal
         int xpHoje = 0;
         try {
-            List<Long> nosHoje = localDb.read(em ->
-                em.createQuery("SELECT un.noId FROM UserNo un WHERE un.userId = :uid AND un.status = 'CONCLUIDO' AND un.concluidoEm >= :inicio", Long.class)
-                .setParameter("uid", userId)
-                .setParameter("inicio", inicioDia)
+            @SuppressWarnings("unchecked")
+            List<Object> nosHoje = (List<Object>) localDb.read(em ->
+                em.createNativeQuery("SELECT noId FROM user_nos WHERE hex(userId) = :uidHex AND status = 'CONCLUIDO' AND concluidoEm >= :inicio")
+                .setParameter("uidHex", uidHex)
+                .setParameter("inicio", Timestamp.valueOf(inicioDia))
                 .getResultList());
 
             if (!nosHoje.isEmpty()) {
+                List<Long> noIds = nosHoje.stream().map(o -> ((Number) o).longValue()).toList();
                 Long xp = noRepository.getEntityManager()
                     .createQuery("SELECT SUM(n.xpRecompensa) FROM No n WHERE n.id IN :ids", Long.class)
-                    .setParameter("ids", nosHoje)
+                    .setParameter("ids", noIds)
                     .getSingleResult();
                 xpHoje = xp != null ? xp.intValue() : 0;
             }

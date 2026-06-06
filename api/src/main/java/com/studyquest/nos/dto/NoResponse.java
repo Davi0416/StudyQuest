@@ -18,7 +18,10 @@ public record NoResponse(
         List<Long> prerequisitoIds,
         String status,
         boolean temMissao,
-        List<Map<String, Object>> aulaBlocos
+        List<Map<String, Object>> aulaBlocos,
+        Integer xpConcedido,  // preenchido apenas no response de concluir()
+        Integer novoTotalXp,  // preenchido apenas no response de concluir()
+        Integer novoStreak    // preenchido apenas no response de concluir()
 ) {
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -33,7 +36,25 @@ public record NoResponse(
                 no.getPrerequisitos().stream().map(No::getId).toList(),
                 status,
                 temMissao,
-                parseAula(no.getAulaJson())
+                parseAula(no.getAulaJson()),
+                null, null, null
+        );
+    }
+
+    public static NoResponse ofConcluido(No no, boolean temMissao,
+                                         int xpConcedido, int novoTotalXp, int novoStreak) {
+        return new NoResponse(
+                no.getId(),
+                no.getTitulo(),
+                no.getConteudo(),
+                no.getTrilhaId(),
+                no.getOrdem(),
+                no.getXpRecompensa(),
+                no.getPrerequisitos().stream().map(No::getId).toList(),
+                "CONCLUIDO",
+                temMissao,
+                parseAula(no.getAulaJson()),
+                xpConcedido, novoTotalXp, novoStreak
         );
     }
 

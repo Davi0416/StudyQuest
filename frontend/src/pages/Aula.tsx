@@ -148,7 +148,7 @@ function tituloPasso(bloco: AulaBloco): string {
 export function Aula() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addXp } = useUser();
+  const { addXp, setUser } = useUser();
 
   const [no, setNo] = useState<No | null>(null);
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
@@ -261,7 +261,11 @@ export function Aula() {
       const updated = unwrap(res) as No;
       setNo(updated);
       setConcluido(true);
-      addXp(no.xpRecompensa);
+      if (updated.novoTotalXp !== undefined && updated.novoStreak !== undefined) {
+        setUser(prev => prev ? { ...prev, totalXp: updated.novoTotalXp!, currentStreak: updated.novoStreak! } : prev);
+      } else {
+        addXp(no.xpRecompensa);
+      }
     } catch (err: any) {
       alert(err.response?.data?.message || 'Erro ao concluir aula');
     } finally {

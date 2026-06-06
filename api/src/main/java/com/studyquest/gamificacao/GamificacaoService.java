@@ -12,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -31,6 +32,7 @@ import java.util.stream.IntStream;
 @ApplicationScoped
 public class GamificacaoService {
 
+    private static final Logger LOG = Logger.getLogger(GamificacaoService.class);
     private static final int XP_POR_NIVEL = 500;
 
     @Inject UserRepository userRepository;
@@ -86,39 +88,44 @@ public class GamificacaoService {
     }
 
     private void atualizarRankingSemanal(User user, int xp) {
-        LocalDate semana = LocalDate.now().with(DayOfWeek.MONDAY);
-        Optional<RankingEntry> entry = rankingRepository.findByUserAndSemana(user.getId(), semana);
-
-        int novoTotal;
-        if (entry.isPresent()) {
-            novoTotal = entry.get().getXpSemana() + xp;
-            entry.get().setXpSemana(novoTotal);
-        } else {
-            novoTotal = xp;
-            rankingRepository.persist(RankingEntry.builder()
+        try {
+            LocalDate semana = LocalDate.now().with(DayOfWeek.MONDAY);
+            Optional<RankingEntry> existing = rankingRepository.findByUserAndSemana(user.getId(), semana);
+            int novoTotal;
+            if (existing.isPresent()) {
+                RankingEntry e = existing.get();
+                e.setXpSemana(e.getXpSemana() + xp);
+                e.setUserName(user.getName());
+                e.setUserAvatarUrl(user.getAvatarUrl());
+                novoTotal = e.getXpSemana();
+            } else {
+                rankingRepository.persist(RankingEntry.builder()
                     .userId(user.getId())
                     .userName(user.getName())
                     .userAvatarUrl(user.getAvatarUrl())
-                    .xpSemana(novoTotal)
+                    .xpSemana(xp)
                     .semana(semana)
                     .build());
+                novoTotal = xp;
+            }
+            sincronizarXpNeon(user, semana, novoTotal, user.getTotalXp());
+        } catch (Exception e) {
+            LOG.warnf(e, "Falha ao atualizar ranking semanal para userId=%s", user.getId());
         }
-
-        // Sincroniza o total semanal do usuário para o Neon (ranking global)
-        sincronizarXpNeon(user, semana, novoTotal);
     }
 
     /**
      * Faz upsert do XP semanal do usuário no Neon PostgreSQL para que apareça
      * no ranking global visto por todos os usuários desktop.
      */
-    private void sincronizarXpNeon(User user, LocalDate semana, int xpTotal) {
+    private void sincronizarXpNeon(User user, LocalDate semana, int xpSemana, int xpTotal) {
         if (neonRankingUrl.isBlank()) return;
         String sql = """
-                INSERT INTO ranking_semanal (userid, username, useravatarurl, xpsemana, semana)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO ranking_semanal (userid, username, useravatarurl, xpsemana, semana, xptotal)
+                VALUES (?, ?, ?, ?, ?, ?)
                 ON CONFLICT (userid, semana)
                 DO UPDATE SET xpsemana = EXCLUDED.xpsemana,
+                              xptotal = EXCLUDED.xptotal,
                               username = EXCLUDED.username,
                               useravatarurl = EXCLUDED.useravatarurl
                 """;
@@ -127,8 +134,9 @@ public class GamificacaoService {
             ps.setObject(1, user.getId());
             ps.setString(2, user.getName());
             ps.setString(3, user.getAvatarUrl());
-            ps.setInt(4, xpTotal);
+            ps.setInt(4, xpSemana);
             ps.setObject(5, semana);
+            ps.setInt(6, xpTotal);
             ps.setQueryTimeout(5);
             ps.executeUpdate();
         } catch (Exception ignored) {
@@ -245,8 +253,7 @@ public class GamificacaoService {
             RankingEntry e = local.get();
             User user = userRepository.findById(userId);
             if (user == null) return;
-
-            sincronizarXpNeon(user, semana, e.getXpSemana());
+            sincronizarXpNeon(user, semana, e.getXpSemana(), user.getTotalXp());
         } catch (Exception ignored) {}
     }
 

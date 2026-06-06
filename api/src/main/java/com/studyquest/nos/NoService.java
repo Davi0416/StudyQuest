@@ -1,6 +1,7 @@
 package com.studyquest.nos;
 
 import com.studyquest.flashcards.FlashcardRepository;
+import com.studyquest.gamificacao.GamificacaoService;
 import com.studyquest.missoes.MissaoRepository;
 import com.studyquest.offline.UserNo;
 import com.studyquest.nos.dto.NoResponse;
@@ -9,9 +10,12 @@ import com.studyquest.shared.db.LocalDb;
 import com.studyquest.shared.exception.NoBloqueadoException;
 import com.studyquest.shared.exception.RecursoNaoEncontradoException;
 import com.studyquest.shared.sync.SyncService;
+import com.studyquest.usuarios.User;
+import com.studyquest.usuarios.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import org.jboss.logging.Logger;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +25,8 @@ import java.util.UUID;
 
 @ApplicationScoped
 public class NoService {
+
+    private static final Logger LOG = Logger.getLogger(NoService.class);
 
     @Inject
     NoRepository noRepository;
@@ -39,6 +45,12 @@ public class NoService {
 
     @Inject
     SyncService syncService;
+
+    @Inject
+    GamificacaoService gamificacaoService;
+
+    @Inject
+    UserRepository userRepository;
 
     public List<NoResponse> listarPorTrilha(Long trilhaId, UUID userId) {
         return noRepository.findByTrilha(trilhaId).stream()
@@ -89,10 +101,12 @@ public class NoService {
             userNo.setStatus("CONCLUIDO");
             userNo.setConcluidoEm(LocalDateTime.now());
 
-            java.util.List<com.studyquest.offline.UserTrilha> uts = em.createQuery(
-                    "SELECT ut FROM UserTrilha ut WHERE ut.userId = :uid AND ut.trilhaId = :tid",
+            String uidHexC = userId.toString().replace("-", "").toUpperCase();
+            @SuppressWarnings("unchecked")
+            java.util.List<com.studyquest.offline.UserTrilha> uts = em.createNativeQuery(
+                    "SELECT * FROM user_trilhas WHERE hex(userId) = :uid AND trilhaId = :tid",
                     com.studyquest.offline.UserTrilha.class)
-                .setParameter("uid", userId)
+                .setParameter("uid", uidHexC)
                 .setParameter("tid", no.getTrilhaId())
                 .setMaxResults(1)
                 .getResultList();
@@ -103,6 +117,15 @@ public class NoService {
             }
         });
 
+        // Concede XP, atualiza streak e ranking imediatamente (datasource PostgreSQL).
+        // Envolto em try/catch: se o XP falhar (ex: DB indisponível), o nó permanece
+        // CONCLUIDO no SQLite e o endpoint não retorna 500 para o frontend.
+        try {
+            gamificacaoService.concederXp(userId, no.getXpRecompensa());
+        } catch (Exception e) {
+            LOG.errorf(e, "Falha ao conceder XP para userId=%s noId=%d", userId, noId);
+        }
+
         syncService.enqueue(userId, "NODE_COMPLETED", Map.of(
                 "noId", noId,
                 "xp", no.getXpRecompensa()
@@ -112,7 +135,11 @@ public class NoService {
                 revisaoService.adicionarCard(userId, f.getId())
         );
 
-        return NoResponse.of(no, "CONCLUIDO", temMissao(noId));
+        User updatedUser = userRepository.findById(userId);
+        int novoTotalXp = updatedUser != null ? updatedUser.getTotalXp() : 0;
+        int novoStreak  = updatedUser != null ? updatedUser.getCurrentStreak() : 0;
+
+        return NoResponse.ofConcluido(no, temMissao(noId), no.getXpRecompensa(), novoTotalXp, novoStreak);
     }
 
     private boolean temMissao(Long noId) {
@@ -153,14 +180,16 @@ public class NoService {
         return localDb.read(em -> findUserNo(em, userId, noId));
     }
 
+    @SuppressWarnings("unchecked")
     private Optional<UserNo> findUserNo(EntityManager em, UUID userId, Long noId) {
-        return em.createQuery(
-                        "SELECT un FROM UserNo un WHERE un.userId = :uid AND un.noId = :nid",
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
+        List<UserNo> results = (List<UserNo>) em.createNativeQuery(
+                        "SELECT * FROM user_nos WHERE hex(userId) = :uid AND noId = :nid",
                         UserNo.class)
-                .setParameter("uid", userId)
+                .setParameter("uid", uidHex)
                 .setParameter("nid", noId)
                 .setMaxResults(1)
-                .getResultStream()
-                .findFirst();
+                .getResultList();
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
 }

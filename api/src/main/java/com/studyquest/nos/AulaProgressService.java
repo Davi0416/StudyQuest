@@ -33,12 +33,14 @@ public class AulaProgressService {
                     .map(UserAulaProgress::getPassoAtual)
                     .orElse(0);
 
-            List<ExercicioProgressoDto> exercicios = em.createQuery(
-                            "SELECT ep FROM UserExercicioProgress ep WHERE ep.userId = :uid AND ep.noId = :nid",
+            String uidHexR = userId.toString().replace("-", "").toUpperCase();
+            @SuppressWarnings("unchecked")
+            List<ExercicioProgressoDto> exercicios = ((List<UserExercicioProgress>) em.createNativeQuery(
+                            "SELECT * FROM user_exercicio_progress WHERE hex(userId) = :uid AND noId = :nid",
                             UserExercicioProgress.class)
-                    .setParameter("uid", userId)
+                    .setParameter("uid", uidHexR)
                     .setParameter("nid", noId)
-                    .getResultStream()
+                    .getResultList()).stream()
                     .map(ep -> new ExercicioProgressoDto(ep.getExercicioId(), ep.getCodigo(), ep.getAprovado()))
                     .toList();
 
@@ -94,24 +96,30 @@ public class AulaProgressService {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Optional<UserAulaProgress> findAulaProgress(EntityManager em, UUID userId, Long noId) {
-        return em.createQuery(
-                        "SELECT p FROM UserAulaProgress p WHERE p.userId = :uid AND p.noId = :nid",
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
+        List<UserAulaProgress> r = (List<UserAulaProgress>) em.createNativeQuery(
+                        "SELECT * FROM user_aula_progress WHERE hex(userId) = :uid AND noId = :nid",
                         UserAulaProgress.class)
-                .setParameter("uid", userId)
+                .setParameter("uid", uidHex)
                 .setParameter("nid", noId)
-                .getResultStream()
-                .findFirst();
+                .setMaxResults(1)
+                .getResultList();
+        return r.isEmpty() ? Optional.empty() : Optional.of(r.get(0));
     }
 
+    @SuppressWarnings("unchecked")
     private Optional<UserExercicioProgress> findExercicioProgress(EntityManager em, UUID userId, Long noId, String exercicioId) {
-        return em.createQuery(
-                        "SELECT ep FROM UserExercicioProgress ep WHERE ep.userId = :uid AND ep.noId = :nid AND ep.exercicioId = :eid",
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
+        List<UserExercicioProgress> r = (List<UserExercicioProgress>) em.createNativeQuery(
+                        "SELECT * FROM user_exercicio_progress WHERE hex(userId) = :uid AND noId = :nid AND exercicioId = :eid",
                         UserExercicioProgress.class)
-                .setParameter("uid", userId)
+                .setParameter("uid", uidHex)
                 .setParameter("nid", noId)
                 .setParameter("eid", exercicioId)
-                .getResultStream()
-                .findFirst();
+                .setMaxResults(1)
+                .getResultList();
+        return r.isEmpty() ? Optional.empty() : Optional.of(r.get(0));
     }
 }

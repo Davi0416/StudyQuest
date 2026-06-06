@@ -52,9 +52,11 @@ public class TrilhaService {
 
     public List<TrilhaResponse> ativas(UUID userId) {
         trilhaSeedLoader.ensureSeeded();
+        String uidHex1 = userId.toString().replace("-", "").toUpperCase();
+        @SuppressWarnings("unchecked")
         List<UserTrilha> userTrilhas = localDb.read(em ->
-                em.createQuery("SELECT ut FROM UserTrilha ut WHERE ut.userId = :uid", UserTrilha.class)
-                        .setParameter("uid", userId)
+                (List<UserTrilha>) em.createNativeQuery("SELECT * FROM user_trilhas WHERE hex(userId) = :uid", UserTrilha.class)
+                        .setParameter("uid", uidHex1)
                         .getResultList()
         );
 
@@ -84,13 +86,14 @@ public class TrilhaService {
                     if (!noIds.isEmpty()) {
                         // Etapa 2: conta e soma XP dos nós concluídos no SQLite local
                         List<Long> noIdsCopy = noIds; // efetivamente final para lambda
+                        String uidHex2 = userId.toString().replace("-", "").toUpperCase();
+                        String inClause = noIdsCopy.stream().map(Object::toString).collect(java.util.stream.Collectors.joining(","));
+                        @SuppressWarnings("unchecked")
                         List<Long> concluidosIds = localDb.read(em ->
-                            em.createQuery(
-                                "SELECT un.noId FROM UserNo un WHERE un.userId = :uid AND un.noId IN :noIds AND un.status = 'CONCLUIDO'",
-                                Long.class)
-                            .setParameter("uid", userId)
-                            .setParameter("noIds", noIdsCopy)
-                            .getResultList()
+                            ((List<Object>) em.createNativeQuery(
+                                "SELECT noId FROM user_nos WHERE hex(userId) = :uid AND noId IN (" + inClause + ") AND status = 'CONCLUIDO'")
+                            .setParameter("uid", uidHex2)
+                            .getResultList()).stream().map(o -> ((Number)o).longValue()).collect(java.util.stream.Collectors.toList())
                         );
 
                         nosConcluidosCount = concluidosIds.size();
@@ -143,13 +146,16 @@ public class TrilhaService {
         return localDb.read(em -> findUserTrilha(em, userId, trilhaId));
     }
 
+    @SuppressWarnings("unchecked")
     private Optional<UserTrilha> findUserTrilha(EntityManager em, UUID userId, Long trilhaId) {
-        return em.createQuery(
-                        "SELECT ut FROM UserTrilha ut WHERE ut.userId = :uid AND ut.trilhaId = :tid",
+        String uidHex = userId.toString().replace("-", "").toUpperCase();
+        List<UserTrilha> results = (List<UserTrilha>) em.createNativeQuery(
+                        "SELECT * FROM user_trilhas WHERE hex(userId) = :uid AND trilhaId = :tid",
                         UserTrilha.class)
-                .setParameter("uid", userId)
+                .setParameter("uid", uidHex)
                 .setParameter("tid", trilhaId)
-                .getResultStream()
-                .findFirst();
+                .setMaxResults(1)
+                .getResultList();
+        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
     }
 }
