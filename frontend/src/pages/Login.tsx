@@ -22,6 +22,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [keepLoggedIn, setKeepLoggedIn] = useState(true);
 
   const { user, setUser } = useUser();
   const navigate = useNavigate();
@@ -290,9 +291,12 @@ export function Login() {
                 {mode === 'login' ? (
                   <div className="flex items-center justify-between mt-[-4px] mb-5">
                     <label className="flex items-center gap-2 text-[13px] text-text-dim cursor-pointer select-none">
-                      <input type="checkbox" className="hidden peer" defaultChecked />
-                      <div className="w-[18px] h-[18px] rounded-[5px] border border-border bg-surface-2 peer-checked:bg-gold peer-checked:border-gold text-[#1a1206] grid place-items-center transition-colors">
-                        <IconCheck size={12} className="opacity-0 peer-checked:opacity-100 transition-opacity" />
+                      <input type="checkbox" className="hidden" checked={keepLoggedIn} onChange={e => setKeepLoggedIn(e.target.checked)} />
+                      <div
+                        className={`w-[18px] h-[18px] rounded-[5px] border grid place-items-center transition-colors ${keepLoggedIn ? 'bg-gold border-gold text-[#1a1206]' : 'bg-surface-2 border-border text-transparent'}`}
+                        onClick={() => setKeepLoggedIn(v => !v)}
+                      >
+                        <IconCheck size={12} />
                       </div>
                       Manter conectado
                     </label>
