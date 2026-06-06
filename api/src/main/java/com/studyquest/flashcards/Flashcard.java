@@ -7,7 +7,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "flashcards")
+@Table(name = "flashcards",
+        indexes = {
+                @Index(name = "idx_flashcards_no", columnList = "noId"),
+                @Index(name = "idx_flashcards_trilha", columnList = "trilhaId")
+        })
 @Getter
 @Setter
 @NoArgsConstructor
