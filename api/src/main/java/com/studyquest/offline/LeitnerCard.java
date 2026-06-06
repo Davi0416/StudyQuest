@@ -7,7 +7,9 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "leitner_cards")
+@Table(name = "leitner_cards",
+        uniqueConstraints = @UniqueConstraint(name = "uc_leitner_user_flashcard", columnNames = {"userId", "flashcardId"}),
+        indexes = @Index(name = "idx_leitner_user_proxima", columnList = "userId, proximaRevisao"))
 @Getter
 @Setter
 @NoArgsConstructor
