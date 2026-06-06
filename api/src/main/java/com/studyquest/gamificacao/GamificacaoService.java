@@ -11,7 +11,12 @@ import com.studyquest.usuarios.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -35,6 +40,15 @@ public class GamificacaoService {
     @Inject SyncService syncService;
     @Inject LocalDb localDb;
     @Inject ObjectMapper objectMapper;
+
+    @ConfigProperty(name = "studyquest.neon.ranking.url", defaultValue = "")
+    String neonRankingUrl;
+
+    @ConfigProperty(name = "studyquest.neon.ranking.user", defaultValue = "")
+    String neonRankingUser;
+
+    @ConfigProperty(name = "studyquest.neon.ranking.password", defaultValue = "")
+    String neonRankingPassword;
 
     @Transactional
     public void concederXp(UUID userId, int xp) {
@@ -134,6 +148,30 @@ public class GamificacaoService {
     public RankingResponse rankingSemanal(UUID userId) {
         LocalDate semana = LocalDate.now().with(DayOfWeek.MONDAY);
 
+        // Tenta Neon primeiro — retorna ranking global com todos os jogadores
+        if (!neonRankingUrl.isBlank()) {
+            List<Map<String, Object>> neonData = fetchTop10FromNeon(semana);
+            if (neonData != null) {
+                List<RankingResponse.RankingItem> items = new ArrayList<>();
+                for (int i = 0; i < neonData.size(); i++) {
+                    Map<String, Object> row = neonData.get(i);
+                    String rowUserId = (String) row.get("userId");
+                    items.add(new RankingResponse.RankingItem(
+                            i + 1,
+                            (String) row.get("userName"),
+                            (String) row.get("avatarUrl"),
+                            ((Number) row.get("xpSemana")).intValue(),
+                            userId.toString().equals(rowUserId)));
+                }
+                RankingResponse.RankingItem posicaoAtual = items.stream()
+                        .filter(RankingResponse.RankingItem::isCurrentUser)
+                        .findFirst().orElse(null);
+                updateRankingCacheRaw(semana, neonData);
+                return new RankingResponse(items, posicaoAtual, false, null);
+            }
+        }
+
+        // Fallback: datasource local (dev/neon direto) ou cache SQLite
         try {
             List<RankingEntry> top10 = rankingRepository.top10Semana(semana);
 
@@ -156,6 +194,59 @@ public class GamificacaoService {
         } catch (Exception e) {
             return loadRankingFromCache(semana, userId);
         }
+    }
+
+    /**
+     * Busca o top-10 diretamente do Neon PostgreSQL via JDBC (sem datasource configurado).
+     * Retorna null em caso de falha (sem conexão, timeout, etc.).
+     */
+    private List<Map<String, Object>> fetchTop10FromNeon(LocalDate semana) {
+        String sql = """
+                SELECT userid, username, useravatarurl, xpsemana
+                FROM ranking_semanal
+                WHERE semana = ?
+                ORDER BY xpsemana DESC
+                LIMIT 10
+                """;
+        try (Connection conn = DriverManager.getConnection(neonRankingUrl, neonRankingUser, neonRankingPassword);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setObject(1, semana);
+            ps.setQueryTimeout(5); // não trava a UI por mais de 5s
+
+            List<Map<String, Object>> result = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> row = new HashMap<>();
+                    row.put("userId",   rs.getString("userid"));
+                    row.put("userName", rs.getString("username"));
+                    row.put("avatarUrl", rs.getString("useravatarurl"));
+                    row.put("xpSemana", rs.getInt("xpsemana"));
+                    result.add(row);
+                }
+            }
+            return result;
+
+        } catch (Exception ex) {
+            // Sem internet ou Neon indisponível — silencioso, usa fallback
+            return null;
+        }
+    }
+
+    private void updateRankingCacheRaw(LocalDate semana, List<Map<String, Object>> data) {
+        try {
+            String json = objectMapper.writeValueAsString(data);
+            String semanaStr = semana.toString();
+            localDb.write(em -> {
+                em.createQuery("DELETE FROM RankingCache rc WHERE rc.semana = :s")
+                        .setParameter("s", semanaStr)
+                        .executeUpdate();
+                em.persist(RankingCache.builder()
+                        .semana(semanaStr)
+                        .dataJson(json)
+                        .build());
+            });
+        } catch (Exception ignored) {}
     }
 
     // ---- Cache de ranking no SQLite ----

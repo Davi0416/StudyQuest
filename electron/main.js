@@ -83,6 +83,7 @@ function bundledPythonPath() {
 
 function buildBackendEnv() {
   const dataDir = ensureDataDir()
+  const mailCfg = loadMailConfig()
   const env = {
     ...process.env,
     QUARKUS_PROFILE: 'desktop',
@@ -92,7 +93,11 @@ function buildBackendEnv() {
     JWT_PRIVATE_KEY_LOCATION: path.join(backendDir, 'privateKey.pem'),
     CORS_ORIGINS: '*',
     // E-mail SMTP — carregado de mail.config.js (gitignored)
-    ...loadMailConfig(),
+    ...mailCfg,
+    // Neon — ranking semanal global (somente leitura), lido de mail.config.js
+    STUDYQUEST_NEON_RANKING_URL:      mailCfg.NEON_RANKING_URL      || '',
+    STUDYQUEST_NEON_RANKING_USER:     mailCfg.NEON_RANKING_USER     || '',
+    STUDYQUEST_NEON_RANKING_PASSWORD: mailCfg.NEON_RANKING_PASSWORD || '',
   }
 
   const python = bundledPythonPath()
