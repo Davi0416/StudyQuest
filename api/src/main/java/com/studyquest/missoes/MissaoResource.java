@@ -3,6 +3,8 @@ package com.studyquest.missoes;
 import com.studyquest.missoes.dto.MissaoResponse;
 import com.studyquest.missoes.dto.SubmeterCodigoRequest;
 import com.studyquest.missoes.dto.SubmissaoResponse;
+import com.studyquest.shared.exception.TooManyRequestsException;
+import com.studyquest.shared.ratelimit.RateLimiterService;
 import com.studyquest.shared.response.ApiResponse;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -11,6 +13,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,11 +23,12 @@ import java.util.UUID;
 @RolesAllowed("user")
 public class MissaoResource {
 
-    @Inject
-    MissaoService missaoService;
+    private static final int JUDGE0_MAX_RPM = 10;
+    private static final Duration JUDGE0_WINDOW = Duration.ofMinutes(1);
 
-    @Inject
-    JsonWebToken jwt;
+    @Inject MissaoService missaoService;
+    @Inject JsonWebToken jwt;
+    @Inject RateLimiterService rateLimiter;
 
     @GET
     @Path("/por-no/{noId}")
@@ -42,7 +46,11 @@ public class MissaoResource {
     @Path("/{id}/submeter")
     public ApiResponse<SubmissaoResponse> submeter(@PathParam("id") Long id,
                                                     @Valid SubmeterCodigoRequest req) {
-        return ApiResponse.ok(missaoService.submeter(id, userId(), req));
+        UUID uid = userId();
+        if (!rateLimiter.tryAcquire(uid, "judge0", JUDGE0_MAX_RPM, JUDGE0_WINDOW)) {
+            throw new TooManyRequestsException(rateLimiter.retryAfterSeconds(uid, "judge0", JUDGE0_WINDOW));
+        }
+        return ApiResponse.ok(missaoService.submeter(id, uid, req));
     }
 
     @GET
