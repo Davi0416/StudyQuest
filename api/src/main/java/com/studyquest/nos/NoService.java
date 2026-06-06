@@ -42,7 +42,6 @@ public class NoService {
 
     public List<NoResponse> listarPorTrilha(Long trilhaId, UUID userId) {
         return noRepository.findByTrilha(trilhaId).stream()
-                .sorted((a, b) -> Integer.compare(a.getOrdem(), b.getOrdem()))
                 .map(no -> NoResponse.of(no, calcularStatus(no, userId), temMissao(no.getId())))
                 .toList();
     }
@@ -147,6 +146,7 @@ public class NoService {
                         UserNo.class)
                 .setParameter("uid", userId)
                 .setParameter("nid", noId)
+                .setMaxResults(1)
                 .getResultStream()
                 .findFirst();
     }
