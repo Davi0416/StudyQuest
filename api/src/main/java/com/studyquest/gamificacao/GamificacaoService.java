@@ -89,16 +89,50 @@ public class GamificacaoService {
         LocalDate semana = LocalDate.now().with(DayOfWeek.MONDAY);
         Optional<RankingEntry> entry = rankingRepository.findByUserAndSemana(user.getId(), semana);
 
+        int novoTotal;
         if (entry.isPresent()) {
-            entry.get().setXpSemana(entry.get().getXpSemana() + xp);
+            novoTotal = entry.get().getXpSemana() + xp;
+            entry.get().setXpSemana(novoTotal);
         } else {
+            novoTotal = xp;
             rankingRepository.persist(RankingEntry.builder()
                     .userId(user.getId())
                     .userName(user.getName())
                     .userAvatarUrl(user.getAvatarUrl())
-                    .xpSemana(xp)
+                    .xpSemana(novoTotal)
                     .semana(semana)
                     .build());
+        }
+
+        // Sincroniza o total semanal do usuário para o Neon (ranking global)
+        sincronizarXpNeon(user, semana, novoTotal);
+    }
+
+    /**
+     * Faz upsert do XP semanal do usuário no Neon PostgreSQL para que apareça
+     * no ranking global visto por todos os usuários desktop.
+     */
+    private void sincronizarXpNeon(User user, LocalDate semana, int xpTotal) {
+        if (neonRankingUrl.isBlank()) return;
+        String sql = """
+                INSERT INTO ranking_semanal (userid, username, useravatarurl, xpsemana, semana)
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT (userid, semana)
+                DO UPDATE SET xpsemana = EXCLUDED.xpsemana,
+                              username = EXCLUDED.username,
+                              useravatarurl = EXCLUDED.useravatarurl
+                """;
+        try (Connection conn = DriverManager.getConnection(neonRankingUrl, neonRankingUser, neonRankingPassword);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, user.getId());
+            ps.setString(2, user.getName());
+            ps.setString(3, user.getAvatarUrl());
+            ps.setInt(4, xpTotal);
+            ps.setObject(5, semana);
+            ps.setQueryTimeout(5);
+            ps.executeUpdate();
+        } catch (Exception ignored) {
+            // Falha silenciosa — offline ou Neon indisponível
         }
     }
 
@@ -150,6 +184,9 @@ public class GamificacaoService {
 
         // Tenta Neon primeiro — retorna ranking global com todos os jogadores
         if (!neonRankingUrl.isBlank()) {
+            // Garante que o XP local do usuário está no Neon antes de ler
+            sincronizarXpLocalParaNeon(userId, semana);
+
             List<Map<String, Object>> neonData = fetchTop10FromNeon(semana);
             if (neonData != null) {
                 List<RankingResponse.RankingItem> items = new ArrayList<>();
@@ -194,6 +231,23 @@ public class GamificacaoService {
         } catch (Exception e) {
             return loadRankingFromCache(semana, userId);
         }
+    }
+
+    /**
+     * Sincroniza o XP semanal do usuário do SQLite local para o Neon.
+     * Chamado antes de ler o ranking para garantir que o usuário já aparece.
+     */
+    private void sincronizarXpLocalParaNeon(UUID userId, LocalDate semana) {
+        try {
+            Optional<RankingEntry> local = rankingRepository.findByUserAndSemana(userId, semana);
+            if (local.isEmpty()) return; // usuário não tem XP esta semana
+
+            RankingEntry e = local.get();
+            User user = userRepository.findById(userId);
+            if (user == null) return;
+
+            sincronizarXpNeon(user, semana, e.getXpSemana());
+        } catch (Exception ignored) {}
     }
 
     /**
