@@ -3,7 +3,7 @@ import { useUser } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { Topbar } from '../components/Topbar';
 import api, { unwrap } from '../lib/api';
-import type {  RevisaoHoje, Trilha, RankingResponse, Conquista  } from "../types";
+import type {  RevisaoHoje, Trilha, RankingResponse, Conquista, No  } from "../types";
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { ProgressBar } from '../components/ui/ProgressBar';
@@ -20,6 +20,7 @@ export function Hub() {
   const [conquistas, setConquistas] = useState<Conquista[]>([]);
   // TODO: endpoint pendente para estatísticas gerais (missões, flashcards dominados, xp hoje, etc)
   const [stats, setStats] = useState<any>(null);
+  const [activeNos, setActiveNos] = useState<No[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,6 +47,17 @@ export function Hub() {
         } catch (e) {
           console.warn("Stats endpoint not available yet");
         }
+
+        const ativas = unwrap(trilhasRes);
+        if (ativas && ativas.length > 0) {
+          try {
+            const nosRes = await api.get(`/nos?trilhaId=${ativas[0].id}`);
+            const nosData = unwrap(nosRes) as No[];
+            setActiveNos(nosData.sort((a, b) => a.ordem - b.ordem));
+          } catch (e) {
+            console.error("Failed to fetch active trail nodes");
+          }
+        }
       } catch (err) {
         console.error("Failed to fetch hub data", err);
       } finally {
@@ -65,15 +77,29 @@ export function Hub() {
     try {
       await api.post(`/trilhas/${trilhaId}/matricular`);
       const trilhasRes = await api.get('/trilhas/ativas');
-      setTrilhas(unwrap(trilhasRes));
+      const ativas = unwrap(trilhasRes);
+      setTrilhas(ativas);
       setCatalogo(prev => prev.map(t => t.id === trilhaId ? { ...t, matriculado: true } : t));
+      
+      if (ativas && ativas.length > 0) {
+        const nosRes = await api.get(`/nos?trilhaId=${ativas[0].id}`);
+        setActiveNos((unwrap(nosRes) as No[]).sort((a, b) => a.ordem - b.ordem));
+      }
     } catch (err) {
       console.error('Failed to enroll in trail', err);
     }
   };
+
+  const nosConcluidosCount = activeNos.filter(n => n.status === 'CONCLUIDO').length;
+  const totalNosTrilha = activeNos.length > 0 ? activeNos.length : (stats?.totalNosTrilha ?? '-');
+  const xpGanho = activeNos.filter(n => n.status === 'CONCLUIDO').reduce((acc, n) => acc + n.xpRecompensa, 0);
+
   const progressPct = activeTrilha && activeTrilha.xpTotal > 0
-    ? Math.min(100, Math.round(((activeTrilha.xpGanho ?? 0) / activeTrilha.xpTotal) * 100))
+    ? Math.min(100, Math.round((xpGanho / activeTrilha.xpTotal) * 100))
     : 0;
+    
+  const proximoNo = activeNos.find(n => n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL') || activeNos.find(n => n.status === 'BLOQUEADO');
+  const proximoNoTitulo = proximoNo?.titulo ?? 'Não disponível';
 
   return (
     <div className="min-h-screen">
@@ -174,14 +200,13 @@ export function Hub() {
                 </div>
                 <div className="text-right">
                   <div className="font-cinzel font-bold text-2xl text-green">{progressPct}%</div>
-                  {/* TODO: O backend precisa enviar o total de nós da trilha atual e os nós concluídos */}
-                  <small className="block text-text-mute text-[11px]">{activeTrilha?.nosConcluidosCount || 0} / {stats?.totalNosTrilha ?? '-'} nós</small>
+                  <small className="block text-text-mute text-[11px]">{nosConcluidosCount} / {totalNosTrilha} nós</small>
                 </div>
               </div>
 
               <ProgressBar progress={progressPct} />
               <div className="flex justify-between mt-3 text-[12.5px] text-text-mute">
-                <span>{activeTrilha?.xpGanho || 0} XP conquistados nesta trilha</span>
+                <span>{xpGanho} XP conquistados nesta trilha</span>
                 {/* TODO: Endpoint precisa enviar quanto XP falta para o próximo nível */}
                 <span>{stats?.xpProximoNivel ?? '-'} XP até o próximo nível</span>
               </div>
@@ -193,8 +218,7 @@ export function Hub() {
                   </div>
                   <div>
                     <small className="block text-text-mute text-[11px] uppercase tracking-wide">Próximo nó a desbloquear</small>
-                    {/* TODO: Endpoint precisa enviar o título do próximo nó */}
-                    <b className="font-semibold text-[14.5px]">{stats?.proximoNoTitulo ?? 'Não disponível'}</b>
+                    <b className="font-semibold text-[14.5px]">{proximoNoTitulo}</b>
                   </div>
                 </div>
                 <Button className="gap-2" onClick={() => activeTrilha ? navigate('/mapa') : trilhasDisponiveis[0] && handleMatricular(trilhasDisponiveis[0].id)} disabled={!activeTrilha && trilhasDisponiveis.length === 0}>

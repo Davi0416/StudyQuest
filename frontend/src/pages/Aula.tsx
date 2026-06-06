@@ -13,19 +13,23 @@ function TextoBloco({ conteudo }: { conteudo: string }) {
   return <AulaRichText conteudo={conteudo} />;
 }
 
+// Usa youtube-nocookie.com para evitar o erro 153 no Electron (origem app://)
 function toYoutubeEmbedUrl(url: string): string {
   if (!url) return url;
-  // Already embed format
-  if (url.includes('youtube.com/embed/') || url.includes('youtube.com/videoseries')) return url;
+  // Already nocookie embed — leave as-is
+  if (url.includes('youtube-nocookie.com/embed')) return url;
+  // Already regular embed — swap domain
+  if (url.includes('youtube.com/embed/')) return url.replace('www.youtube.com', 'www.youtube-nocookie.com');
+  if (url.includes('youtube.com/videoseries')) return url.replace('www.youtube.com', 'www.youtube-nocookie.com');
   // Standard watch URL: youtube.com/watch?v=ID
   const watchMatch = url.match(/[?&]v=([A-Za-z0-9_-]{11})/);
-  if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}`;
+  if (watchMatch) return `https://www.youtube-nocookie.com/embed/${watchMatch[1]}`;
   // Short URL: youtu.be/ID
   const shortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
-  if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}`;
+  if (shortMatch) return `https://www.youtube-nocookie.com/embed/${shortMatch[1]}`;
   // Playlist URL
   const listMatch = url.match(/list=([^&]+)/);
-  if (listMatch) return `https://www.youtube.com/embed/videoseries?list=${listMatch[1]}`;
+  if (listMatch) return `https://www.youtube-nocookie.com/embed/videoseries?list=${listMatch[1]}`;
   return url;
 }
 
@@ -58,7 +62,6 @@ function VideoBloco({ titulo, url, linkAssistir }: { titulo: string; url: string
           title={titulo}
           className="w-full h-full"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerPolicy="strict-origin-when-cross-origin"
           allowFullScreen
         />
       </div>
