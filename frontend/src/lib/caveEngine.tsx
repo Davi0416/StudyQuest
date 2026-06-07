@@ -1,5 +1,11 @@
-// caveEngine.ts — Cave terrain renderer (Caminho da Serpente)
-
+// caveEngine.tsx — Cave terrain renderer (Caminho da Serpente)
+import React from 'react';
+import {
+  IconBox, IconCategory, IconTypography, IconList, IconBraces, IconRoute,
+  IconMathFunction, IconBolt, IconFilter, IconComponents, IconBug,
+  IconFileCode, IconPackages, IconRepeat, IconRegex, IconFlask,
+  IconSkull, IconTrophy
+} from '@tabler/icons-react';
 export const TILE = 8;
 export const SCALE = 4;
 export const COLS = 56;
@@ -60,27 +66,26 @@ export const CAVE_BIOME_LABEL: Record<string, string> = {
 // Boss em [49,5] igual ao HTML de referência
 // Nós extras usam as rows 38-40 que antes ficavam vazias na entrada
 export const CAVE_STATIC_NODES: Array<{
-  id: string; icon: string; tile: [number, number]; biome: string; boss?: boolean; project?: boolean;
+  id: string; icon: React.ReactNode; tile: [number, number]; biome: string; boss?: boolean; project?: boolean;
 }> = [
-  { id: 'vars',    icon: '🦎', tile: [6,  40] as [number,number], biome: 'entrance' },
-  { id: 'types',   icon: '🐢', tile: [16, 39] as [number,number], biome: 'entrance' },
-  { id: 'strings', icon: '🦎', tile: [26, 38] as [number,number], biome: 'entrance' },
-  { id: 'lists',   icon: '🐊', tile: [36, 37] as [number,number], biome: 'entrance' },
-  { id: 'dicts',   icon: '🐍', tile: [44, 34] as [number,number], biome: 'crystal'  },
-  { id: 'flow',    icon: '🦎', tile: [48, 30] as [number,number], biome: 'crystal'  },
-  { id: 'funcs',   icon: '🐉', tile: [42, 27] as [number,number], biome: 'crystal'  },
-  { id: 'lambdas', icon: '🦎', tile: [32, 25] as [number,number], biome: 'crystal'  },
-  { id: 'comp',    icon: '🐲', tile: [21, 24] as [number,number], biome: 'fungal'   },
-  { id: 'oop',     icon: '🦕', tile: [11, 21] as [number,number], biome: 'fungal'   },
-  { id: 'exc',     icon: '🦎', tile: [7,  18] as [number,number], biome: 'fungal'   },
-  { id: 'files',   icon: '🐊', tile: [14, 15] as [number,number], biome: 'fungal'   },
-  { id: 'mods',    icon: '🐊', tile: [26, 13] as [number,number], biome: 'lava'     },
-  { id: 'iters',   icon: '🦖', tile: [33, 11] as [number,number], biome: 'lava'     },
-  { id: 'regex',   icon: '🦎', tile: [39, 10] as [number,number], biome: 'lava'     },
-  { id: 'tests',   icon: '🐍', tile: [45, 8]  as [number,number], biome: 'lava'     },
-  { id: 'boss',    icon: '🐍', tile: [50, 6]  as [number,number], biome: 'lava',   boss: true    },
-  // project posicionado acima do boss com espaçamento adequado para evitar sobreposição
-  { id: 'project', icon: '⭐', tile: [50, 2]  as [number,number], biome: 'summit', project: true },
+  { id: 'vars',    icon: <IconBox size="1em" stroke={1.5} />, tile: [6,  36], biome: 'entrance' },
+  { id: 'types',   icon: <IconCategory size="1em" stroke={1.5} />, tile: [10, 34], biome: 'entrance' },
+  { id: 'strings', icon: <IconTypography size="1em" stroke={1.5} />, tile: [15, 32], biome: 'entrance' },
+  { id: 'lists',   icon: <IconList size="1em" stroke={1.5} />, tile: [18, 31], biome: 'entrance' },
+  { id: 'dicts',   icon: <IconBraces size="1em" stroke={1.5} />, tile: [20, 29], biome: 'crystal'  },
+  { id: 'flow',    icon: <IconRoute size="1em" stroke={1.5} />, tile: [22, 27], biome: 'crystal'  },
+  { id: 'funcs',   icon: <IconMathFunction size="1em" stroke={1.5} />, tile: [22, 25], biome: 'crystal'  },
+  { id: 'lambdas', icon: <IconBolt size="1em" stroke={1.5} />, tile: [23, 24], biome: 'crystal'  },
+  { id: 'comp',    icon: <IconFilter size="1em" stroke={1.5} />, tile: [23, 22], biome: 'fungal'   },
+  { id: 'oop',     icon: <IconComponents size="1em" stroke={1.5} />, tile: [25, 20], biome: 'fungal'   },
+  { id: 'exc',     icon: <IconBug size="1em" stroke={1.5} />, tile: [27, 19], biome: 'fungal'   },
+  { id: 'files',   icon: <IconFileCode size="1em" stroke={1.5} />, tile: [31, 17], biome: 'fungal'   },
+  { id: 'mods',    icon: <IconPackages size="1em" stroke={1.5} />, tile: [35, 15], biome: 'lava'     },
+  { id: 'iters',   icon: <IconRepeat size="1em" stroke={1.5} />, tile: [40, 14], biome: 'lava'     },
+  { id: 'regex',   icon: <IconRegex size="1em" stroke={1.5} />, tile: [45, 12], biome: 'lava'     },
+  { id: 'tests',   icon: <IconFlask size="1em" stroke={1.5} />, tile: [49, 10], biome: 'lava'     },
+  { id: 'boss',    icon: <IconSkull size="1em" stroke={1.5} />, tile: [52, 8], biome: 'lava',   boss: true    },
+  { id: 'project', icon: <IconTrophy size="1em" stroke={1.5} />, tile: [52, 3], biome: 'summit', project: true },
 ];
 
 export const CAVE_EDGES: [number,number][] = [

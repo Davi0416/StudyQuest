@@ -42,12 +42,10 @@ const PROJECTS = [
   },
 ] as const;
 import {
-  createCaveEngine, drawCaveMinimap, tileCenter,
-  WORLD_W, WORLD_H, TPX,
-  CAVE_STATIC_NODES, CAVE_EDGES,
+  CAVE_STATIC_NODES,
   CAVE_NODE_THEME, CAVE_BIOME_LABEL,
-  type CaveEngineState,
 } from '../lib/caveEngine';
+import { makeRenderer } from '../lib/map';
 
 function getStaticIndex(i: number, total: number) {
   const maxIdx = CAVE_STATIC_NODES.length - 1;
@@ -81,88 +79,22 @@ export function Mapa() {
 
   const scrollRef   = useRef<HTMLDivElement>(null);
   const terrainRef  = useRef<HTMLCanvasElement>(null);
-  const minimapRef  = useRef<HTMLCanvasElement>(null);
-  const engineRef   = useRef<CaveEngineState | null>(null);
-  const centeredRef = useRef(false);
-
-  // ── Minimap ────────────────────────────────────────────────────────────────
-  const updateMinimap = useCallback(() => {
-    if (!minimapRef.current || !engineRef.current || !scrollRef.current) return;
-    const mmNodes = nodes.map((n, i) => {
-      const s = CAVE_STATIC_NODES[getStaticIndex(i, nodes.length)];
-      return { tile: s.tile, status: n.status, isSelected: n.id === selectedNodeId, boss: !!s.boss, project: !!s.project };
-    });
-    drawCaveMinimap(minimapRef.current, engineRef.current.pathTiles, mmNodes, scrollRef.current);
-  }, [nodes, selectedNodeId]);
+  const engineRef   = useRef<any>(null);
+  const [engineReady, setEngineReady] = useState(false);
 
   // ── Init canvas ────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!terrainRef.current) return;
-    // cave engine is expensive — render once
-    engineRef.current = createCaveEngine(terrainRef.current);
+    const R = makeRenderer(terrainRef.current);
+    R.build();
+    engineRef.current = R;
+    setEngineReady(true);
   }, []);
-
-  useEffect(() => { updateMinimap(); }, [updateMinimap]);
-
-  // ── Center on active node ──────────────────────────────────────────────────
-  useEffect(() => {
-    if (!scrollRef.current || nodes.length === 0 || centeredRef.current) return;
-    const idx = nodes.findIndex(n => n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL');
-    const i   = idx >= 0 ? idx : 0;
-    const tile = CAVE_STATIC_NODES[getStaticIndex(i, nodes.length)].tile;
-    const ctr  = tileCenter(tile);
-    const sc   = scrollRef.current;
-    sc.scrollLeft = ctr.x - sc.clientWidth  / 2;
-    sc.scrollTop  = ctr.y - sc.clientHeight / 2;
-    centeredRef.current = true;
-    updateMinimap();
-  }, [nodes, updateMinimap]);
-
-  // ── Drag-to-pan ────────────────────────────────────────────────────────────
-  useEffect(() => {
-    const scroll = scrollRef.current;
-    if (!scroll) return;
-    let dragging = false, sx0 = 0, sy0 = 0, sl0 = 0, st0 = 0;
-    const onDown = (e: PointerEvent) => {
-      if ((e.target as HTMLElement).closest('[data-map-node]')) return;
-      dragging = true; sx0 = e.clientX; sy0 = e.clientY; sl0 = scroll.scrollLeft; st0 = scroll.scrollTop;
-      scroll.classList.add('cursor-grabbing'); scroll.setPointerCapture(e.pointerId);
-    };
-    const onMove = (e: PointerEvent) => {
-      if (!dragging) return;
-      scroll.scrollLeft = sl0 - (e.clientX - sx0);
-      scroll.scrollTop  = st0 - (e.clientY - sy0);
-      updateMinimap();
-    };
-    const onUp = () => { dragging = false; scroll.classList.remove('cursor-grabbing'); };
-    scroll.addEventListener('pointerdown', onDown);
-    scroll.addEventListener('pointermove', onMove);
-    scroll.addEventListener('pointerup',    onUp);
-    scroll.addEventListener('pointercancel',onUp);
-    scroll.addEventListener('scroll', updateMinimap);
-    return () => {
-      scroll.removeEventListener('pointerdown', onDown);
-      scroll.removeEventListener('pointermove', onMove);
-      scroll.removeEventListener('pointerup',    onUp);
-      scroll.removeEventListener('pointercancel',onUp);
-      scroll.removeEventListener('scroll', updateMinimap);
-    };
-  }, [updateMinimap]);
-
-  const handleMinimapClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!minimapRef.current || !scrollRef.current) return;
-    const rect = minimapRef.current.getBoundingClientRect();
-    const fx   = (e.clientX - rect.left) / rect.width;
-    const fy   = (e.clientY - rect.top)  / rect.height;
-    const sc   = scrollRef.current;
-    sc.scrollTo({ left: fx * WORLD_W - sc.clientWidth / 2, top: fy * WORLD_H - sc.clientHeight / 2, behavior: 'smooth' });
-  };
 
   // ── API ────────────────────────────────────────────────────────────────────
   const loadNodesForTrilha = async (trilha: Trilha) => {
     setActiveTrilha(trilha);
     setNeedsEnrollment(false);
-    centeredRef.current = false;
     const nosRes  = await api.get(`/nos?trilhaId=${trilha.id}`);
     const nosData = unwrap(nosRes) as No[];
     const sorted  = nosData.sort((a, b) => a.ordem - b.ordem);
@@ -252,159 +184,133 @@ export function Mapa() {
     <div className="h-screen flex flex-col bg-bg overflow-hidden">
       <Topbar />
 
-      <div className="flex-1 flex min-h-0">
+      <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden">
 
         {/* ── MAP REGION ────────────────────────────────────────────────── */}
-        <div className="relative flex-1 overflow-hidden bg-[#04060a]">
+        <div className="relative flex-1 overflow-hidden bg-[#05080a]" style={{ containerType: 'size' as any }}>
+          <div className="relative w-full h-full overflow-hidden" style={{ containerType: 'size' as any }}>
+            <canvas ref={terrainRef} className="absolute inset-0 block w-full h-full" style={{ imageRendering: 'pixelated', mixBlendMode: 'normal' }} />
 
-          {/* Trail badge */}
-          <div className="absolute top-[18px] left-[18px] z-[8] flex items-center gap-3 px-4 py-2.5 bg-[rgba(13,17,23,.82)] backdrop-blur-[8px] border border-[rgba(95,195,107,.4)] rounded-md shadow-soft">
-            <div className="w-[38px] h-[38px] rounded-[9px] grid place-items-center text-[21px] border-[0.5px] border-[rgba(95,195,107,.45)]" style={{ background: 'linear-gradient(155deg, rgba(95,195,107,.2), rgba(95,195,107,.04))', color: '#5fc36b' }}>
-              {trailIcon}
-            </div>
-            <div>
-              <div className="text-[10px] tracking-[1.4px] uppercase font-semibold" style={{ color: '#5fc36b' }}>Trilha Ativa</div>
-              <div className="font-cinzel font-bold text-base leading-[1.1]">
-                {loading ? 'Carregando…' : activeTrilha?.titulo || 'Nenhuma trilha ativa'}
+            {/* Trail badge */}
+            <div className="absolute left-[1.6cqw] top-[2.6cqh] z-[8] flex items-center gap-[1.3cqw] p-[1.1cqh_1.6cqw_1.1cqh_1.1cqh] bg-[rgba(10,17,16,.86)] backdrop-blur-[2px] border border-[#2c4a3c] rounded-[3px] shadow-[0_4px_18px_-6px_#000,inset_0_0_0_1px_rgba(87,224,138,.08)]">
+              <div className="w-[4.4cqw] h-[4.4cqw] shrink-0 rounded-[3px] grid place-items-center text-[2.5cqw] border border-[#2f6647] shadow-[0_0_10px_rgba(87,224,138,.35),inset_0_0_6px_rgba(87,224,138,.2)]" style={{ background: 'radial-gradient(circle at 50% 40%, #15402a, #0a1c15)', color: '#7dffb0' }}>
+                {trailIcon}
+              </div>
+              <div>
+                <div className="font-['Press_Start_2P',monospace] text-[0.95cqw] tracking-[0.5px] mb-[0.7cqh] text-[#57e08a]" style={{ textShadow: '0 0 8px rgba(87,224,138,.5)' }}>Trilha Ativa</div>
+                <div className="font-['Press_Start_2P',monospace] text-[1.45cqw] text-[#eaf6ee] mb-[0.7cqh]" style={{ textShadow: '0 2px 0 #04140d' }}>
+                  {loading ? 'Carregando…' : activeTrilha?.titulo || 'Nenhuma trilha'}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Scrollable world */}
-          <div ref={scrollRef} className="absolute inset-0 overflow-auto cursor-grab" style={{ scrollbarWidth: 'thin', scrollbarColor: '#30363d transparent' }}>
-            <div className="relative" style={{ width: WORLD_W, height: WORLD_H }}>
-              <canvas ref={terrainRef} className="absolute left-0 top-0 block" style={{ imageRendering: 'pixelated' }} />
-
-              {/* Error / no trails overlay */}
-              {!loading && !activeTrilha && !needsEnrollment && (semTrilhasNoServidor || fetchError) && (
-                <div className="absolute inset-0 z-20 grid place-items-center bg-[#04060a]/85">
-                  <div className="max-w-md mx-6 p-8 rounded-lg bg-surface border border-border text-center">
-                    <h2 className="font-cinzel font-bold text-xl mb-2">Nenhuma trilha disponível</h2>
-                    <p className="text-text-dim text-sm">{fetchError ?? 'Aguarde o backend iniciar e tente novamente.'}</p>
-                    <Button className="mt-4" onClick={() => fetchMap()}>Tentar novamente</Button>
-                  </div>
+            {/* Error / no trails overlay */}
+            {!loading && !activeTrilha && !needsEnrollment && (semTrilhasNoServidor || fetchError) && (
+              <div className="absolute inset-0 z-20 grid place-items-center bg-[#04060a]/85">
+                <div className="max-w-md mx-6 p-8 rounded-lg bg-surface border border-border text-center">
+                  <h2 className="font-cinzel font-bold text-xl mb-2">Nenhuma trilha disponível</h2>
+                  <p className="text-text-dim text-sm">{fetchError ?? 'Aguarde o backend iniciar e tente novamente.'}</p>
+                  <Button className="mt-4" onClick={() => fetchMap()}>Tentar novamente</Button>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Enrollment overlay */}
-              {!loading && needsEnrollment && (
-                <div className="absolute inset-0 z-20 grid place-items-center bg-[#04060a]/85">
-                  <div className="max-w-md w-full mx-6 p-8 rounded-lg bg-surface border border-[rgba(95,195,107,.3)] text-center shadow-soft">
-                    <div className="text-4xl mb-4">🐍</div>
-                    <h2 className="font-cinzel font-bold text-2xl mb-2">Escolha sua trilha</h2>
-                    <p className="text-text-dim text-sm mb-6">Matricule-se para entrar na caverna e começar a jornada.</p>
-                    <div className="flex flex-col gap-3">
-                      {catalogo.map(t => (
-                        <div key={t.id} className="flex items-center justify-between gap-3 p-4 rounded-md bg-surface-2 border border-border text-left">
-                          <div>
-                            <div className="font-semibold">{t.titulo}</div>
-                            <div className="text-xs text-text-dim mt-1">{t.descricao}</div>
-                          </div>
-                          <Button className="shrink-0 py-1 px-3 text-xs h-auto" onClick={() => handleMatricular(t.id)} disabled={enrolling}>
-                            {enrolling ? '…' : 'Matricular'}
-                          </Button>
+            {/* Enrollment overlay */}
+            {!loading && needsEnrollment && (
+              <div className="absolute inset-0 z-20 grid place-items-center bg-[#04060a]/85">
+                <div className="max-w-md w-full mx-6 p-8 rounded-lg bg-surface border border-[rgba(95,195,107,.3)] text-center shadow-[0_4px_18px_-6px_#000]">
+                  <div className="text-4xl mb-4">🐍</div>
+                  <h2 className="font-cinzel font-bold text-2xl mb-2">Escolha sua trilha</h2>
+                  <p className="text-text-dim text-sm mb-6">Matricule-se para entrar na caverna e começar a jornada.</p>
+                  <div className="flex flex-col gap-3">
+                    {catalogo.map(t => (
+                      <div key={t.id} className="flex items-center justify-between gap-3 p-4 rounded-md bg-surface-2 border border-border text-left">
+                        <div>
+                          <div className="font-semibold">{t.titulo}</div>
+                          <div className="text-xs text-text-dim mt-1">{t.descricao}</div>
                         </div>
-                      ))}
-                    </div>
+                        <Button className="shrink-0 py-1 px-3 text-xs h-auto" onClick={() => handleMatricular(t.id)} disabled={enrolling}>
+                          {enrolling ? '…' : 'Matricular'}
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Nodes */}
-              {nodes.map((n, i) => {
-                const s    = CAVE_STATIC_NODES[getStaticIndex(i, nodes.length)];
-                const x    = (s.tile[0] + 0.5) * TPX;
-                const y    = (s.tile[1] + 0.5) * TPX;
-                const isSel       = selectedNodeId === n.id;
-                const isBossNode  = !!s.boss;
-                const isProjNode  = !!s.project;
-                const theme = CAVE_NODE_THEME[s.biome];
-                const size  = (isBossNode || isProjNode) ? 'w-[66px] h-[66px] text-[40px]' : 'w-[46px] h-[46px] text-[26px]';
-                const frameColor = isBossNode ? '#e0852f' : isProjNode ? '#d4c060' : theme.frame;
+            {/* Nodes */}
+            {engineReady && engineRef.current && nodes.map((n, i) => {
+              const staticIdx = getStaticIndex(i, nodes.length);
+              const s = CAVE_STATIC_NODES[staticIdx];
+              const isSel       = selectedNodeId === n.id;
+              const isBossNode  = !!s.boss;
+              const isProjNode  = !!s.project;
+              
+              let xPct = engineRef.current.nodeAnchors[staticIdx][0];
+              let yPct = engineRef.current.nodeAnchors[staticIdx][1];
 
-                return (
+              const left = `${xPct * 100}%`;
+              const top = `${yPct * 100}%`;
+              
+              const theme = CAVE_NODE_THEME[s.biome];
+              const size  = (isBossNode || isProjNode) ? 'w-[4.4cqw] h-[4.4cqw] text-[2.2cqw]' : 'w-[3.4cqw] h-[3.4cqw] text-[1.8cqw]';
+              const frameColor = isBossNode ? '#e0852f' : isProjNode ? '#d4c060' : theme.frame;
+
+              return (
+                <div
+                  key={n.id}
+                  data-map-node
+                  className={`absolute flex flex-col items-center gap-[0.5cqh] z-10 cursor-pointer transition-transform ${isSel ? 'scale-110 z-20' : 'hover:scale-[1.12] hover:z-20'}`}
+                  style={{ left, top, transform: 'translate(-50%, -50%)' }}
+                  onClick={() => setSelectedNodeId(n.id)}
+                >
                   <div
-                    key={n.id}
-                    data-map-node
-                    className={`absolute flex flex-col items-center gap-1.5 z-10 cursor-pointer transition-transform ${isSel ? 'scale-110 z-20' : 'hover:scale-110 hover:z-20'}`}
-                    style={{ left: x, top: y, transform: 'translate(-50%, -50%)' }}
-                    onClick={() => setSelectedNodeId(n.id)}
+                    className={`relative grid place-items-center leading-none rounded-[4px] ${size}`}
+                    style={{
+                      background: theme.plat,
+                      boxShadow: isBossNode
+                        ? `0 0 0 1px #06080c, 0 0 0 2px ${frameColor}, 0 0 0 3px #06080c, 0 3px 0 3px rgba(0,0,0,.55)`
+                        : `0 0 0 1px #06080c, 0 0 0 2px ${frameColor}, 0 0 0 3px #06080c, 0 3px 0 3px rgba(0,0,0,.5)`,
+                      outline: isSel ? '2px solid var(--gold)' : 'none',
+                      outlineOffset: isSel ? '4px' : '0',
+                      animation: isProjNode ? 'projectAura 2s ease-in-out infinite' : isBossNode ? 'bossAura 1.6s ease-in-out infinite' : (n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL') ? 'pulseRing 1.8s ease-in-out infinite' : 'none',
+                    }}
                   >
-                    <div
-                      className={`relative grid place-items-center leading-none ${size}`}
-                      style={{
-                        background: theme.plat,
-                        boxShadow: isBossNode
-                          ? `0 0 0 3px #06080c, 0 0 0 6px ${frameColor}, 0 0 0 7px #06080c, 0 8px 0 7px rgba(0,0,0,.55)`
-                          : `0 0 0 3px #06080c, 0 0 0 6px ${frameColor}, 0 0 0 7px #06080c, 0 7px 0 7px rgba(0,0,0,.5)`,
-                        outline: isSel ? '2px solid var(--gold)' : 'none',
-                        outlineOffset: isSel ? '9px' : '0',
-                        imageRendering: 'pixelated',
-                        animation: isProjNode ? 'projectAura 2s ease-in-out infinite' : isBossNode ? 'bossAura 1.6s ease-in-out infinite' : (n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL') ? 'pulseRing 1.8s ease-in-out infinite' : 'none',
-                      }}
-                    >
-                      <span className={n.status === 'BLOQUEADO' ? 'grayscale opacity-50' : ''}>{s.icon}</span>
+                    <span className={n.status === 'BLOQUEADO' ? 'grayscale opacity-50' : ''}>{s.icon}</span>
 
-                      {/* Completed check */}
-                      {n.status === 'CONCLUIDO' && (
-                        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-[18px] h-[18px] bg-[#7ee787] text-[#0b1f12] grid place-items-center border-2 border-[#06080c] text-xs">
-                          <IconCheck size={12} />
-                        </div>
-                      )}
+                    {/* Completed check */}
+                    {n.status === 'CONCLUIDO' && (
+                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-[1.2cqw] h-[1.2cqw] bg-[#7ee787] text-[#0b1f12] grid place-items-center border border-[#06080c] text-[0.6cqw] rounded-sm">
+                        <IconCheck size={8} />
+                      </div>
+                    )}
 
-                      {/* Active arrow */}
-                      {(n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL') && !isBossNode && (
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-[12px] border-l-transparent border-r-transparent animate-bounce"
-                             style={{ borderTopColor: '#46c7ff', filter: 'drop-shadow(0 0 5px rgba(70,199,255,.7))' }} />
-                      )}
-
-                      {/* Lock */}
-                      {n.status === 'BLOQUEADO' && (
-                        <div className="absolute inset-0 grid place-items-center text-[#cfd6df] text-xl" style={{ background: 'rgba(6,8,12,.4)' }}>
-                          <IconLock size={isBossNode ? 20 : 16} />
-                        </div>
-                      )}
-
-                      {/* Boss crown */}
-                      {isBossNode && (
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-lg">👑</div>
-                      )}
-                      {/* Project trophy */}
-                      {isProjNode && (
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-lg">🏆</div>
-                      )}
-                    </div>
-
-                    <div
-                      className="text-text text-center whitespace-nowrap px-2 py-1 border-[0.5px] border-border rounded shadow-[1px_1px_0_#000]"
-                      style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '8px', lineHeight: '1.4', background: 'rgba(6,8,12,.85)', color: isProjNode ? '#d4c060' : (n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL') ? '#46c7ff' : isBossNode ? '#e0852f' : undefined }}
-                    >
-                      {n.titulo}
-                    </div>
+                    {/* Lock */}
+                    {n.status === 'BLOQUEADO' && (
+                      <div className="absolute inset-0 grid place-items-center text-[#cfd6df] text-[1.2cqw]" style={{ background: 'rgba(6,8,12,.4)' }}>
+                        <IconLock size={10} />
+                      </div>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Vignette */}
-          <div className="absolute inset-0 pointer-events-none z-[6]" style={{ background: 'radial-gradient(ellipse 70% 70% at 50% 50%, transparent 35%, rgba(2,3,6,.55) 100%)', boxShadow: 'inset 0 0 200px 70px rgba(0,0,0,.72)' }} />
+                  <div
+                    className="text-text text-center whitespace-nowrap px-[0.6cqw] py-[0.3cqh] border border-[#1f322b] rounded-[2px]"
+                    style={{ fontSize: '0.9cqw', lineHeight: '1', background: 'rgba(7,12,11,.82)', color: isProjNode ? '#d4c060' : (n.status === 'EM_PROGRESSO' || n.status === 'DISPONIVEL') ? '#46c7ff' : isBossNode ? '#e0852f' : '#b7d4c6', textShadow: '0 1px 0 #000' }}
+                  >
+                    {i + 1}. {n.titulo}
+                  </div>
+                </div>
+              );
+            })}
 
-          {/* Hint */}
-          <div className="absolute bottom-4 left-[18px] z-[8] flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgba(13,17,23,.70)] backdrop-blur-sm border border-border text-text-dim text-xs">
-            <IconArrowsMove size={14} className="text-text-mute" />
-            Arraste para explorar · clique num nó para ver o estágio
-          </div>
-
-          {/* Minimap */}
-          <div className="absolute right-[18px] bottom-[18px] z-[8] p-2 rounded-md bg-[rgba(13,17,23,.85)] backdrop-blur-sm border border-border shadow-soft">
-            <div className="mb-1.5 pl-0.5 text-text-mute" style={{ fontFamily: "'Press Start 2P', monospace", fontSize: '7px', letterSpacing: '.5px' }}>CAVERNA</div>
-            <canvas ref={minimapRef} width={120} height={86} className="block cursor-pointer border border-border rounded" style={{ imageRendering: 'pixelated' }} onClick={handleMinimapClick} />
+            {/* Scanlines overlay */}
+            <div className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-50" style={{ background: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.25) 0 2px, transparent 2px 4px)' }} />
           </div>
         </div>
 
         {/* ── HUD ───────────────────────────────────────────────────────── */}
-        <aside className="w-[300px] shrink-0 bg-surface border-l border-border flex flex-col min-h-0">
+        <aside className="w-full md:w-[320px] shrink-0 bg-surface border-t md:border-t-0 md:border-l border-border flex flex-col flex-[0_0_45%] md:flex-none h-auto min-h-0">
           <div className="flex-1 overflow-y-auto p-5 pb-6" style={{ scrollbarWidth: 'thin', scrollbarColor: '#30363d transparent' }}>
             {selectedNode && selStatic ? (
               <>

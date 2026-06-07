@@ -66,42 +66,39 @@
             "tipo": "exercicio",
             "id": "basico-bananas",
             "nivel": 1,
-            "enunciado": "Contrato do Mercador\n\nVocê chegou à vila e o mercador quer saber quantas bananas você carrega. Ele não aceita resposta verbal — só código Python.\n\nObjetivo:\n1. Crie a variável bananas com o valor 5\n2. Use print() para mostrar o conteúdo de bananas na tela\n\nSaída esperada:\n5\n\nDica: print(bananas) — sem aspas no nome da variável!",
-            "codigoInicial": "bananas = 5\n# Use print() abaixo para mostrar bananas\n",
+            "enunciado": "Contrato do Mercador\n\nVocê chegou à vila e o mercador quer registrar quantas bananas você carrega. Ele grita a quantidade — você precisa lê-la e devolvê-la em código.\n\nObjetivo:\n1. Leia a quantidade com bananas = int(input())\n2. Use print() para mostrar o conteúdo de bananas na tela\n\nExemplo: se a entrada for 5, a saída deve ser 5.\n\nDica: print(bananas) — sem aspas no nome da variável! O valor vem da entrada, não escreva o número na mão.",
+            "codigoInicial": "bananas = int(input())\n# Use print() abaixo para mostrar bananas\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "5\n"
-              }
+              { "stdin": "5\n", "expected_output": "5\n" },
+              { "stdin": "12\n", "expected_output": "12\n" },
+              { "stdin": "0\n", "expected_output": "0\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "basico-ficha-rpg",
             "nivel": 2,
-            "enunciado": "Ficha de Personagem\n\nAntes de entrar na dungeon, o guardião exige sua ficha oficial. Monte-a com variáveis e exiba na tela.\n\nObjetivo:\n1. Crie nome (texto) e idade (número)\n2. Imprima uma frase juntando os dois\n\nSaída esperada:\nAventureiro tem 20 anos\n\nDica: Você pode juntar texto e número assim:\nprint(nome, \"tem\", idade, \"anos\")\n\nO print() aceita vários argumentos separados por vírgula — ele coloca um espaço entre eles automaticamente.",
-            "codigoInicial": "nome = \"Aventureiro\"\nidade = 20\n# Imprima uma frase juntando nome e idade\n",
+            "enunciado": "Ficha de Personagem\n\nAntes de entrar na dungeon, o guardião exige sua ficha oficial. Ele dita o nome na primeira linha e a idade na segunda — você lê e monta a frase.\n\nObjetivo:\n1. Leia nome com input() (1ª linha) e idade com input() (2ª linha)\n2. Imprima uma frase juntando os dois\n\nExemplo: entrada Aventureiro / 20 → saída: Aventureiro tem 20 anos\n\nDica: print(nome, \"tem\", idade, \"anos\") — o print() coloca um espaço entre cada argumento automaticamente.",
+            "codigoInicial": "nome = input()\nidade = input()\n# Imprima uma frase juntando nome e idade\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "Aventureiro tem 20 anos\n"
-              }
+              { "stdin": "Aventureiro\n20\n", "expected_output": "Aventureiro tem 20 anos\n" },
+              { "stdin": "Luna\n31\n", "expected_output": "Luna tem 31 anos\n" },
+              { "stdin": "Rex\n7\n", "expected_output": "Rex tem 7 anos\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "basico-coercao",
             "nivel": 3,
-            "enunciado": "Bug de Alquimia\n\nO alquimista da guilda tentou calcular o dobro de poções, mas a poção estava registrada como texto no grimório. O resultado saiu errado: \"1010\" em vez de 20.\n\nObjetivo:\nCorrija o código usando int() para que o resultado seja 20.\n\nAtenção:\nquantidade = \"10\"  ← isso é texto, não número!\ntotal = quantidade * 2  ← multiplica texto, não número\n\nSaída esperada:\n20",
-            "codigoInicial": "quantidade = \"10\"\ntotal = quantidade * 2\nprint(total)\n",
+            "enunciado": "Bug de Alquimia\n\nO alquimista lê a quantidade de poções do grimório, mas o input() sempre devolve TEXTO. Multiplicar texto por 2 repete a string (\"10\" vira \"1010\") em vez de dobrar o número.\n\nObjetivo:\nLeia a quantidade com input(), converta com int() e imprima o dobro.\n\nExemplo: entrada 10 → saída 20 (e NÃO \"1010\").\n\nAtenção: sem int(), \"10\" * 2 vira \"1010\". Converta antes de multiplicar.",
+            "codigoInicial": "quantidade = input()\n# Converta com int() e imprima o dobro\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "20\n"
-              }
+              { "stdin": "10\n", "expected_output": "20\n" },
+              { "stdin": "7\n", "expected_output": "14\n" },
+              { "stdin": "100\n", "expected_output": "200\n" }
             ]
           },
           {
@@ -174,42 +171,39 @@
             "tipo": "exercicio",
             "id": "math-divisao-inteira",
             "nivel": 1,
-            "enunciado": "Divisão do Tesouro\n\nApós a batalha, 10 moedas de ouro precisam ser divididas entre 3 goblins capturados (como troféu simbólico, claro).\n\nObjetivo:\nUse // (divisão inteira) para calcular quanto cada um recebe — sem centavos, sem frações.\n\nSaída esperada:\n3\n\nDica: 10 // 3 = ? (ignore o resto por enquanto)",
-            "codigoInicial": "# Calcule 10 // 3 e mostre com print()\n",
+            "enunciado": "Divisão do Tesouro\n\nApós a batalha, as moedas de ouro precisam ser divididas igualmente entre os aventureiros. Leia o total de moedas (1ª linha) e a quantidade de aventureiros (2ª linha).\n\nObjetivo:\nUse // (divisão inteira) para calcular quanto cada um recebe — sem centavos, sem frações.\n\nExemplo: 10 moedas / 3 aventureiros → 3\n\nDica: moedas // aventureiros (ignore o resto).",
+            "codigoInicial": "moedas = int(input())\naventureiros = int(input())\n# Calcule a divisão inteira e mostre com print()\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "3\n"
-              }
+              { "stdin": "10\n3\n", "expected_output": "3\n" },
+              { "stdin": "20\n6\n", "expected_output": "3\n" },
+              { "stdin": "9\n2\n", "expected_output": "4\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "math-slicing-estu",
             "nivel": 2,
-            "enunciado": "Runa Cortada\n\nNo templo antigo, a palavra sagrada \"ESTUDAR\" foi gravada em uma pedra. Você precisa extrair apenas as primeiras 4 letras para ativar o mecanismo.\n\nObjetivo:\nUse slicing na palavra \"ESTUDAR\" para pegar só \"ESTU\" e imprima.\n\nSaída esperada:\nESTU\n\nDica: [0:4] pega da posição 0 até ANTES da 4.",
-            "codigoInicial": "palavra = \"ESTUDAR\"\n# Use slicing e print\n",
+            "enunciado": "Runa Cortada\n\nNo templo antigo, uma palavra sagrada foi gravada em pedra. Leia a palavra com input() e extraia apenas as primeiras 4 letras para ativar o mecanismo.\n\nObjetivo:\nUse slicing na palavra lida para pegar os 4 primeiros caracteres e imprima.\n\nExemplo: ESTUDAR → ESTU\n\nDica: palavra[0:4] pega da posição 0 até ANTES da 4.",
+            "codigoInicial": "palavra = input()\n# Use slicing e print\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "ESTU\n"
-              }
+              { "stdin": "ESTUDAR\n", "expected_output": "ESTU\n" },
+              { "stdin": "PYTHON\n", "expected_output": "PYTH\n" },
+              { "stdin": "PROGRAMA\n", "expected_output": "PROG\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "math-fstring-preco",
             "nivel": 3,
-            "enunciado": "Etiqueta do Mercador\n\nO mercador exige que todo item tenha etiqueta formatada corretamente. O preço é 49.9, mas na etiqueta deve aparecer com duas casas decimais.\n\nObjetivo:\nUse f-string para imprimir exatamente:\nO item custa R$ 49.90\n\nDica: Use {preco:.2f} dentro da f-string para forçar 2 casas decimais.",
-            "codigoInicial": "preco = 49.9\n# Escreva seu print com f-string abaixo\n",
+            "enunciado": "Etiqueta do Mercador\n\nO mercador exige que todo item tenha etiqueta com o preço em duas casas decimais. Leia o preço com input() (use float) e monte a etiqueta.\n\nObjetivo:\nUse f-string para imprimir exatamente:\nO item custa R$ <preco com 2 casas>\n\nExemplo: entrada 49.9 → O item custa R$ 49.90\n\nDica: float(input()) para ler, e {preco:.2f} dentro da f-string para forçar 2 casas decimais.",
+            "codigoInicial": "preco = float(input())\n# Escreva seu print com f-string abaixo\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "O item custa R$ 49.90\n"
-              }
+              { "stdin": "49.9\n", "expected_output": "O item custa R$ 49.90\n" },
+              { "stdin": "3\n", "expected_output": "O item custa R$ 3.00\n" },
+              { "stdin": "12.5\n", "expected_output": "O item custa R$ 12.50\n" }
             ]
           },
           {
@@ -272,42 +266,38 @@
             "tipo": "exercicio",
             "id": "cond-fome",
             "nivel": 1,
-            "enunciado": "Rotina do Aventureiro\n\nSeu personagem acordou na taverna. A variável fome já está definida como True.\n\nObjetivo:\n• Se fome for True → imprima \"Comer\"\n• Senão → imprima \"Dormir\"\n\nSaída esperada:\nComer\n\nDica: Estrutura básica:\nif fome:\n    print(\"Comer\")\nelse:\n    print(\"Dormir\")",
-            "codigoInicial": "fome = True\n# Escreva if / else abaixo\n",
+            "enunciado": "Rotina do Aventureiro\n\nSeu personagem acordou na taverna. Leia o estado dele com input(): pode vir \"sim\" (está com fome) ou \"nao\".\n\nObjetivo:\n• Se a entrada for \"sim\" → imprima \"Comer\"\n• Senão → imprima \"Dormir\"\n\nExemplo: entrada sim → Comer | entrada nao → Dormir\n\nDica:\nif resposta == \"sim\":\n    print(\"Comer\")\nelse:\n    print(\"Dormir\")",
+            "codigoInicial": "resposta = input()\n# Escreva if / else abaixo\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "Comer\n"
-              }
+              { "stdin": "sim\n", "expected_output": "Comer\n" },
+              { "stdin": "nao\n", "expected_output": "Dormir\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "cond-paridade",
             "nivel": 2,
-            "enunciado": "Oráculo dos Números\n\nO oráculo da torre pede que você classifique o número 7 como par ou ímpar.\n\nObjetivo:\nUse numero = 7 e o operador % (resto da divisão).\n• Se numero % 2 == 0 → imprima \"Par\"\n• Senão → imprima \"Ímpar\"\n\nSaída esperada:\nÍmpar\n\nDica: 7 ÷ 2 = 3 com resto 1. Como o resto não é 0, é ímpar.",
-            "codigoInicial": "numero = 7\n# if / else para Par ou Ímpar\n",
+            "enunciado": "Oráculo dos Números\n\nO oráculo da torre pede que você classifique um número como par ou ímpar. Leia o número com input().\n\nObjetivo:\nUse o operador % (resto da divisão).\n• Se numero % 2 == 0 → imprima \"Par\"\n• Senão → imprima \"Ímpar\"\n\nExemplo: 7 → Ímpar | 8 → Par\n\nDica: numero = int(input()). 7 ÷ 2 deixa resto 1 (ímpar); 8 deixa resto 0 (par).",
+            "codigoInicial": "numero = int(input())\n# if / else para Par ou Ímpar\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "Ímpar\n"
-              }
+              { "stdin": "7\n", "expected_output": "Ímpar\n" },
+              { "stdin": "8\n", "expected_output": "Par\n" },
+              { "stdin": "0\n", "expected_output": "Par\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "cond-login",
             "nivel": 3,
-            "enunciado": "Portão da Fortaleza\n\nA fortaleza só abre se usuario E senha estiverem corretos ao mesmo tempo. Um alone não basta — segurança em camadas.\n\nObjetivo:\nAs variáveis já estão no código. Imprima \"Acesso liberado\" quando os dois baterem.\n\nSaída esperada:\nAcesso liberado\n\nDica: Use and para exigir as duas condições:\nif usuario_digitado == usuario_db and senha_digitada == senha_db:",
-            "codigoInicial": "usuario_db = \"heroi\"\nsenha_db = \"1234\"\nusuario_digitado = \"heroi\"\nsenha_digitada = \"1234\"\n# Verifique login e imprima Acesso liberado\n",
+            "enunciado": "Portão da Fortaleza\n\nA fortaleza só abre se usuário E senha estiverem corretos ao mesmo tempo. O usuário oficial é \"heroi\" e a senha \"1234\". Leia o usuário digitado (1ª linha) e a senha digitada (2ª linha).\n\nObjetivo:\n• Se os dois baterem → imprima \"Acesso liberado\"\n• Senão → imprima \"Acesso negado\"\n\nExemplo: heroi / 1234 → Acesso liberado | heroi / 0000 → Acesso negado\n\nDica: use and para exigir as duas condições ao mesmo tempo.",
+            "codigoInicial": "usuario_db = \"heroi\"\nsenha_db = \"1234\"\nusuario = input()\nsenha = input()\n# Verifique login com and e imprima o resultado\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "Acesso liberado\n"
-              }
+              { "stdin": "heroi\n1234\n", "expected_output": "Acesso liberado\n" },
+              { "stdin": "heroi\n0000\n", "expected_output": "Acesso negado\n" },
+              { "stdin": "intruso\n1234\n", "expected_output": "Acesso negado\n" }
             ]
           },
           {
@@ -376,42 +366,39 @@
             "tipo": "exercicio",
             "id": "loop-while-contagem",
             "nivel": 1,
-            "enunciado": "Contagem Regressiva\n\nO portal mágico só abre após uma contagem de 1 a 5. Use while para imprimir cada número, um por linha.\n\nObjetivo:\nImprima 1, 2, 3, 4, 5 (cada um em sua linha)\n\nDica: Comece com contador = 1 e incremente com contador = contador + 1 a cada volta.\n\nAtenção: Não esqueça de atualizar o contador — senão loop infinito!",
-            "codigoInicial": "contador = 1\n# while: imprima de 1 a 5\n",
+            "enunciado": "Contagem do Portal\n\nO portal mágico abre após contar de 1 até N. Leia N com input() e use while para imprimir cada número de 1 a N, um por linha.\n\nObjetivo:\nImprima 1, 2, ..., N (cada um em sua linha)\n\nExemplo: entrada 5 → imprime 1, 2, 3, 4, 5\n\nDica: n = int(input()). Comece com contador = 1 e incremente com contador = contador + 1 a cada volta. Não esqueça de atualizar o contador — senão loop infinito!",
+            "codigoInicial": "n = int(input())\ncontador = 1\n# while: imprima de 1 a n\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "1\n2\n3\n4\n5\n"
-              }
+              { "stdin": "5\n", "expected_output": "1\n2\n3\n4\n5\n" },
+              { "stdin": "3\n", "expected_output": "1\n2\n3\n" },
+              { "stdin": "1\n", "expected_output": "1\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "loop-for-pares",
             "nivel": 2,
-            "enunciado": "Runas Pares\n\nO ritual exige invocar apenas números pares de 0 a 10. Use for com range() para imprimi-los, um por linha.\n\nSaída esperada:\n0\n2\n4\n6\n8\n10\n\nDica: range(0, 11, 2) gera 0, 2, 4... 10 (início, fim exclusivo, passo).",
-            "codigoInicial": "# for + range: pares de 0 a 10\n",
+            "enunciado": "Runas Pares\n\nO ritual exige invocar os números pares de 0 até N. Leia N com input() e use for com range() para imprimi-los, um por linha.\n\nObjetivo:\nImprima 0, 2, 4, ... até N (inclusive se N for par)\n\nExemplo: entrada 10 → 0, 2, 4, 6, 8, 10\n\nDica: range(0, n + 1, 2) gera os pares (início, fim exclusivo, passo). Some 1 ao n para incluí-lo.",
+            "codigoInicial": "n = int(input())\n# for + range: pares de 0 a n\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "0\n2\n4\n6\n8\n10\n"
-              }
+              { "stdin": "10\n", "expected_output": "0\n2\n4\n6\n8\n10\n" },
+              { "stdin": "6\n", "expected_output": "0\n2\n4\n6\n" },
+              { "stdin": "5\n", "expected_output": "0\n2\n4\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "loop-break-segredo",
             "nivel": 3,
-            "enunciado": "Caça ao Tesouro\n\nTrês passagens se abrem diante de você. Percorra a lista [\"111\", \"segredo\", \"222\"] até encontrar a palavra-chave.\n\nObjetivo:\nQuando encontrar \"segredo\", imprima \"Achei!\" e pare com break.\n\nSaída esperada:\nAchei!\n\nDica: break interrompe o loop na hora — não continue procurando depois de achar.",
-            "codigoInicial": "passagens = [\"111\", \"segredo\", \"222\"]\nfor item in passagens:\n    pass\n",
+            "enunciado": "Caça ao Tesouro\n\nVocê percorre as passagens [\"111\", \"segredo\", \"222\", \"333\"] procurando uma palavra-chave. Leia a palavra procurada com input().\n\nObjetivo:\n• Percorra a lista com for\n• Se encontrar a palavra, imprima \"Achei!\" e pare com break\n• Se o loop terminar sem achar, imprima \"Nada\"\n\nExemplo: procurar segredo → Achei! | procurar 999 → Nada\n\nDica: use o else do for (alinhado ao for) para o caso \"não encontrei\", ou uma variável de flag.",
+            "codigoInicial": "passagens = [\"111\", \"segredo\", \"222\", \"333\"]\nalvo = input()\nfor item in passagens:\n    pass\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "Achei!\n"
-              }
+              { "stdin": "segredo\n", "expected_output": "Achei!\n" },
+              { "stdin": "222\n", "expected_output": "Achei!\n" },
+              { "stdin": "999\n", "expected_output": "Nada\n" }
             ]
           },
           {
@@ -481,42 +468,38 @@
             "tipo": "exercicio",
             "id": "lista-append-len",
             "nivel": 1,
-            "enunciado": "Organize a Mochila\n\nSua mochila já tem 3 poções. O alquimista te deu um frasco de veneno para guardar.\n\nObjetivo:\n1. Use .append() para adicionar \"veneno\" no final da lista\n2. Imprima len(mochila) — deve ser 4\n\nSaída esperada:\n4",
-            "codigoInicial": "mochila = [\"poção\", \"poção\", \"poção\"]\n# append veneno e print len\n",
+            "enunciado": "Organize a Mochila\n\nSua mochila já tem 3 poções. O alquimista te entrega um novo item para guardar — leia o nome do item com input().\n\nObjetivo:\n1. Use .append() para adicionar o item lido no final da lista\n2. Imprima a mochila completa com print(mochila)\n\nExemplo: item veneno → ['poção', 'poção', 'poção', 'veneno']\n\nDica: mochila.append(item) adiciona no fim. print(mochila) mostra a lista inteira.",
+            "codigoInicial": "mochila = [\"poção\", \"poção\", \"poção\"]\nitem = input()\n# append item e print mochila\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "4\n"
-              }
+              { "stdin": "veneno\n", "expected_output": "['poção', 'poção', 'poção', 'veneno']\n" },
+              { "stdin": "espada\n", "expected_output": "['poção', 'poção', 'poção', 'espada']\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "tupla-cofre-espada",
             "nivel": 2,
-            "enunciado": "Abra o Cofre\n\nO cofre antigo guarda três relíquias em ordem: espada, escudo, poção. Tuplas não mentem — a posição 0 é sempre a espada.\n\nObjetivo:\nLeia o primeiro item com cofre[0] e imprima \"espada\".\n\nDica: Índices começam em 0, não em 1!",
-            "codigoInicial": "cofre = (\"espada\", \"escudo\", \"poção\")\n# Leia cofre[0] e imprima\n",
+            "enunciado": "Abra o Cofre\n\nO cofre antigo guarda quatro relíquias em ordem: espada, escudo, poção, anel. Leia com input() a posição (índice) que o guardião pede e mostre a relíquia daquela posição.\n\nObjetivo:\nLeia o índice com int(input()) e imprima cofre[indice].\n\nExemplo: índice 0 → espada | índice 2 → poção\n\nDica: Índices começam em 0, não em 1! Tuplas se leem igual a listas: cofre[indice].",
+            "codigoInicial": "cofre = (\"espada\", \"escudo\", \"poção\", \"anel\")\nindice = int(input())\n# Imprima cofre[indice]\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "espada\n"
-              }
+              { "stdin": "0\n", "expected_output": "espada\n" },
+              { "stdin": "2\n", "expected_output": "poção\n" },
+              { "stdin": "3\n", "expected_output": "anel\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "try-except-valueerror",
             "nivel": 3,
-            "enunciado": "Escudo do Guardião\n\nO guardião pede um número, mas visitantes teimosos digitam letras. Proteja seu código!\n\nObjetivo:\n1. Leia um dado com input()\n2. Tente converter com int()\n3. Se o usuário digitar letras, capture ValueError e imprima:\nErro: digite um número!\n\nDica: O teste automático simula a entrada \"abc\".",
+            "enunciado": "Escudo do Guardião\n\nO guardião pede um número, mas visitantes teimosos digitam letras. Proteja seu código com try/except!\n\nObjetivo:\n1. Leia um dado com input()\n2. Tente converter com int() dentro de um try\n3. Se der certo, imprima: Numero valido: <n>\n4. Se o usuário digitar letras, capture ValueError e imprima: Erro: digite um número!\n\nExemplo: 42 → Numero valido: 42 | abc → Erro: digite um número!\n\nDica: o except ValueError captura a falha do int() sem derrubar o programa.",
             "codigoInicial": "dado = input()\n# try int(dado) / except ValueError\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "abc",
-                "expected_output": "Erro: digite um número!\n"
-              }
+              { "stdin": "abc\n", "expected_output": "Erro: digite um número!\n" },
+              { "stdin": "42\n", "expected_output": "Numero valido: 42\n" },
+              { "stdin": "7\n", "expected_output": "Numero valido: 7\n" }
             ]
           },
           {
@@ -563,48 +546,54 @@
           },
           {
             "tipo": "texto",
+            "conteudo": "▶ Parâmetros, valores padrão e escopo\n\nParâmetros podem ter valor padrão — usado quando você não passa o argumento:\n\ndef atacar(dano, critico=False):\n    if critico:\n        return dano * 2\n    return dano\n\natacar(10)         →  10\natacar(10, True)   →  20\n\n▶ Vários argumentos e retorno múltiplo\n\ndef status(vida, mana):\n    return vida > 0, mana > 0\n\nvivo, tem_mana = status(80, 0)\nprint(vivo, tem_mana)  →  True False\n\n▶ Escopo local x global\n\npontos = 0  # global\n\ndef ganhar():\n    pontos = 50   # NOVA variável local — não muda a de fora!\n    return pontos\n\nganhar()\nprint(pontos)  →  0\n\nVariáveis criadas dentro de uma função morrem quando ela termina. Para devolver um resultado, use return — não dependa de variáveis globais.\n\nDica: prefira funções que recebem tudo por parâmetro e devolvem com return. Isso deixa o código previsível e fácil de testar."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Funções (Parte 1) — Curso Python #20",
+            "url": "https://www.youtube.com/embed/ezfr9d7wd_k",
+            "linkAssistir": "https://www.youtube.com/watch?v=ezfr9d7wd_k"
+          },
+          {
+            "tipo": "texto",
             "conteudo": "Prática: Três exercícios para fixar funções antes de seguir ao cruzamento das vertentes."
           },
           {
             "tipo": "exercicio",
             "id": "func-hello",
             "nivel": 1,
-            "enunciado": "Feitiço de Boas-vindas\n\nCrie a função cumprimentar que recebe um nome e imprime Olá, <nome>!\n\nDepois chame cumprimentar(\"Aventureiro\").\n\nSaída esperada:\nOlá, Aventureiro!",
-            "codigoInicial": "def cumprimentar(nome):\n    pass\n\ncumprimentar(\"Aventureiro\")\n",
+            "enunciado": "Feitiço de Boas-vindas\n\nCrie a função cumprimentar(nome) que imprime Olá, <nome>!\n\nLeia o nome com input() e chame a função com ele.\n\nExemplo: entrada Aventureiro → Olá, Aventureiro!\n\nDica: dentro da função use print(f\"Olá, {nome}!\").",
+            "codigoInicial": "def cumprimentar(nome):\n    pass\n\nnome = input()\ncumprimentar(nome)\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "Olá, Aventureiro!\n"
-              }
+              { "stdin": "Aventureiro\n", "expected_output": "Olá, Aventureiro!\n" },
+              { "stdin": "Luna\n", "expected_output": "Olá, Luna!\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "func-dobro",
             "nivel": 2,
-            "enunciado": "Amplificador de Poder\n\nCrie dobro(n) que retorna n multiplicado por 2.\n\nImprima dobro(7).\n\nSaída esperada:\n14",
-            "codigoInicial": "def dobro(n):\n    pass\n\nprint(dobro(7))\n",
+            "enunciado": "Amplificador de Poder\n\nCrie dobro(n) que RETORNA (com return) n multiplicado por 2.\n\nLeia n com input(), chame a função e imprima o resultado.\n\nExemplo: entrada 7 → 14\n\nDica: a função deve usar return n * 2 — quem imprime é o print(dobro(n)) lá fora.",
+            "codigoInicial": "def dobro(n):\n    pass\n\nn = int(input())\nprint(dobro(n))\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "14\n"
-              }
+              { "stdin": "7\n", "expected_output": "14\n" },
+              { "stdin": "10\n", "expected_output": "20\n" },
+              { "stdin": "0\n", "expected_output": "0\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "func-curar",
             "nivel": 3,
-            "enunciado": "Poção de Cura\n\nCrie curar(vida, pocao) que retorna vida + pocao.\n\nImprima curar(60, 25).\n\nSaída esperada:\n85",
-            "codigoInicial": "def curar(vida, pocao):\n    pass\n\nprint(curar(60, 25))\n",
+            "enunciado": "Poção de Cura\n\nCrie curar(vida, pocao) que retorna vida + pocao.\n\nLeia a vida atual (1ª linha) e o valor da poção (2ª linha), chame a função e imprima o total.\n\nExemplo: 60 / 25 → 85\n\nDica: dois inputs, dois int(). return vida + pocao dentro da função.",
+            "codigoInicial": "def curar(vida, pocao):\n    pass\n\nvida = int(input())\npocao = int(input())\nprint(curar(vida, pocao))\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "85\n"
-              }
+              { "stdin": "60\n25\n", "expected_output": "85\n" },
+              { "stdin": "100\n0\n", "expected_output": "100\n" },
+              { "stdin": "30\n45\n", "expected_output": "75\n" }
             ]
           },
           {
@@ -651,48 +640,53 @@
           },
           {
             "tipo": "texto",
+            "conteudo": "▶ Percorrendo chaves e valores\n\nficha = {\"nome\": \"Rex\", \"hp\": 100, \"classe\": \"Tank\"}\n\n# só as chaves\nfor chave in ficha:\n    print(chave)            →  nome, hp, classe\n\n# chave e valor juntos com .items()\nfor chave, valor in ficha.items():\n    print(chave, \"=\", valor)\n\n# só os valores\nfor v in ficha.values():\n    print(v)\n\n▶ Verificar e remover\n\n\"hp\" in ficha        →  True   (a chave existe?)\ndel ficha[\"hp\"]      →  remove o par\nficha.pop(\"classe\")  →  remove e devolve o valor\n\n▶ Contar ocorrências (padrão clássico)\n\npalavras = [\"a\", \"b\", \"a\", \"a\", \"b\"]\ncontagem = {}\nfor p in palavras:\n    contagem[p] = contagem.get(p, 0) + 1\nprint(contagem)  →  {'a': 3, 'b': 2}\n\nDica: o padrão dict.get(chave, 0) + 1 é a forma mais comum de contar coisas em Python — guarde no inventário."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Dicionários — Curso Python #19",
+            "url": "https://www.youtube.com/embed/ZWj8o692qGY",
+            "linkAssistir": "https://www.youtube.com/watch?v=ZWj8o692qGY"
+          },
+          {
+            "tipo": "texto",
             "conteudo": "Prática: Organize fichas de heróis e prepare-se para purificar registros corrompidos no miniboss."
           },
           {
             "tipo": "exercicio",
             "id": "dict-criar",
             "nivel": 1,
-            "enunciado": "Ficha do Recruta\n\nCrie item = {\"nome\": \"Espada Longa\", \"dano\": 15} e imprima item[\"dano\"].\n\nSaída esperada:\n15",
-            "codigoInicial": "# Crie o dicionário e imprima o dano\n",
+            "enunciado": "Ficha do Recruta\n\nLeia o dano de um item com input() e monte item = {\"nome\": \"Espada Longa\", \"dano\": <dano>}. Depois imprima item[\"dano\"].\n\nExemplo: entrada 15 → 15\n\nDica: dano = int(input()); item = {\"nome\": \"Espada Longa\", \"dano\": dano}; print(item[\"dano\"]).",
+            "codigoInicial": "dano = int(input())\n# Crie o dicionário e imprima o dano\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "15\n"
-              }
+              { "stdin": "15\n", "expected_output": "15\n" },
+              { "stdin": "30\n", "expected_output": "30\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "dict-get",
             "nivel": 2,
-            "enunciado": "Baú Misterioso\n\nheroi = {\"nome\": \"Luna\"}\n\nUse .get para imprimir ouro com padrão 0 (heroi não tem ouro).\n\nSaída esperada:\n0",
-            "codigoInicial": "heroi = {\"nome\": \"Luna\"}\n# print com .get\n",
+            "enunciado": "Baú Misterioso\n\nheroi = {\"nome\": \"Luna\", \"ouro\": 50}\n\nLeia com input() qual chave o mestre quer consultar e imprima o valor usando .get com padrão 0 (para chaves que não existem).\n\nExemplo: chave ouro → 50 | chave mp → 0\n\nDica: print(heroi.get(chave, 0)) — o .get devolve o padrão em vez de quebrar com KeyError.",
+            "codigoInicial": "heroi = {\"nome\": \"Luna\", \"ouro\": 50}\nchave = input()\n# print com .get e padrão 0\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "0\n"
-              }
+              { "stdin": "ouro\n", "expected_output": "50\n" },
+              { "stdin": "mp\n", "expected_output": "0\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "dict-update",
             "nivel": 3,
-            "enunciado": "Level Up\n\nficha = {\"nome\": \"Kira\", \"nivel\": 4}\n\nAtualize nivel para 5 e imprima ficha[\"nivel\"].\n\nSaída esperada:\n5",
-            "codigoInicial": "ficha = {\"nome\": \"Kira\", \"nivel\": 4}\n# Atualize e imprima\n",
+            "enunciado": "Level Up\n\nficha = {\"nome\": \"Kira\", \"nivel\": 4}\n\nLeia com input() quantos níveis o herói subiu, some ao nível atual, atualize a ficha e imprima ficha[\"nivel\"].\n\nExemplo: subiu 1 → 5 | subiu 3 → 7\n\nDica: ficha[\"nivel\"] = ficha[\"nivel\"] + ganho. Atribuir em chave existente atualiza o valor.",
+            "codigoInicial": "ficha = {\"nome\": \"Kira\", \"nivel\": 4}\nganho = int(input())\n# Atualize ficha[\"nivel\"] e imprima\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "",
-                "expected_output": "5\n"
-              }
+              { "stdin": "1\n", "expected_output": "5\n" },
+              { "stdin": "3\n", "expected_output": "7\n" },
+              { "stdin": "0\n", "expected_output": "4\n" }
             ]
           },
           {
@@ -737,10 +731,9 @@
             "codigoInicial": "dado = input()\n# Purifique abaixo\n",
             "linguagem": "python",
             "testes": [
-              {
-                "stdin": "xX_LAMA_Xx-Herolink-25-Guerreiros",
-                "expected_output": "*** Herolink *** tem 25 anos...\n"
-              }
+              { "stdin": "xX_LAMA_Xx-Herolink-25-Guerreiros\n", "expected_output": "*** Herolink *** tem 25 anos...\n" },
+              { "stdin": "zZ_DARK_Zz-Kira-19-Maga\n", "expected_output": "*** Kira *** tem 19 anos...\n" },
+              { "stdin": "lixo-Rex-42-Tank\n", "expected_output": "*** Rex *** tem 42 anos...\n" }
             ]
           },
           {
@@ -777,45 +770,58 @@
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "## Compreensões e Lambdas\n\nVocê já sabe criar listas com for. Agora aprende a escrever isso de forma compacta e pythônica.\n\n▶ List Comprehension\n\nnumeros = [1, 2, 3, 4, 5]\ndobros = [n * 2 for n in numeros]\nprint(dobros)  →  [2, 4, 6, 8, 10]\n\nCom filtro:\npares = [n for n in numeros if n % 2 == 0]\nprint(pares)  →  [2, 4]\n\n▶ Dict Comprehension\n\ncubos = {n: n**3 for n in range(1, 6)}\nprint(cubos)  →  {1: 1, 2: 8, 3: 27, 4: 64, 5: 125}\n\n▶ Lambda\n\ndobro = lambda x: x * 2\nprint(dobro(5))  →  10\n\nUsada com sorted:\nnomes = [\"banana\", \"uva\", \"abacaxi\"]\nnomes.sort(key=lambda s: len(s))\nprint(nomes)  →  ['uva', 'banana', 'abacaxi']\n\n▶ map() e filter()\n\nmap(lambda x: x**2, [1,2,3])  →  [1, 4, 9]\nfilter(lambda x: x > 2, [1,2,3,4])  →  [3, 4]\n\nAmbos retornam iteradores — converta com list() para ver."
+            "conteudo": "## Compreensões e Lambdas\n\nVocê já sabe criar listas com for. Agora aprende a escrever isso de forma compacta e pythônica.\n\n▶ List Comprehension\n\nnumeros = [1, 2, 3, 4, 5]\ndobros = [n * 2 for n in numeros]\nprint(dobros)  →  [2, 4, 6, 8, 10]\n\nCom filtro:\npares = [n for n in numeros if n % 2 == 0]\nprint(pares)  →  [2, 4]\n\nO segredo: leia da direita para a esquerda — primeiro o for, depois o if (filtro), por último a transformação à esquerda."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Dict Comprehension\n\ncubos = {n: n**3 for n in range(1, 6)}\nprint(cubos)  →  {1: 1, 2: 8, 3: 27, 4: 64, 5: 125}\n\n▶ Lambda\n\ndobro = lambda x: x * 2\nprint(dobro(5))  →  10\n\nUsada com sorted:\nnomes = [\"banana\", \"uva\", \"abacaxi\"]\nnomes.sort(key=lambda s: len(s))\nprint(nomes)  →  ['uva', 'banana', 'abacaxi']\n\nLambdas brilham como argumento de outras funções (sorted, max, filter) — quando a lógica é curta demais para merecer um def."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ map() e filter()\n\nmap(lambda x: x**2, [1,2,3])  →  [1, 4, 9]\nfilter(lambda x: x > 2, [1,2,3,4])  →  [3, 4]\n\nAmbos retornam iteradores — converta com list() para ver."
           },
           {
             "tipo": "video",
-            "titulo": "List Comprehension (Curso em Vídeo #33)",
-            "url": "https://www.youtube.com/embed/G4wBCcHbDzE",
-            "linkAssistir": "https://www.youtube.com/watch?v=G4wBCcHbDzE"
+            "titulo": "List Comprehension em Python — Aula 23",
+            "url": "https://www.youtube.com/embed/j7pe5x2apBs",
+            "linkAssistir": "https://www.youtube.com/watch?v=j7pe5x2apBs"
           },
           {
             "tipo": "exercicio",
             "id": "comp-quadrados",
             "nivel": 1,
-            "enunciado": "Quadrados Mágicos\n\nUse list comprehension para criar uma lista com o quadrado de cada número de 1 a 5.\n\nSaída esperada:\n[1, 4, 9, 16, 25]",
-            "codigoInicial": "# [n**2 for n in range(...)]\n",
+            "enunciado": "Quadrados Mágicos\n\nLeia N com input() e use list comprehension para criar uma lista com o quadrado de cada número de 1 a N. Imprima a lista.\n\nExemplo: N = 5 → [1, 4, 9, 16, 25]\n\nDica: [n**2 for n in range(1, N + 1)]",
+            "codigoInicial": "n = int(input())\n# [x**2 for x in range(1, n + 1)]\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "[1, 4, 9, 16, 25]\n"}
+              { "stdin": "5\n", "expected_output": "[1, 4, 9, 16, 25]\n" },
+              { "stdin": "3\n", "expected_output": "[1, 4, 9]\n" },
+              { "stdin": "1\n", "expected_output": "[1]\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "comp-filter-pares",
             "nivel": 2,
-            "enunciado": "Runas Pares\n\nDada a lista [1,2,3,4,5,6,7,8], use comprehension com filtro para pegar só os pares.\n\nSaída esperada:\n[2, 4, 6, 8]",
-            "codigoInicial": "nums = [1,2,3,4,5,6,7,8]\n# [n for n in nums if ...]\n",
+            "enunciado": "Runas Pares\n\nLeia uma linha com vários números separados por espaço e use comprehension com filtro para criar uma lista só com os pares. Imprima a lista.\n\nExemplo: entrada \"1 2 3 4 5 6 7 8\" → [2, 4, 6, 8]\n\nDica: nums = [int(x) for x in input().split()]; depois [n for n in nums if n % 2 == 0]",
+            "codigoInicial": "nums = [int(x) for x in input().split()]\n# [n for n in nums if ...]\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "[2, 4, 6, 8]\n"}
+              { "stdin": "1 2 3 4 5 6 7 8\n", "expected_output": "[2, 4, 6, 8]\n" },
+              { "stdin": "10 11 12 13\n", "expected_output": "[10, 12]\n" },
+              { "stdin": "1 3 5\n", "expected_output": "[]\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "comp-lambda-sort",
             "nivel": 3,
-            "enunciado": "Ordenar por Tamanho\n\nOrde a lista [\"banana\", \"uva\", \"abacaxi\", \"pera\"] pelo tamanho de cada palavra (menor primeiro) usando lambda.\n\nSaída esperada:\n['uva', 'pera', 'banana', 'abacaxi']",
-            "codigoInicial": "frutas = [\"banana\", \"uva\", \"abacaxi\", \"pera\"]\n# frutas.sort(key=lambda ...)\n",
+            "enunciado": "Ordenar por Tamanho\n\nLeia uma linha com palavras separadas por espaço e ordene-as pelo tamanho de cada palavra (menor primeiro) usando lambda. Imprima a lista resultante.\n\nExemplo: \"banana uva abacaxi pera\" → ['uva', 'pera', 'banana', 'abacaxi']\n\nDica: palavras = input().split(); palavras.sort(key=lambda s: len(s)); print(palavras)",
+            "codigoInicial": "palavras = input().split()\n# palavras.sort(key=lambda ...) e print\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "['uva', 'pera', 'banana', 'abacaxi']\n"}
+              { "stdin": "banana uva abacaxi pera\n", "expected_output": "['uva', 'pera', 'banana', 'abacaxi']\n" },
+              { "stdin": "oi tchau a\n", "expected_output": "['a', 'oi', 'tchau']\n" }
             ]
           },
           {"tipo": "flashcards"}
@@ -850,7 +856,15 @@
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "## Orientação a Objetos\n\n▶ Criando uma classe\n\nclass Guerreiro:\n    def __init__(self, nome, vida, ataque):\n        self.nome = nome\n        self.vida = vida\n        self.ataque = ataque\n\n    def atacar(self, inimigo):\n        inimigo.vida -= self.ataque\n        print(f\"{self.nome} atacou {inimigo.nome} por {self.ataque}!\")\n\n    def esta_vivo(self):\n        return self.vida > 0\n\n▶ Instanciando e usando\n\nkira = Guerreiro(\"Kira\", 100, 25)\nrex  = Guerreiro(\"Rex\", 80, 20)\n\nkira.atacar(rex)\nprint(rex.vida)        →  55\nprint(rex.esta_vivo()) →  True\n\n▶ __str__ — representação legível\n\n    def __str__(self):\n        return f\"{self.nome} (vida: {self.vida})\"\n\nprint(kira)  →  Kira (vida: 100)\n\nDica: __init__ é o construtor (roda quando cria o objeto). self sempre primeiro. Atributos são criados com self.nome = valor."
+            "conteudo": "## Orientação a Objetos\n\n▶ Criando uma classe\n\nclass Guerreiro:\n    def __init__(self, nome, vida, ataque):\n        self.nome = nome\n        self.vida = vida\n        self.ataque = ataque\n\n    def atacar(self, inimigo):\n        inimigo.vida -= self.ataque\n        print(f\"{self.nome} atacou {inimigo.nome} por {self.ataque}!\")\n\n    def esta_vivo(self):\n        return self.vida > 0\n\nObserve: todo método recebe self como primeiro parâmetro. É por ele que o objeto acessa seus próprios atributos (self.nome, self.vida)."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Instanciando e usando\n\nkira = Guerreiro(\"Kira\", 100, 25)\nrex  = Guerreiro(\"Rex\", 80, 20)\n\nkira.atacar(rex)\nprint(rex.vida)        →  55\nprint(rex.esta_vivo()) →  True\n\nCada objeto é independente: kira e rex têm seus próprios valores de vida. Mudar um não afeta o outro."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ __str__ — representação legível\n\n    def __str__(self):\n        return f\"{self.nome} (vida: {self.vida})\"\n\nprint(kira)  →  Kira (vida: 100)\n\nDica: __init__ é o construtor (roda quando cria o objeto). self sempre primeiro. Atributos são criados com self.nome = valor."
           },
           {
             "tipo": "video",
@@ -862,33 +876,37 @@
             "tipo": "exercicio",
             "id": "oop-cachorro",
             "nivel": 1,
-            "enunciado": "Criar um Cachorro\n\nCrie a classe Cachorro com __init__(self, nome) e um método latir(self) que imprime \"<nome> diz: Au!\"\n\nInstancie Cachorro(\"Rex\") e chame latir().\n\nSaída esperada:\nRex diz: Au!",
-            "codigoInicial": "class Cachorro:\n    def __init__(self, nome):\n        pass\n    def latir(self):\n        pass\n\nrex = Cachorro(\"Rex\")\nrex.latir()\n",
+            "enunciado": "Criar um Cachorro\n\nCrie a classe Cachorro com __init__(self, nome) e um método latir(self) que imprime \"<nome> diz: Au!\"\n\nLeia o nome com input(), instancie o Cachorro e chame latir().\n\nExemplo: entrada Rex → Rex diz: Au!\n\nDica: guarde self.nome = nome no __init__ e use-o no print do latir().",
+            "codigoInicial": "class Cachorro:\n    def __init__(self, nome):\n        pass\n    def latir(self):\n        pass\n\nnome = input()\ncao = Cachorro(nome)\ncao.latir()\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "Rex diz: Au!\n"}
+              { "stdin": "Rex\n", "expected_output": "Rex diz: Au!\n" },
+              { "stdin": "Bidu\n", "expected_output": "Bidu diz: Au!\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "oop-heroi-vida",
             "nivel": 2,
-            "enunciado": "Herói com HP\n\nCrie Heroi(nome, vida) com método receber_dano(dano) que subtrai da vida e imprime a vida restante.\n\nCrie Heroi(\"Luna\", 100), chame receber_dano(30).\n\nSaída esperada:\n70",
-            "codigoInicial": "class Heroi:\n    def __init__(self, nome, vida):\n        pass\n    def receber_dano(self, dano):\n        pass\n\nluna = Heroi(\"Luna\", 100)\nluna.receber_dano(30)\n",
+            "enunciado": "Herói com HP\n\nCrie Heroi(nome, vida) com método receber_dano(dano) que subtrai da vida e imprime a vida restante.\n\nLeia a vida inicial (1ª linha) e o dano recebido (2ª linha), crie o herói e chame receber_dano.\n\nExemplo: vida 100 / dano 30 → 70\n\nDica: self.vida -= dano e depois print(self.vida) dentro do método.",
+            "codigoInicial": "class Heroi:\n    def __init__(self, nome, vida):\n        pass\n    def receber_dano(self, dano):\n        pass\n\nvida = int(input())\ndano = int(input())\nluna = Heroi(\"Luna\", vida)\nluna.receber_dano(dano)\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "70\n"}
+              { "stdin": "100\n30\n", "expected_output": "70\n" },
+              { "stdin": "80\n80\n", "expected_output": "0\n" },
+              { "stdin": "50\n15\n", "expected_output": "35\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "oop-str",
             "nivel": 3,
-            "enunciado": "Representação do Herói\n\nCrie Heroi(nome, nivel) com __str__ retornando \"<nome> — Nível <nivel>\".\n\nImprima Heroi(\"Kira\", 7).\n\nSaída esperada:\nKira — Nível 7",
-            "codigoInicial": "class Heroi:\n    def __init__(self, nome, nivel):\n        pass\n    def __str__(self):\n        pass\n\nprint(Heroi(\"Kira\", 7))\n",
+            "enunciado": "Representação do Herói\n\nCrie Heroi(nome, nivel) com __str__ retornando \"<nome> — Nível <nivel>\".\n\nLeia o nome (1ª linha) e o nível (2ª linha), crie o herói e imprima-o com print().\n\nExemplo: Kira / 7 → Kira — Nível 7\n\nDica: __str__ deve retornar (return) uma f-string; o print() chama o __str__ automaticamente.",
+            "codigoInicial": "class Heroi:\n    def __init__(self, nome, nivel):\n        pass\n    def __str__(self):\n        pass\n\nnome = input()\nnivel = int(input())\nprint(Heroi(nome, nivel))\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "Kira — Nível 7\n"}
+              { "stdin": "Kira\n7\n", "expected_output": "Kira — Nível 7\n" },
+              { "stdin": "Rex\n12\n", "expected_output": "Rex — Nível 12\n" }
             ]
           },
           {"tipo": "flashcards"}
@@ -923,28 +941,57 @@
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "## Herança e Polimorfismo\n\n▶ Herança básica\n\nclass Animal:\n    def __init__(self, nome):\n        self.nome = nome\n    def falar(self):\n        print(f\"{self.nome} faz barulho\")\n\nclass Cachorro(Animal):\n    def falar(self):\n        print(f\"{self.nome} diz: Au!\")\n\nclass Gato(Animal):\n    def falar(self):\n        print(f\"{self.nome} diz: Miau!\")\n\n▶ Usando super()\n\nclass Mago(Heroi):\n    def __init__(self, nome, vida, mana):\n        super().__init__(nome, vida)   # chama Heroi.__init__\n        self.mana = mana\n\n▶ Polimorfismo\n\nanimais = [Cachorro(\"Rex\"), Gato(\"Luna\")]\nfor a in animais:\n    a.falar()   # cada um faz a sua versão\n\nSaída:\nRex diz: Au!\nLuna diz: Miau!\n\nDica: Polimorfismo = mesmo método, comportamentos diferentes. Fundamental para código extensível."
+            "conteudo": "## Herança e Polimorfismo\n\n▶ Herança básica\n\nclass Animal:\n    def __init__(self, nome):\n        self.nome = nome\n    def falar(self):\n        print(f\"{self.nome} faz barulho\")\n\nclass Cachorro(Animal):\n    def falar(self):\n        print(f\"{self.nome} diz: Au!\")\n\nclass Gato(Animal):\n    def falar(self):\n        print(f\"{self.nome} diz: Miau!\")\n\nCachorro e Gato herdam __init__ de Animal (não precisam reescrevê-lo) e só personalizam falar(). Reuso puro."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Usando super()\n\nclass Mago(Heroi):\n    def __init__(self, nome, vida, mana):\n        super().__init__(nome, vida)   # chama Heroi.__init__\n        self.mana = mana\n\nsuper().__init__() aproveita o que o pai já sabe fazer. Sem ele, você teria que recriar self.nome e self.vida na mão."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Polimorfismo\n\nanimais = [Cachorro(\"Rex\"), Gato(\"Luna\")]\nfor a in animais:\n    a.falar()   # cada um faz a sua versão\n\nSaída:\nRex diz: Au!\nLuna diz: Miau!\n\nDica: Polimorfismo = mesmo método, comportamentos diferentes. Fundamental para código extensível."
+          },
+          {
+            "tipo": "video",
+            "titulo": "POO: Herança — Curso de Python #25",
+            "url": "https://www.youtube.com/embed/cN4esJ0DhqI",
+            "linkAssistir": "https://www.youtube.com/watch?v=cN4esJ0DhqI"
           },
           {
             "tipo": "exercicio",
             "id": "heranca-forma",
             "nivel": 1,
-            "enunciado": "Área das Formas\n\nCrie Quadrado(Forma) herdando de Forma. Quadrado(lado) deve ter area() retornando lado*lado.\n\nImprima Quadrado(5).area().\n\nSaída esperada:\n25",
-            "codigoInicial": "class Forma:\n    def area(self):\n        return 0\n\nclass Quadrado(Forma):\n    def __init__(self, lado):\n        self.lado = lado\n    def area(self):\n        pass\n\nprint(Quadrado(5).area())\n",
+            "enunciado": "Área das Formas\n\nCrie Quadrado(Forma) herdando de Forma. Quadrado(lado) deve ter area() retornando lado*lado.\n\nLeia o lado com input(), crie o quadrado e imprima sua área.\n\nExemplo: lado 5 → 25\n\nDica: o método area() sobrescreve o da classe pai e deve return self.lado * self.lado.",
+            "codigoInicial": "class Forma:\n    def area(self):\n        return 0\n\nclass Quadrado(Forma):\n    def __init__(self, lado):\n        self.lado = lado\n    def area(self):\n        pass\n\nlado = int(input())\nprint(Quadrado(lado).area())\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "25\n"}
+              { "stdin": "5\n", "expected_output": "25\n" },
+              { "stdin": "10\n", "expected_output": "100\n" },
+              { "stdin": "1\n", "expected_output": "1\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "heranca-super",
             "nivel": 2,
-            "enunciado": "Mago com Mana\n\nCrie Mago herdando de Heroi. Mago(nome, vida, mana) usa super() e tem lançar_magia() que imprime \"<nome> lança magia! Mana: <mana-10>\".\n\nCrie Mago(\"Kira\", 80, 100) e chame lançar_magia().\n\nSaída esperada:\nKira lança magia! Mana: 90",
-            "codigoInicial": "class Heroi:\n    def __init__(self, nome, vida):\n        self.nome = nome\n        self.vida = vida\n\nclass Mago(Heroi):\n    def __init__(self, nome, vida, mana):\n        super().__init__(nome, vida)\n        self.mana = mana\n    def lancar_magia(self):\n        pass\n\nMago(\"Kira\", 80, 100).lancar_magia()\n",
+            "enunciado": "Mago com Mana\n\nCrie Mago herdando de Heroi. Mago(nome, vida, mana) usa super() e tem lancar_magia() que gasta 10 de mana e imprime \"<nome> lança magia! Mana: <mana restante>\".\n\nLeia o nome (1ª linha) e a mana inicial (2ª linha), crie o Mago (vida fixa 80) e chame lancar_magia().\n\nExemplo: Kira / 100 → Kira lança magia! Mana: 90\n\nDica: self.mana -= 10 antes de montar a f-string.",
+            "codigoInicial": "class Heroi:\n    def __init__(self, nome, vida):\n        self.nome = nome\n        self.vida = vida\n\nclass Mago(Heroi):\n    def __init__(self, nome, vida, mana):\n        super().__init__(nome, vida)\n        self.mana = mana\n    def lancar_magia(self):\n        pass\n\nnome = input()\nmana = int(input())\nMago(nome, 80, mana).lancar_magia()\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "Kira lança magia! Mana: 90\n"}
+              { "stdin": "Kira\n100\n", "expected_output": "Kira lança magia! Mana: 90\n" },
+              { "stdin": "Gandalf\n50\n", "expected_output": "Gandalf lança magia! Mana: 40\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "heranca-polimorfismo",
+            "nivel": 3,
+            "enunciado": "Coro de Criaturas\n\nA classe Animal tem falar() genérico. Crie Cachorro e Gato herdando de Animal, cada um sobrescrevendo falar() para imprimir \"<nome> diz: Au!\" e \"<nome> diz: Miau!\".\n\nLeia a espécie (1ª linha: cao ou gato) e o nome (2ª linha), crie o objeto certo e chame falar(). Isso é polimorfismo: o mesmo método, comportamentos diferentes.\n\nExemplo: cao / Rex → Rex diz: Au! | gato / Luna → Luna diz: Miau!\n\nDica: um if escolhe qual classe instanciar; o resto do código chama falar() sem se importar com o tipo.",
+            "codigoInicial": "class Animal:\n    def __init__(self, nome):\n        self.nome = nome\n    def falar(self):\n        print(f\"{self.nome} faz barulho\")\n\nclass Cachorro(Animal):\n    def falar(self):\n        pass\n\nclass Gato(Animal):\n    def falar(self):\n        pass\n\nespecie = input()\nnome = input()\n# Crie o objeto certo e chame falar()\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "cao\nRex\n", "expected_output": "Rex diz: Au!\n" },
+              { "stdin": "gato\nLuna\n", "expected_output": "Luna diz: Miau!\n" }
             ]
           },
           {"tipo": "flashcards"}
@@ -979,28 +1026,58 @@
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "## Exceções e Arquivos\n\n▶ raise e exceções customizadas\n\nclass VidaInvalida(Exception):\n    pass\n\ndef definir_vida(v):\n    if v < 0:\n        raise VidaInvalida(\"Vida não pode ser negativa!\")\n    return v\n\ntry:\n    definir_vida(-5)\nexcept VidaInvalida as e:\n    print(f\"Erro: {e}\")\n\n▶ finally\n\ntry:\n    resultado = 10 / 0\nexcept ZeroDivisionError:\n    print(\"Divisão por zero!\")\nfinally:\n    print(\"Sempre executa\")\n\n▶ Leitura e escrita de arquivos\n\n# Escrever\nwith open(\"notas.txt\", \"w\") as f:\n    f.write(\"Kira: 9.5\\n\")\n    f.write(\"Rex: 7.0\\n\")\n\n# Ler linha por linha\nwith open(\"notas.txt\", \"r\") as f:\n    for linha in f:\n        print(linha.strip())\n\nDica: Use sempre with — ele garante fechamento do arquivo mesmo em caso de erro."
+            "conteudo": "## Exceções e Arquivos\n\n▶ raise e exceções customizadas\n\nclass VidaInvalida(Exception):\n    pass\n\ndef definir_vida(v):\n    if v < 0:\n        raise VidaInvalida(\"Vida não pode ser negativa!\")\n    return v\n\ntry:\n    definir_vida(-5)\nexcept VidaInvalida as e:\n    print(f\"Erro: {e}\")\n\nCriar suas próprias exceções (herdando de Exception) deixa os erros do seu programa específicos e fáceis de capturar — bem melhor que um Exception genérico."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ finally\n\ntry:\n    resultado = 10 / 0\nexcept ZeroDivisionError:\n    print(\"Divisão por zero!\")\nfinally:\n    print(\"Sempre executa\")\n\nO finally é o lugar para liberar recursos (fechar arquivos, conexões) — ele roda mesmo que um return ou erro aconteça dentro do try."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Leitura e escrita de arquivos\n\n# Escrever\nwith open(\"notas.txt\", \"w\") as f:\n    f.write(\"Kira: 9.5\\n\")\n    f.write(\"Rex: 7.0\\n\")\n\n# Ler linha por linha\nwith open(\"notas.txt\", \"r\") as f:\n    for linha in f:\n        print(linha.strip())\n\nDica: Use sempre with — ele garante fechamento do arquivo mesmo em caso de erro."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Try/Except — tratamento de erros (Curso de Python #26)",
+            "url": "https://www.youtube.com/embed/jT-C3OjUBvQ",
+            "linkAssistir": "https://www.youtube.com/watch?v=jT-C3OjUBvQ"
           },
           {
             "tipo": "exercicio",
             "id": "exc-raise-negativo",
             "nivel": 1,
-            "enunciado": "Guardião do Estoque\n\nCrie verificar_estoque(qtd) que lança ValueError com \"Estoque negativo\" se qtd < 0. Caso contrário, imprime o valor.\n\nChame verificar_estoque(-3) dentro de try/except e imprima a mensagem de erro.\n\nSaída esperada:\nEstoque negativo",
-            "codigoInicial": "def verificar_estoque(qtd):\n    pass\n\ntry:\n    verificar_estoque(-3)\nexcept ValueError as e:\n    print(e)\n",
+            "enunciado": "Guardião do Estoque\n\nCrie verificar_estoque(qtd) que lança ValueError com \"Estoque negativo\" se qtd < 0. Caso contrário, imprime o valor.\n\nLeia a quantidade com input() e chame verificar_estoque dentro de try/except.\n\nExemplo: -3 → Estoque negativo | 5 → 5\n\nDica: use raise ValueError(\"Estoque negativo\") quando qtd < 0; o except captura e imprime a mensagem.",
+            "codigoInicial": "def verificar_estoque(qtd):\n    pass\n\nqtd = int(input())\ntry:\n    verificar_estoque(qtd)\nexcept ValueError as e:\n    print(e)\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "Estoque negativo\n"}
+              { "stdin": "-3\n", "expected_output": "Estoque negativo\n" },
+              { "stdin": "5\n", "expected_output": "5\n" },
+              { "stdin": "0\n", "expected_output": "0\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "exc-arquivo-write-read",
             "nivel": 2,
-            "enunciado": "Diário do Aventureiro\n\nEscreva \"Missão cumprida\" no arquivo \"diario.txt\", depois leia e imprima seu conteúdo.\n\nSaída esperada:\nMissão cumprida",
-            "codigoInicial": "# Escreva e depois leia diario.txt\n",
+            "enunciado": "Diário do Aventureiro\n\nLeia uma frase com input(), escreva-a no arquivo \"diario.txt\", depois reabra o arquivo, leia e imprima seu conteúdo.\n\nExemplo: entrada \"Missão cumprida\" → Missão cumprida\n\nDica: use with open(\"diario.txt\", \"w\") para escrever e with open(\"diario.txt\", \"r\") para ler. Cuidado com \\n extra ao imprimir (use .strip() se precisar).",
+            "codigoInicial": "frase = input()\n# Escreva frase em diario.txt, depois leia e imprima\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "Missão cumprida\n"}
+              { "stdin": "Missão cumprida\n", "expected_output": "Missão cumprida\n" },
+              { "stdin": "Dragão derrotado\n", "expected_output": "Dragão derrotado\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "exc-finally",
+            "nivel": 3,
+            "enunciado": "O Portão Sempre Fecha\n\nLeia um divisor com input() e tente calcular 100 / divisor.\n\n• Se der certo, imprima o resultado como inteiro (ex: 100 / 4 → 25)\n• Se o divisor for 0, capture ZeroDivisionError e imprima \"Divisao invalida\"\n• Em QUALQUER caso, no fim imprima \"Portao fechado\" (use finally)\n\nExemplo (entrada 4):\n25\nPortao fechado\n\nExemplo (entrada 0):\nDivisao invalida\nPortao fechado\n\nDica: o bloco finally roda sempre — com ou sem erro.",
+            "codigoInicial": "divisor = int(input())\n# try / except ZeroDivisionError / finally\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "4\n", "expected_output": "25\nPortao fechado\n" },
+              { "stdin": "0\n", "expected_output": "Divisao invalida\nPortao fechado\n" },
+              { "stdin": "5\n", "expected_output": "20\nPortao fechado\n" }
             ]
           },
           {"tipo": "flashcards"}
@@ -1035,28 +1112,58 @@
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "## Módulos e Pacotes\n\n▶ Biblioteca padrão\n\nimport math\nprint(math.pi)        →  3.14159...\nprint(math.sqrt(25))  →  5.0\nprint(math.floor(3.7)) →  3\n\nimport random\nprint(random.randint(1, 6))  →  dado de 6 faces\nprint(random.choice([\"espada\", \"escudo\", \"poção\"]))\n\nimport os\nprint(os.getcwd())  →  diretório atual\nos.listdir(\".\")     →  arquivos do diretório\n\n▶ JSON\n\nimport json\n\nheroi = {\"nome\": \"Kira\", \"nivel\": 5}\njson_str = json.dumps(heroi, ensure_ascii=False)\nprint(json_str)  →  {\"nome\": \"Kira\", \"nivel\": 5}\n\nde_volta = json.loads(json_str)\nprint(de_volta[\"nome\"])  →  Kira\n\n▶ __name__\n\ndef main():\n    print(\"Rodando direto!\")\n\nif __name__ == \"__main__\":\n    main()\n\nDica: pip install <pacote> instala bibliotecas externas. Exemplos populares: requests (HTTP), pandas (dados), pytest (testes)."
+            "conteudo": "## Módulos e Pacotes\n\n▶ Biblioteca padrão\n\nimport math\nprint(math.pi)        →  3.14159...\nprint(math.sqrt(25))  →  5.0\nprint(math.floor(3.7)) →  3\n\nimport random\nprint(random.randint(1, 6))  →  dado de 6 faces\nprint(random.choice([\"espada\", \"escudo\", \"poção\"]))\n\nimport os\nprint(os.getcwd())  →  diretório atual\nos.listdir(\".\")     →  arquivos do diretório\n\nA biblioteca padrão é enorme: math, random, os, datetime, collections... antes de escrever algo do zero, verifique se o Python já não traz pronto."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ JSON\n\nimport json\n\nheroi = {\"nome\": \"Kira\", \"nivel\": 5}\njson_str = json.dumps(heroi, ensure_ascii=False)\nprint(json_str)  →  {\"nome\": \"Kira\", \"nivel\": 5}\n\nde_volta = json.loads(json_str)\nprint(de_volta[\"nome\"])  →  Kira\n\njson.dumps transforma dict em texto (para salvar/enviar); json.loads faz o caminho de volta (texto → dict). É o formato universal de troca de dados entre sistemas."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ __name__\n\ndef main():\n    print(\"Rodando direto!\")\n\nif __name__ == \"__main__\":\n    main()\n\nDica: pip install <pacote> instala bibliotecas externas. Exemplos populares: requests (HTTP), pandas (dados), pytest (testes)."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Utilizando Módulos — Curso Python #08",
+            "url": "https://www.youtube.com/embed/oOUyhGNib2Q",
+            "linkAssistir": "https://www.youtube.com/watch?v=oOUyhGNib2Q"
           },
           {
             "tipo": "exercicio",
             "id": "mod-math",
             "nivel": 1,
-            "enunciado": "Raiz Mágica\n\nUse o módulo math para calcular sqrt(144) e imprima o resultado como inteiro.\n\nSaída esperada:\n12",
-            "codigoInicial": "import math\n# Calcule e imprima sqrt(144) como int\n",
+            "enunciado": "Raiz Mágica\n\nLeia um número com input() e use o módulo math para calcular sua raiz quadrada, imprimindo o resultado como inteiro.\n\nExemplo: 144 → 12 | 81 → 9\n\nDica: import math; print(int(math.sqrt(n))).",
+            "codigoInicial": "import math\nn = int(input())\n# Calcule e imprima a raiz como int\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "12\n"}
+              { "stdin": "144\n", "expected_output": "12\n" },
+              { "stdin": "81\n", "expected_output": "9\n" },
+              { "stdin": "100\n", "expected_output": "10\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "mod-json",
             "nivel": 2,
-            "enunciado": "Inventário em JSON\n\nConverta o dicionário {\"item\": \"espada\", \"dano\": 15} para string JSON e imprima.\n\nSaída esperada:\n{\"item\": \"espada\", \"dano\": 15}",
-            "codigoInicial": "import json\ninventario = {\"item\": \"espada\", \"dano\": 15}\n# json.dumps e print\n",
+            "enunciado": "Inventário em JSON\n\nLeia o nome do item (1ª linha) e o dano (2ª linha), monte o dicionário {\"item\": <nome>, \"dano\": <dano>} e converta para string JSON, imprimindo o resultado.\n\nExemplo: espada / 15 → {\"item\": \"espada\", \"dano\": 15}\n\nDica: import json; print(json.dumps(inventario)). O dano deve ser int para não virar string no JSON.",
+            "codigoInicial": "import json\nnome = input()\ndano = int(input())\n# monte o dict, json.dumps e print\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "{\"item\": \"espada\", \"dano\": 15}\n"}
+              { "stdin": "espada\n15\n", "expected_output": "{\"item\": \"espada\", \"dano\": 15}\n" },
+              { "stdin": "escudo\n8\n", "expected_output": "{\"item\": \"escudo\", \"dano\": 8}\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "mod-gcd",
+            "nivel": 3,
+            "enunciado": "Pacto dos Números\n\nDois grupos de aventureiros querem se dividir em pelotões do mesmo tamanho. O maior pelotão possível é o máximo divisor comum (MDC) das duas quantidades.\n\nLeia dois números (um por linha) e use math.gcd para imprimir o MDC.\n\nExemplo: 12 / 18 → 6 | 7 / 5 → 1\n\nDica: from math import gcd ou math.gcd(a, b).",
+            "codigoInicial": "import math\na = int(input())\nb = int(input())\n# imprima o MDC com math.gcd\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "12\n18\n", "expected_output": "6\n" },
+              { "stdin": "7\n5\n", "expected_output": "1\n" },
+              { "stdin": "100\n40\n", "expected_output": "20\n" }
             ]
           },
           {"tipo": "flashcards"}
@@ -1091,28 +1198,58 @@
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "## Iteradores e Geradores\n\n▶ iter() e next()\n\nqualquer for por baixo dos panos usa iter() + next():\n\nfor x in [1, 2, 3]: → equivale a:\nit = iter([1, 2, 3])\nwhile True:\n    try: x = next(it)\n    except StopIteration: break\n\n▶ Geradores com yield\n\ndef contar_ate(n):\n    i = 1\n    while i <= n:\n        yield i\n        i += 1\n\nfor num in contar_ate(5):\n    print(num)   →  1, 2, 3, 4, 5\n\nDiferença chave:\n• return → encerra a função, devolve valor\n• yield  → pausa a função, devolve valor, continua depois\n\n▶ Generator para sequência infinita\n\ndef fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\nfib = fibonacci()\nfor _ in range(8):\n    print(next(fib), end=\" \")  →  0 1 1 2 3 5 8 13\n\nDica: Use generators quando os dados podem ser processados um por vez — leitura de arquivos grandes, streams, pipelines."
+            "conteudo": "## Iteradores e Geradores\n\n▶ iter() e next()\n\nqualquer for por baixo dos panos usa iter() + next():\n\nfor x in [1, 2, 3]: → equivale a:\nit = iter([1, 2, 3])\nwhile True:\n    try: x = next(it)\n    except StopIteration: break\n\nTodo objeto iterável (lista, tupla, string, dict) sabe entregar um iterador via iter(). O for esconde esse mecanismo de você no dia a dia."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Geradores com yield\n\ndef contar_ate(n):\n    i = 1\n    while i <= n:\n        yield i\n        i += 1\n\nfor num in contar_ate(5):\n    print(num)   →  1, 2, 3, 4, 5\n\nDiferença chave:\n• return → encerra a função, devolve valor\n• yield  → pausa a função, devolve valor, continua depois\n\nCada next() retoma a função exatamente de onde o yield parou, com as variáveis locais intactas. É como pausar e despausar um vídeo."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Generator para sequência infinita\n\ndef fibonacci():\n    a, b = 0, 1\n    while True:\n        yield a\n        a, b = b, a + b\n\nfib = fibonacci()\nfor _ in range(8):\n    print(next(fib), end=\" \")  →  0 1 1 2 3 5 8 13\n\nDica: Use generators quando os dados podem ser processados um por vez — leitura de arquivos grandes, streams, pipelines."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Geradores, Iteradores e Iteráveis em Python — Aula 25",
+            "url": "https://www.youtube.com/embed/gHrc6FLBh20",
+            "linkAssistir": "https://www.youtube.com/watch?v=gHrc6FLBh20"
           },
           {
             "tipo": "exercicio",
             "id": "iter-pares",
             "nivel": 1,
-            "enunciado": "Gerador de Pares\n\nCrie pares_ate(n) que yield números pares de 2 até n (inclusive).\n\nImprima com list(pares_ate(10)).\n\nSaída esperada:\n[2, 4, 6, 8, 10]",
-            "codigoInicial": "def pares_ate(n):\n    pass\n\nprint(list(pares_ate(10)))\n",
+            "enunciado": "Gerador de Pares\n\nCrie pares_ate(n) que use yield para produzir os números pares de 2 até n (inclusive).\n\nLeia n com input() e imprima list(pares_ate(n)).\n\nExemplo: 10 → [2, 4, 6, 8, 10] | 6 → [2, 4, 6]\n\nDica: dentro da função, percorra range(2, n + 1, 2) com yield.",
+            "codigoInicial": "def pares_ate(n):\n    pass\n\nn = int(input())\nprint(list(pares_ate(n)))\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "[2, 4, 6, 8, 10]\n"}
+              { "stdin": "10\n", "expected_output": "[2, 4, 6, 8, 10]\n" },
+              { "stdin": "6\n", "expected_output": "[2, 4, 6]\n" },
+              { "stdin": "1\n", "expected_output": "[]\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "iter-next-manual",
             "nivel": 2,
-            "enunciado": "Próxima Sala\n\nDada a lista [\"entrada\", \"corredor\", \"tesouro\"], use iter() e next() para imprimir os três elementos um por um.\n\nSaída esperada:\nentrada\ncorredor\ntesouro",
-            "codigoInicial": "salas = [\"entrada\", \"corredor\", \"tesouro\"]\n# it = iter(salas), next(it) x3\n",
+            "enunciado": "Próxima Sala\n\nLeia uma linha com nomes de salas separados por espaço, crie um iterador com iter() e use next() dentro de um loop para imprimir cada sala, uma por linha.\n\nExemplo: \"entrada corredor tesouro\" → entrada / corredor / tesouro (um por linha)\n\nDica: it = iter(salas); use um for ... in it, ou next(it) com tratamento de StopIteration.",
+            "codigoInicial": "salas = input().split()\n# it = iter(salas); percorra com next() e imprima cada uma\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "entrada\ncorredor\ntesouro\n"}
+              { "stdin": "entrada corredor tesouro\n", "expected_output": "entrada\ncorredor\ntesouro\n" },
+              { "stdin": "hall cripta\n", "expected_output": "hall\ncripta\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "iter-fibonacci",
+            "nivel": 3,
+            "enunciado": "Sequência Ascendente\n\nCrie o gerador fibonacci() que produz a sequência de Fibonacci (0, 1, 1, 2, 3, 5, ...) infinitamente com yield.\n\nLeia N com input() e imprima os N primeiros termos separados por espaço (numa única linha).\n\nExemplo: N = 8 → 0 1 1 2 3 5 8 13\n\nDica: dentro do gerador use a, b = 0, 1 e a cada volta: yield a; a, b = b, a + b. Colete N termos com next() ou um contador.",
+            "codigoInicial": "def fibonacci():\n    a, b = 0, 1\n    while True:\n        pass\n\nn = int(input())\nfib = fibonacci()\n# colete n termos e imprima separados por espaço\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "8\n", "expected_output": "0 1 1 2 3 5 8 13\n" },
+              { "stdin": "1\n", "expected_output": "0\n" },
+              { "stdin": "5\n", "expected_output": "0 1 1 2 3\n" }
             ]
           },
           {"tipo": "flashcards"}
@@ -1147,28 +1284,59 @@
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "## Expressões Regulares\n\nimport re\n\n▶ Funções principais\n\n• re.search(padrão, texto) → Match ou None (primeira ocorrência)\n• re.findall(padrão, texto) → lista de strings\n• re.sub(padrão, novo, texto) → texto substituído\n• re.match(padrão, texto) → match só no início\n\n▶ Padrões essenciais\n\n.     → qualquer caractere (exceto \\n)\n\\d    → dígito [0-9]\n\\w    → letra, dígito ou _\n\\s    → espaço em branco\n\\D    → não-dígito\n+     → um ou mais\n*     → zero ou mais\n?     → zero ou um\n{n}   → exatamente n vezes\n^     → início da string\n$     → fim da string\n\n▶ Exemplos práticos\n\n# Extrair números\nre.findall(r\"\\d+\", \"Dano: 45, Vida: 100\")  →  ['45', '100']\n\n# Validar email simples\nif re.search(r\"\\w+@\\w+\\.\\w+\", email):\n    print(\"Email válido\")\n\n# Substituir espaços por underscore\nre.sub(r\"\\s+\", \"_\", \"Nome do herói\")  →  \"Nome_do_herói\"\n\nDica: Use r\"...\" (raw string) para padrões regex — evita conflito com \\ do Python."
+            "conteudo": "## Expressões Regulares\n\nimport re\n\n▶ Funções principais\n\n• re.search(padrão, texto) → Match ou None (primeira ocorrência)\n• re.findall(padrão, texto) → lista de strings\n• re.sub(padrão, novo, texto) → texto substituído\n• re.match(padrão, texto) → match só no início\n• re.fullmatch(padrão, texto) → exige que a string INTEIRA case (ótimo para validação)\n\nDica: search procura em qualquer lugar; match olha só o começo; fullmatch exige casar tudo. Escolha conforme a pergunta que você está fazendo."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Padrões essenciais\n\n.     → qualquer caractere (exceto \\n)\n\\d    → dígito [0-9]\n\\w    → letra, dígito ou _\n\\s    → espaço em branco\n\\D    → não-dígito\n+     → um ou mais\n*     → zero ou mais\n?     → zero ou um\n{n}   → exatamente n vezes\n^     → início da string\n$     → fim da string\n\nNão decore tudo: tenha essa tabela à mão e monte o padrão por partes. Sites como regex101.com ajudam a testar enquanto você aprende."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Exemplos práticos\n\n# Extrair números\nre.findall(r\"\\d+\", \"Dano: 45, Vida: 100\")  →  ['45', '100']\n\n# Validar email simples\nif re.search(r\"\\w+@\\w+\\.\\w+\", email):\n    print(\"Email válido\")\n\n# Substituir espaços por underscore\nre.sub(r\"\\s+\", \"_\", \"Nome do herói\")  →  \"Nome_do_herói\"\n\nDica: Use r\"...\" (raw string) para padrões regex — evita conflito com \\ do Python."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Expressões Regulares em Python — Parte 1",
+            "url": "https://www.youtube.com/embed/wBI0yv2FG6U",
+            "linkAssistir": "https://www.youtube.com/watch?v=wBI0yv2FG6U"
           },
           {
             "tipo": "exercicio",
             "id": "regex-findall",
             "nivel": 1,
-            "enunciado": "Extrator de XP\n\nExtraia todos os números do texto \"XP: 320, Bonus: 50, Total: 370\" e imprima a lista.\n\nSaída esperada:\n['320', '50', '370']",
-            "codigoInicial": "import re\ntexto = \"XP: 320, Bonus: 50, Total: 370\"\n# re.findall e print\n",
+            "enunciado": "Extrator de XP\n\nLeia uma linha de texto com input() e use re.findall para extrair todos os números (sequências de dígitos) presentes, imprimindo a lista resultante.\n\nExemplo: \"XP: 320, Bonus: 50, Total: 370\" → ['320', '50', '370']\n\nDica: re.findall(r\"\\d+\", texto) devolve uma lista de strings.",
+            "codigoInicial": "import re\ntexto = input()\n# re.findall e print\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "['320', '50', '370']\n"}
+              { "stdin": "XP: 320, Bonus: 50, Total: 370\n", "expected_output": "['320', '50', '370']\n" },
+              { "stdin": "HP 100 MP 40\n", "expected_output": "['100', '40']\n" },
+              { "stdin": "sem numeros aqui\n", "expected_output": "[]\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "regex-sub",
             "nivel": 2,
-            "enunciado": "Censura de Ameaças\n\nSubstitua todas as ocorrências de \"goblin\" por \"***\" no texto \"O goblin escapou e o goblin atacou\".\n\nSaída esperada:\nO *** escapou e o *** atacou",
-            "codigoInicial": "import re\ntexto = \"O goblin escapou e o goblin atacou\"\n# re.sub e print\n",
+            "enunciado": "Censura de Ameaças\n\nLeia uma linha de texto com input() e use re.sub para substituir todas as ocorrências de \"goblin\" por \"***\", imprimindo o texto censurado.\n\nExemplo: \"O goblin escapou e o goblin atacou\" → O *** escapou e o *** atacou\n\nDica: re.sub(r\"goblin\", \"***\", texto).",
+            "codigoInicial": "import re\ntexto = input()\n# re.sub e print\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "O *** escapou e o *** atacou\n"}
+              { "stdin": "O goblin escapou e o goblin atacou\n", "expected_output": "O *** escapou e o *** atacou\n" },
+              { "stdin": "um goblin sozinho\n", "expected_output": "um *** sozinho\n" },
+              { "stdin": "nenhuma ameaca\n", "expected_output": "nenhuma ameaca\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "regex-email",
+            "nivel": 3,
+            "enunciado": "Pergaminho de Acesso\n\nA guilda só aceita e-mails válidos no cadastro. Leia um texto com input() e verifique se ele tem o formato de e-mail (algo@algo.algo).\n\n• Se for válido, imprima: valido\n• Senão, imprima: invalido\n\nExemplo: kira@guilda.com → valido | semArroba.com → invalido\n\nDica: use re.fullmatch(r\"\\w+@\\w+\\.\\w+\", texto) — fullmatch exige que a string INTEIRA case com o padrão.",
+            "codigoInicial": "import re\ntexto = input()\n# verifique o formato de e-mail e imprima valido/invalido\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "kira@guilda.com\n", "expected_output": "valido\n" },
+              { "stdin": "semArroba.com\n", "expected_output": "invalido\n" },
+              { "stdin": "rex@torre.org\n", "expected_output": "valido\n" }
             ]
           },
           {"tipo": "flashcards"}
@@ -1203,28 +1371,59 @@
         "blocos": [
           {
             "tipo": "texto",
-            "conteudo": "## Testes Automatizados com unittest\n\n▶ Por que testar?\n\nSem testes você só descobre bugs em produção — quando já causaram dano. Com testes você descobre na hora.\n\n▶ Estrutura básica\n\nimport unittest\n\ndef somar(a, b):\n    return a + b\n\nclass TestSomar(unittest.TestCase):\n\n    def test_soma_inteiros(self):\n        self.assertEqual(somar(2, 3), 5)\n\n    def test_soma_negativos(self):\n        self.assertEqual(somar(-1, -2), -3)\n\n    def test_soma_zero(self):\n        self.assertEqual(somar(5, 0), 5)\n\nif __name__ == \"__main__\":\n    unittest.main()\n\n▶ assertRaises\n\nclass TestDivisao(unittest.TestCase):\n    def test_divisao_zero(self):\n        with self.assertRaises(ZeroDivisionError):\n            resultado = 10 / 0\n\n▶ setUp e tearDown\n\nclass TestHeroi(unittest.TestCase):\n    def setUp(self):           # roda antes de CADA teste\n        self.heroi = Heroi(\"Kira\", 100)\n    def test_vida_inicial(self):\n        self.assertEqual(self.heroi.vida, 100)\n\nDica: Código sem teste é código com data de validade. Todo projeto sério tem pelo menos testes das funções críticas."
+            "conteudo": "## Testes Automatizados com unittest\n\n▶ Por que testar?\n\nSem testes você só descobre bugs em produção — quando já causaram dano. Com testes você descobre na hora.\n\nMais que pegar bugs, testes te dão coragem para mexer no código: se algo quebrar, um teste vermelho avisa na hora — em vez de o usuário descobrir por você."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ Estrutura básica\n\nimport unittest\n\ndef somar(a, b):\n    return a + b\n\nclass TestSomar(unittest.TestCase):\n\n    def test_soma_inteiros(self):\n        self.assertEqual(somar(2, 3), 5)\n\n    def test_soma_negativos(self):\n        self.assertEqual(somar(-1, -2), -3)\n\n    def test_soma_zero(self):\n        self.assertEqual(somar(5, 0), 5)\n\nif __name__ == \"__main__\":\n    unittest.main()\n\nCada método test_ é um cenário independente. O runner roda todos e mostra um ponto (.) para cada sucesso e um F para cada falha."
+          },
+          {
+            "tipo": "texto",
+            "conteudo": "▶ assertRaises\n\nclass TestDivisao(unittest.TestCase):\n    def test_divisao_zero(self):\n        with self.assertRaises(ZeroDivisionError):\n            resultado = 10 / 0\n\n▶ setUp e tearDown\n\nclass TestHeroi(unittest.TestCase):\n    def setUp(self):           # roda antes de CADA teste\n        self.heroi = Heroi(\"Kira\", 100)\n    def test_vida_inicial(self):\n        self.assertEqual(self.heroi.vida, 100)\n\nDica: Código sem teste é código com data de validade. Todo projeto sério tem pelo menos testes das funções críticas."
+          },
+          {
+            "tipo": "video",
+            "titulo": "Criando testes automatizados com Python usando unittest",
+            "url": "https://www.youtube.com/embed/F3qKoXicgIo",
+            "linkAssistir": "https://www.youtube.com/watch?v=F3qKoXicgIo"
           },
           {
             "tipo": "exercicio",
             "id": "test-dobro",
             "nivel": 1,
-            "enunciado": "Testando o Dobro\n\nDada a função dobro(n) = n*2, complete o teste para verificar que dobro(5) == 10.\n\nSaída esperada:\nOK",
-            "codigoInicial": "import unittest\n\ndef dobro(n):\n    return n * 2\n\nclass TestDobro(unittest.TestCase):\n    def test_dobro_cinco(self):\n        self.assertEqual(dobro(5), 10)\n\nif __name__ == \"__main__\":\n    unittest.main(verbosity=0)\n",
+            "enunciado": "Provando o Dobro\n\nImplemente dobro(n) que retorna n*2. Em seguida, valide-a com um assert (que falha se a lógica estiver errada) e só então imprima o resultado.\n\nLeia n com input(), garanta com assert dobro(n) == n * 2 e imprima dobro(n).\n\nExemplo: 5 → 10 | 7 → 14\n\nDica: assert é a base de qualquer teste — se a condição for falsa, ele levanta AssertionError e o programa para.",
+            "codigoInicial": "def dobro(n):\n    pass\n\nn = int(input())\nassert dobro(n) == n * 2\nprint(dobro(n))\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "OK\n"}
+              { "stdin": "5\n", "expected_output": "10\n" },
+              { "stdin": "7\n", "expected_output": "14\n" },
+              { "stdin": "0\n", "expected_output": "0\n" }
             ]
           },
           {
             "tipo": "exercicio",
             "id": "test-paridade",
             "nivel": 2,
-            "enunciado": "Testando Par/Ímpar\n\ndef eh_par(n): return n % 2 == 0\n\nEscreva dois testes: eh_par(4) é True e eh_par(7) é False.\n\nSaída esperada:\nOK",
-            "codigoInicial": "import unittest\n\ndef eh_par(n):\n    return n % 2 == 0\n\nclass TestParidade(unittest.TestCase):\n    def test_par(self):\n        pass\n    def test_impar(self):\n        pass\n\nif __name__ == \"__main__\":\n    unittest.main(verbosity=0)\n",
+            "enunciado": "Bateria de Paridade\n\nImplemente eh_par(n) que retorna True se n for par. Antes de usar, rode uma pequena bateria de testes com assert (eh_par(4) deve ser True, eh_par(7) deve ser False).\n\nDepois leia n com input() e imprima o resultado de eh_par(n) (True ou False).\n\nExemplo: 4 → True | 7 → False\n\nDica: comece com os dois asserts fixos; se a função estiver certa, eles passam silenciosamente e o print mostra o resultado da entrada.",
+            "codigoInicial": "def eh_par(n):\n    pass\n\nassert eh_par(4) == True\nassert eh_par(7) == False\n\nn = int(input())\nprint(eh_par(n))\n",
             "linguagem": "python",
             "testes": [
-              {"stdin": "", "expected_output": "OK\n"}
+              { "stdin": "4\n", "expected_output": "True\n" },
+              { "stdin": "7\n", "expected_output": "False\n" },
+              { "stdin": "0\n", "expected_output": "True\n" }
+            ]
+          },
+          {
+            "tipo": "exercicio",
+            "id": "test-excecao",
+            "nivel": 3,
+            "enunciado": "Testando o Inesperado\n\nImplemente sacar(saldo, valor) que retorna saldo - valor, mas levanta ValueError(\"Saldo insuficiente\") se valor > saldo.\n\nO código já traz uma bateria de testes: um caso normal (assert) e um que verifica se a exceção é lançada quando deve. Se sua função estiver certa, os asserts passam.\n\nDepois leia saldo (1ª linha) e valor (2ª linha) e imprima o saldo restante — ou a mensagem de erro, se o saque for inválido.\n\nExemplo: 100 / 40 → 60 | 10 / 50 → Saldo insuficiente\n\nDica: testar que algo FALHA quando deve é tão importante quanto testar que funciona. Aqui usamos try/except no lugar do assertRaises do unittest.",
+            "codigoInicial": "def sacar(saldo, valor):\n    pass\n\n# bateria de testes\nassert sacar(100, 40) == 60\ntry:\n    sacar(10, 50)\n    passou = False\nexcept ValueError:\n    passou = True\nassert passou\n\nsaldo = int(input())\nvalor = int(input())\ntry:\n    print(sacar(saldo, valor))\nexcept ValueError as e:\n    print(e)\n",
+            "linguagem": "python",
+            "testes": [
+              { "stdin": "100\n40\n", "expected_output": "60\n" },
+              { "stdin": "10\n50\n", "expected_output": "Saldo insuficiente\n" },
+              { "stdin": "50\n50\n", "expected_output": "0\n" }
             ]
           },
           {"tipo": "flashcards"}
@@ -1264,8 +1463,16 @@
             "linguagem": "python",
             "testes": [
               {
-                "stdin": "2\nxX_LAMA_Xx-Kira-19-Maga\nxX_LAMA_Xx-Rex-24-Tank",
+                "stdin": "2\nxX_LAMA_Xx-Kira-19-Maga\nxX_LAMA_Xx-Rex-24-Tank\n",
                 "expected_output": "*** Kira *** · Maga · 19 anos\n*** Rex *** · Tank · 24 anos\nTotal: 2 heróis\n"
+              },
+              {
+                "stdin": "1\nzZ_DARK_Zz-Luna-30-Curandeira\n",
+                "expected_output": "*** Luna *** · Curandeira · 30 anos\nTotal: 1 heróis\n"
+              },
+              {
+                "stdin": "3\nlixo-Aragorn-40-Guerreiro\nlixo-Gimli-150-Tank\nlixo-Legolas-200-Arqueiro\n",
+                "expected_output": "*** Aragorn *** · Guerreiro · 40 anos\n*** Gimli *** · Tank · 150 anos\n*** Legolas *** · Arqueiro · 200 anos\nTotal: 3 heróis\n"
               }
             ]
           },

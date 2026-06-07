@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { IconSword, IconMap, IconFlask, IconMedal, IconTrophy, IconFlame } from '@tabler/icons-react';
+import { IconSword, IconMap, IconFlask, IconMedal, IconTrophy, IconFlame, IconHome } from '@tabler/icons-react';
 
 export function Topbar() {
   const { user } = useUser();
@@ -9,7 +9,7 @@ export function Topbar() {
   if (!user) return null;
 
   return (
-    <header className="sticky top-0 z-50 h-[64px] backdrop-blur-[12px] border-b border-border bg-bg/80 px-6 flex items-center justify-between">
+    <header className="sticky top-0 z-50 h-[64px] backdrop-blur-[12px] border-b border-border bg-bg/80 px-6 flex items-center justify-between relative">
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Início">
         <IconSword className="text-gold" size={24} />
@@ -19,7 +19,10 @@ export function Topbar() {
       </Link>
 
       {/* Nav */}
-      <nav className="flex items-center gap-6">
+      <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-6">
+        <NavLink to="/" end className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors ${isActive ? 'text-gold' : 'text-text-mute hover:text-text'}`}>
+          <IconHome size={18} /> Home
+        </NavLink>
         <NavLink to="/mapa" className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors ${isActive ? 'text-gold' : 'text-text-mute hover:text-text'}`}>
           <IconMap size={18} /> Mapa
         </NavLink>

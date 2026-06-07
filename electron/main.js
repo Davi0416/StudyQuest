@@ -284,6 +284,7 @@ function createWindow(splash) {
     minWidth: 900,
     minHeight: 600,
     title: 'StudyQuest',
+    icon: path.join(__dirname, 'icons', 'icon_navbar.ico'),
     backgroundColor: '#0d1117',
     autoHideMenuBar: true,
     show: false,
