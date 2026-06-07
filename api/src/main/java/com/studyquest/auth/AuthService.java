@@ -2,7 +2,6 @@ package com.studyquest.auth;
 
 import com.studyquest.auth.dto.LoginRequest;
 import com.studyquest.auth.dto.RegisterRequest;
-import com.studyquest.auth.dto.RegisterResponse;
 import com.studyquest.auth.dto.TokenResponse;
 import com.studyquest.offline.CachedSession;
 import com.studyquest.shared.ConnectivityChecker;
@@ -16,6 +15,7 @@ import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.jwt.JsonWebToken;
@@ -30,10 +30,11 @@ import java.util.UUID;
 @ApplicationScoped
 public class AuthService {
 
-    private static final String ISSUER = "https://studyquest.app";
+    @ConfigProperty(name = "studyquest.jwt.issuer")
+    String issuer;
 
     @Inject UserRepository userRepository;
-    @Inject EmailVerificationService emailVerificationService;
+
     @Inject JWTParser jwtParser;
     @Inject LocalDb localDb;
     @Inject ConnectivityChecker connectivityChecker;
@@ -60,7 +61,7 @@ public class AuthService {
                 .email(req.email())
                 .passwordHash(BcryptUtil.bcryptHash(req.password()))
                 .avatarUrl(req.avatarUrl())
-                .emailVerified(true)
+                .emailVerified(true) // verificação de e-mail desabilitada temporariamente
                 .registerIp(ip)
                 .build();
 
@@ -71,33 +72,7 @@ public class AuthService {
         return tokens;
     }
 
-    @Transactional
-    public TokenResponse verifyEmail(String email, String code) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
-
-        if (!user.isEmailVerified()) {
-            emailVerificationService.verify(email, code);
-            user.setEmailVerified(true);
-            user.setEmailVerifiedAt(LocalDateTime.now());
-        }
-
-        TokenResponse tokens = generateTokens(user);
-        cacheSession(user, tokens.refreshToken());
-        return tokens;
-    }
-
-    @Transactional
-    public void resendVerification(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
-
-        if (user.isEmailVerified()) {
-            throw new WebApplicationException("E-mail já verificado", Response.Status.CONFLICT);
-        }
-
-        emailVerificationService.resendCode(user);
-    }
+    // verificação de e-mail desabilitada temporariamente
 
     public TokenResponse login(LoginRequest req) {
         if (!connectivityChecker.isOnline()) {
@@ -131,6 +106,11 @@ public class AuthService {
 
         try {
             JsonWebToken claims = jwtParser.parse(refreshToken);
+
+            if (!claims.getGroups().contains("refresh")) {
+                throw new WebApplicationException("Token inválido para refresh", Response.Status.UNAUTHORIZED);
+            }
+
             UUID userId = UUID.fromString(claims.getSubject());
             String jti = claims.getTokenID();
 
@@ -142,6 +122,9 @@ public class AuthService {
 
                 User user = userRepository.findById(userId);
                 if (user == null) throw new RecursoNaoEncontradoException("Usuário não encontrado");
+
+                // Revoga o token antigo antes de emitir o novo par (rotation)
+                revokeJti(jti, userId, claims.getExpirationTime());
 
                 TokenResponse tokens = generateTokens(user);
                 cacheSession(user, tokens.refreshToken());
@@ -171,18 +154,26 @@ public class AuthService {
             JsonWebToken claims = jwtParser.parse(refreshToken);
             String jti = claims.getTokenID();
             if (jti == null) return;
-
             UUID userId = UUID.fromString(claims.getSubject());
-            LocalDateTime expiresAt = LocalDateTime.ofInstant(
-                    Instant.ofEpochSecond(claims.getExpirationTime()), ZoneOffset.UTC);
+            revokeJti(jti, userId, claims.getExpirationTime());
+        } catch (Exception ignored) {
+            // Logout é best-effort — token pode já estar expirado ou malformado
+        }
+    }
 
+    @Transactional
+    void revokeJti(String jti, UUID userId, long expirationEpochSecond) {
+        if (jti == null) return;
+        try {
+            LocalDateTime expiresAt = LocalDateTime.ofInstant(
+                    Instant.ofEpochSecond(expirationEpochSecond), ZoneOffset.UTC);
             revokedTokenRepository.persist(RevokedToken.builder()
                     .jti(jti)
                     .userId(userId)
                     .expiresAt(expiresAt)
                     .build());
         } catch (Exception ignored) {
-            // Logout é best-effort — token pode já estar expirado ou malformado
+            // Ignora duplicatas (jti já revogado)
         }
     }
 
@@ -191,7 +182,7 @@ public class AuthService {
     private TokenResponse generateTokens(User user) {
         String jti = UUID.randomUUID().toString();
 
-        String accessToken = Jwt.issuer(ISSUER)
+        String accessToken = Jwt.issuer(issuer)
                 .subject(user.getId().toString())
                 .groups(Set.of("user"))
                 .claim("name", user.getName())
@@ -200,7 +191,7 @@ public class AuthService {
                 .sign();
 
         // jti no refresh token para suporte a revogação
-        String refreshToken = Jwt.issuer(ISSUER)
+        String refreshToken = Jwt.issuer(issuer)
                 .subject(user.getId().toString())
                 .groups(Set.of("refresh"))
                 .claim("jti", jti)
@@ -213,7 +204,7 @@ public class AuthService {
     private TokenResponse generateTokensFromCache(CachedSession session) {
         String jti = UUID.randomUUID().toString();
 
-        String accessToken = Jwt.issuer(ISSUER)
+        String accessToken = Jwt.issuer(issuer)
                 .subject(session.getUserId().toString())
                 .groups(Set.of("user"))
                 .claim("name", session.getName())
@@ -221,7 +212,7 @@ public class AuthService {
                 .expiresIn(Duration.ofMinutes(15))
                 .sign();
 
-        String refreshToken = Jwt.issuer(ISSUER)
+        String refreshToken = Jwt.issuer(issuer)
                 .subject(session.getUserId().toString())
                 .groups(Set.of("refresh"))
                 .claim("jti", jti)
