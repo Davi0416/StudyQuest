@@ -12,4 +12,8 @@ public class UserRepository implements PanacheRepositoryBase<User, UUID> {
     public Optional<User> findByEmail(String email) {
         return find("email", email).firstResultOptional();
     }
+
+    public long countByRegisterIp(String ip) {
+        return count("registerIp", ip);
+    }
 }

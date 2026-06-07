@@ -57,4 +57,7 @@ public class User {
     private boolean emailVerified = false;
 
     private LocalDateTime emailVerifiedAt;
+
+    @Column(name = "register_ip")
+    private String registerIp;
 }

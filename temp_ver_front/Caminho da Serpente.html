@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StudyQuest — O Caminho da Serpente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --green: #57e08a; --green-d: #1c5a38; --gold: #e8b94a; --ink: #0a0e0e;
+    --panel: rgba(10, 17, 16, 0.86); --panel-br: #2c4a3c;
+  }
+  html, body { height: 100%; background: #05080a; overflow: hidden; }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'VT323', monospace;
+    background:
+      radial-gradient(120% 90% at 78% 14%, #11231b 0%, #060a0b 55%, #04070a 100%);
+  }
+  .stage {
+    position: relative; width: min(96vw, 168vh); aspect-ratio: 16 / 9;
+    container-type: size;
+    box-shadow: 0 24px 80px -20px #000, 0 0 0 1px #1d2b27, inset 0 0 0 1px #0c1311;
+    background: #05080a; overflow: hidden;
+  }
+  canvas#map {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    display: block;
+  }
+  .overlay { position: absolute; inset: 0; pointer-events: none; }
+
+  /* ---------------- HUD banner ---------------- */
+  .hud {
+    position: absolute; left: 1.6cqw; top: 2.6cqh;
+    display: flex; align-items: center; gap: 1.3cqw;
+    padding: 1.1cqh 1.6cqw 1.1cqh 1.1cqh;
+    background: var(--panel); border: 1px solid var(--panel-br);
+    border-radius: 3px; pointer-events: auto;
+    box-shadow: 0 4px 18px -6px #000, inset 0 0 0 1px rgba(87,224,138,0.08);
+    backdrop-filter: blur(2px);
+  }
+  .hud .crest {
+    width: 4.4cqw; height: 4.4cqw; flex: none; border-radius: 3px;
+    display: grid; place-items: center;
+    background: radial-gradient(circle at 50% 40%, #15402a, #0a1c15);
+    border: 1px solid #2f6647; box-shadow: 0 0 10px rgba(87,224,138,0.35), inset 0 0 6px rgba(87,224,138,0.2);
+  }
+  .hud .crest svg { width: 70%; height: 70%; }
+  .hud .label { line-height: 1; }
+  .hud .kicker {
+    font-family: 'Press Start 2P', monospace; font-size: 0.95cqw; letter-spacing: 0.5px;
+    color: var(--green); text-shadow: 0 0 8px rgba(87,224,138,0.5); display: block; margin-bottom: 0.7cqh;
+  }
+  .hud .title {
+    font-family: 'Press Start 2P', monospace; font-size: 1.45cqw; color: #eaf6ee;
+    text-shadow: 0 2px 0 #04140d; display: block; margin-bottom: 0.7cqh;
+  }
+  .hud .meta { font-size: 1.9cqw; color: #7fae97; letter-spacing: 0.5px; }
+  .hud .meta b { color: #cfe9da; font-weight: 400; }
+
+  .progress {
+    position: absolute; left: 1.6cqw; bottom: 2.4cqh;
+    display: flex; align-items: center; gap: 1cqw;
+    padding: 0.9cqh 1.3cqw; background: var(--panel); border: 1px solid var(--panel-br);
+    border-radius: 3px; pointer-events: auto;
+  }
+  .progress .bar { width: 14cqw; height: 1.3cqh; background: #0c1714; border: 1px solid #25453a; border-radius: 2px; overflow: hidden; }
+  .progress .fill { height: 100%; width: 36%; background: linear-gradient(90deg, #2f9a5f, #57e08a); box-shadow: 0 0 8px rgba(87,224,138,0.6); }
+  .progress .txt { font-size: 1.8cqw; color: #9fc7b3; }
+  .progress .txt b { color: var(--green); font-weight: 400; }
+
+  /* ---------------- nodes ---------------- */
+  .node {
+    position: absolute; transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5cqh;
+    pointer-events: auto; cursor: pointer; width: max-content;
+  }
+  .node .chip {
+    width: 4.6cqw; height: 4.6cqw; display: grid; place-items: center; position: relative;
+    border-radius: 4px; background: linear-gradient(180deg, #16201d, #0a110f);
+    border: 1px solid #2a3a34; transition: transform 0.12s ease;
+  }
+  .node .chip svg { width: 58%; height: 58%; }
+  .node:hover .chip { transform: scale(1.12); }
+  .node.lbl-up { flex-direction: column-reverse; }
+  .node .name {
+    font-size: 1.45cqw; line-height: 1; color: #b7d4c6; white-space: nowrap;
+    background: rgba(7,12,11,0.82); border: 1px solid #1f322b; border-radius: 2px;
+    padding: 0.4cqh 0.7cqw; letter-spacing: 0.4px;
+    text-shadow: 0 1px 0 #000;
+  }
+  /* states */
+  .node.done .chip { border-color: var(--gold); box-shadow: 0 0 0 1px rgba(232,185,74,0.25), 0 0 12px rgba(232,185,74,0.35); }
+  .node.done .chip svg { color: var(--gold); }
+  .node.done .name { color: #e7d3a2; border-color: #5a4a22; }
+
+  .node.active { z-index: 5; }
+  .node.active .chip {
+    width: 5.6cqw; height: 5.6cqw; border-color: var(--green);
+    background: radial-gradient(circle at 50% 40%, #1c5436, #0a1c14);
+    box-shadow: 0 0 0 1px rgba(87,224,138,0.4), 0 0 18px rgba(87,224,138,0.55);
+    animation: pulse 1.9s ease-in-out infinite;
+  }
+  .node.active .chip svg { color: #c8ffdd; }
+  .node.active .name { color: #d8ffe7; border-color: #2f6647; font-size: 1.6cqw; }
+  .node.active::after {
+    content: 'VOCÊ ESTÁ AQUI'; position: absolute; top: -2.6cqh; left: 50%; transform: translateX(-50%);
+    font-family: 'Press Start 2P', monospace; font-size: 0.78cqw; color: var(--green);
+    text-shadow: 0 0 8px rgba(87,224,138,0.7); white-space: nowrap;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(87,224,138,0.4), 0 0 14px rgba(87,224,138,0.45); }
+    50% { box-shadow: 0 0 0 1px rgba(87,224,138,0.7), 0 0 26px rgba(87,224,138,0.8); }
+  }
+
+  .node.lock .chip { opacity: 0.92; border-color: #33403a; background: linear-gradient(180deg, #11181610, #0a0f0e); }
+  .node.lock .chip svg { color: #5f7068; }
+  .node.lock .name { color: #6f857b; }
+  .node.lock { cursor: not-allowed; }
+  .node.lock.shake .chip { animation: shake 0.4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-2px)} 40%,80%{transform:translateX(2px)} }
+
+  /* ---------------- boss ---------------- */
+  .boss {
+    position: absolute; right: 1.4cqw; top: 19.5cqh; pointer-events: auto;
+    display: flex; flex-direction: column; align-items: flex-end; text-align: right;
+    padding: 1cqh 1.2cqw 1.1cqh; border-radius: 3px;
+    background: rgba(7, 11, 11, 0.74); border: 1px solid #5a2533; border-right: 2px solid #ff5d6e;
+    box-shadow: 0 6px 22px -8px #000, 0 0 16px rgba(255,70,80,0.12);
+    backdrop-filter: blur(2px);
+  }
+  .boss .skull { font-family: 'Press Start 2P', monospace; font-size: 1cqw; color: #ff5d5d; letter-spacing: 1px; margin-bottom: 0.5cqh; text-shadow: 0 0 10px rgba(255,60,60,0.6); }
+  .boss .plate {
+    font-family: 'Press Start 2P', monospace; font-size: 1.7cqw; color: #eafff0;
+    letter-spacing: 1px; text-shadow: 0 0 14px rgba(87,224,138,0.7), 0 2px 0 #06160e;
+  }
+  .boss .sub { font-size: 1.7cqw; color: #8fd6ab; letter-spacing: 1px; margin-top: 0.4cqh; }
+  .boss .hp { margin-top: 0.7cqh; width: 13cqw; height: 1.2cqh; background: #14090b; border: 1px solid #4a2230; border-radius: 2px; overflow: hidden; }
+  .boss .hp i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #b3263a, #ff5d6e); box-shadow: 0 0 8px rgba(255,80,90,0.7); }
+
+  /* ---------------- tooltip ---------------- */
+  .tip {
+    position: absolute; transform: translate(-50%, -100%); pointer-events: none; opacity: 0;
+    transition: opacity 0.12s; background: rgba(6,12,11,0.95); border: 1px solid #2f6647;
+    border-radius: 3px; padding: 0.7cqh 1cqw; white-space: nowrap; z-index: 20;
+    box-shadow: 0 6px 20px -8px #000;
+  }
+  .tip .tt { font-family: 'Press Start 2P', monospace; font-size: 0.85cqw; color: #eafff0; display: block; margin-bottom: 0.6cqh; }
+  .tip .ts { font-size: 1.5cqw; letter-spacing: 0.4px; }
+  .tip.show { opacity: 1; }
+  .tip .ts.s-done { color: var(--gold); }
+  .tip .ts.s-active { color: var(--green); }
+  .tip .ts.s-lock { color: #8aa39a; }
+
+  .scan { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: 0.5;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.25) 0 2px, transparent 2px 4px); }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <canvas id="map"></canvas>
+    <div class="scan"></div>
+    <div class="overlay" id="overlay">
+      <div class="hud">
+        <div class="crest">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#7dffb0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 5c-4 0-5 3-5 5s1 4-1 5-4-1-4-3 1-3 3-3h6c2 0 3-1 3-3" />
+            <circle cx="18" cy="5" r="0.6" fill="#7dffb0" stroke="none" />
+          </svg>
+        </div>
+        <div class="label">
+          <span class="kicker">Trilha Ativa</span>
+          <span class="title">Caverna dos Répteis</span>
+          <span class="meta"><b>Python</b> · 18 guardiões ancestrais</span>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="bar"><div class="fill" style="width:29%"></div></div>
+        <span class="txt"><b>5</b> / 17 fases · <b>Laços de Repetição</b></span>
+      </div>
+
+      <div id="nodes"></div>
+      <div class="tip" id="tip"><span class="tt"></span><span class="ts"></span></div>
+    </div>
+  </div>
+
+  <!-- SVG icon defs -->
+  <svg style="display:none">
+    <defs>
+      <g id="ic-snake"><path d="M17 5c-4 0-5 3-5 5s1 4-1 5-4-1-4-3 1-3 3-3h6c2 0 3-1 3-3" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="18.2" cy="5" r="0.7" fill="currentColor"/></g>
+      <g id="ic-lock"><rect x="5" y="11" width="14" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+      <g id="ic-check"><path d="M5 13l4 4 10-11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g>
+    </defs>
+  </svg>
+
+  <script src="noise.js"></script>
+  <script src="map.js"></script>
+  <script>
+    const R = CaveMap.makeRenderer(document.getElementById('map'));
+    R.build();
+
+    const ICON = {
+      done: '<svg viewBox="0 0 24 24"><use href="#ic-check"/></svg>',
+      active: '<svg viewBox="0 0 24 24"><use href="#ic-snake"/></svg>',
+      lock: '<svg viewBox="0 0 24 24"><use href="#ic-lock"/></svg>',
+    };
+    const STATUS = { done: 'Concluída', active: 'Em andamento', lock: 'Bloqueada' };
+
+    const nodesEl = document.getElementById('nodes');
+    const tip = document.getElementById('tip');
+    const tipName = tip.querySelector('.tt');
+    const tipStat = tip.querySelector('.ts');
+
+    R.nodeAnchors.forEach((a, i) => {
+      const d = R.nodes[i];
+      const el = document.createElement('div');
+      const nearBoss = a[0] > 0.72 && a[1] < 0.42;
+      const up = (i % 2 === 1) && d.st !== 'active' && !nearBoss;
+      el.className = 'node ' + d.st + (up ? ' lbl-up' : '');
+      el.style.left = (a[0] * 100) + '%';
+      el.style.top = (a[1] * 100) + '%';
+      el.innerHTML = '<div class="chip">' + ICON[d.st] + '</div><div class="name">' +
+        (i + 1) + '. ' + d.t + '</div>';
+      el.addEventListener('mouseenter', () => {
+        tipName.textContent = (i + 1) + '. ' + d.t;
+        tipStat.textContent = STATUS[d.st];
+        tipStat.className = 'ts s-' + d.st;
+        tip.style.left = (a[0] * 100) + '%';
+        tip.style.top = (a[1] * 100 - 5.5) + '%';
+        tip.classList.add('show');
+      });
+      el.addEventListener('mouseleave', () => tip.classList.remove('show'));
+      el.addEventListener('click', () => {
+        if (d.st === 'lock') { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+      });
+      nodesEl.appendChild(el);
+    });
+
+    // boss nameplate — anchored to the top-right corner (positioned via CSS)
+    const boss = document.createElement('div');
+    boss.className = 'boss';
+    boss.innerHTML =
+      '<div class="skull">CHEFE FINAL</div>' +
+      '<div class="plate">NAJA ANANTA</div>' +
+      '<div class="sub">Guardiã do Código</div>' +
+      '<div class="hp"><i></i></div>';
+    document.getElementById('overlay').appendChild(boss);
+  </script>
+</body>
+</html>

@@ -40,7 +40,7 @@ public class AuthService {
     @Inject RevokedTokenRepository revokedTokenRepository;
 
     @Transactional
-    public TokenResponse register(RegisterRequest req) {
+    public TokenResponse register(RegisterRequest req, String ip) {
         if (!connectivityChecker.isOnline()) {
             throw new WebApplicationException(
                     "Registro requer conexão com a internet. Conecte-se e tente novamente.",
@@ -51,12 +51,17 @@ public class AuthService {
             throw new WebApplicationException("Email já cadastrado", Response.Status.CONFLICT);
         });
 
+        if (userRepository.countByRegisterIp(ip) >= 3) {
+            throw new WebApplicationException("Limite de 3 contas por IP excedido.", Response.Status.FORBIDDEN);
+        }
+
         User user = User.builder()
                 .name(req.name())
                 .email(req.email())
                 .passwordHash(BcryptUtil.bcryptHash(req.password()))
                 .avatarUrl(req.avatarUrl())
                 .emailVerified(true)
+                .registerIp(ip)
                 .build();
 
         userRepository.persist(user);
