@@ -44,7 +44,8 @@ api.interceptors.response.use(
       try {
         const refresh = localStorage.getItem('refreshToken');
         const { data } = await axios.post(
-          `http://127.0.0.1:${apiPort}/api/auth/refresh?token=${refresh}`
+          `http://127.0.0.1:${apiPort}/api/auth/refresh`,
+          { refreshToken: refresh }
         );
         
         const newToken = data.data.accessToken;

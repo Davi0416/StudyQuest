@@ -67,16 +67,27 @@ npm run dist:win
 if (-not $?) { throw "electron-builder falhou" }
 
 # ── 5. Atualiza o app instalado (sem precisar rodar o instalador) ──────────────
-$installedAsar = "$env:LOCALAPPDATA\Programs\studyquest\resources\app.asar"
-$builtAsar     = "$root\electron\dist-electron\win-unpacked\resources\app.asar"
-if (Test-Path $installedAsar) {
+# Copia o conteudo inteiro de resources/: app.asar (main/preload) + frontend-dist
+# + backend. Copiar so o app.asar deixa frontend e backend desatualizados, porque
+# eles sao empacotados como extraResources, FORA do asar.
+$installedResources = "$env:LOCALAPPDATA\Programs\studyquest\resources"
+$builtResources     = "$root\electron\dist-electron\win-unpacked\resources"
+if (Test-Path $installedResources) {
     Step "Atualizando app instalado"
-    Copy-Item $builtAsar $installedAsar -Force
-    Write-Host "    app.asar atualizado em $installedAsar"
+    # StudyQuest precisa estar fechado (passo 0 ja garante isso)
+    foreach ($item in @("app.asar", "frontend-dist", "backend")) {
+        $src = Join-Path $builtResources $item
+        $dst = Join-Path $installedResources $item
+        if (Test-Path $src) {
+            if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
+            Copy-Item $src $dst -Recurse -Force
+            Write-Host "    $item atualizado"
+        }
+    }
 }
 
 Step "Concluido!"
 Write-Host "Instalador: $root\electron\dist-electron\StudyQuest Setup *.exe" -ForegroundColor Green
-if (Test-Path $installedAsar) {
+if (Test-Path $installedResources) {
     Write-Host "App instalado ja atualizado - pode abrir o StudyQuest diretamente." -ForegroundColor Green
 }
