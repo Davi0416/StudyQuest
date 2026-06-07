@@ -18,7 +18,13 @@ function CalloutBox({ children, className }: { children: React.ReactNode; classN
 }
 
 function parseCallout(line: string, prefix: string) {
-  return line.startsWith(prefix) ? line.slice(prefix.length).trim() : line;
+  const content = line.startsWith(prefix) ? line.slice(prefix.length).trim() : line;
+  return content.split('\n').map((ln, i, arr) => (
+    <React.Fragment key={i}>
+      {ln}
+      {i < arr.length - 1 && <br />}
+    </React.Fragment>
+  ));
 }
 
 type Block =
@@ -54,8 +60,21 @@ function groupLines(lines: string[]): Block[] {
       }
       blocks.push({ kind: 'saida', index: i, label, header: prefix, body });
     } else {
-      blocks.push({ kind: 'line', index: i, text: lines[i] });
-      i++;
+      let text = lines[i];
+      const prefixes = ['Contexto:', 'Objetivo:', 'Mestre:', 'Prática:', 'Dica:', 'Atenção:', 'Entrada:'];
+      if (prefixes.some(p => trimmed.startsWith(p))) {
+        i++;
+        while (i < lines.length) {
+          const next = lines[i].trim();
+          if (!next) { i++; break; }
+          if (isBlockHeader(next)) break;
+          text += '\n' + next;
+          i++;
+        }
+      } else {
+        i++;
+      }
+      blocks.push({ kind: 'line', index: i, text });
     }
   }
   return blocks;

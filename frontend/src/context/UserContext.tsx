@@ -37,6 +37,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     initUser();
   }, []);
 
+  useEffect(() => {
+    const handler = () => {
+      setUser(null);
+      navigate('/login');
+    };
+    window.addEventListener('auth:logout', handler);
+    return () => window.removeEventListener('auth:logout', handler);
+  }, [navigate]);
+
   const addXp = (amount: number) => {
     setUser(prev => {
       if (!prev) return prev;

@@ -213,14 +213,14 @@ export function Aula() {
         }
 
         const fcRes = await api.get(`/flashcards?noId=${id}`);
-        setFlashcards(unwrap(fcRes) as Flashcard[]);
+        setFlashcards((unwrap(fcRes) as Flashcard[]) || []);
 
         const progRes = await api.get(`/nos/${id}/aula/progresso`);
         const prog = unwrap(progRes) as AulaProgresso;
 
         const codigos: Record<string, string> = {};
         const aprovados = new Set<string>();
-        for (const ex of prog.exercicios) {
+        for (const ex of prog.exercicios || []) {
           if (ex.codigo) codigos[ex.id] = ex.codigo;
           if (ex.aprovado) aprovados.add(ex.id);
         }
@@ -244,7 +244,7 @@ export function Aula() {
   }, [id, navigate]);
 
   function exerciciosFrom(data: No) {
-    return data.aulaBlocos.filter((b): b is Extract<AulaBloco, { tipo: 'exercicio' }> => b.tipo === 'exercicio');
+    return (data.aulaBlocos || []).filter((b): b is Extract<AulaBloco, { tipo: 'exercicio' }> => b.tipo === 'exercicio');
   }
 
   useEffect(() => {
@@ -277,7 +277,7 @@ export function Aula() {
     return <div className="min-h-screen bg-bg text-text grid place-items-center">Carregando aula...</div>;
   }
 
-  const blocos: AulaBloco[] = no.aulaBlocos.length > 0
+  const blocos: AulaBloco[] = (no.aulaBlocos || []).length > 0
     ? no.aulaBlocos
     : [{ tipo: 'texto', conteudo: no.conteudo }];
 

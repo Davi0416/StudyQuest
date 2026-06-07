@@ -45,7 +45,7 @@ import {
   CAVE_STATIC_NODES,
   CAVE_NODE_THEME, CAVE_BIOME_LABEL,
 } from '../lib/caveEngine';
-import { makeRenderer } from '../lib/map';
+import { makeRenderer, type MapEngine } from '../lib/map';
 
 function getStaticIndex(i: number, total: number) {
   const maxIdx = CAVE_STATIC_NODES.length - 1;
@@ -79,7 +79,7 @@ export function Mapa() {
 
   const scrollRef   = useRef<HTMLDivElement>(null);
   const terrainRef  = useRef<HTMLCanvasElement>(null);
-  const engineRef   = useRef<any>(null);
+  const engineRef   = useRef<MapEngine | null>(null);
   const [engineReady, setEngineReady] = useState(false);
 
   // ── Init canvas ────────────────────────────────────────────────────────────
@@ -89,6 +89,10 @@ export function Mapa() {
     R.build();
     engineRef.current = R;
     setEngineReady(true);
+
+    return () => {
+      engineRef.current?.stop();
+    };
   }, []);
 
   // ── API ────────────────────────────────────────────────────────────────────

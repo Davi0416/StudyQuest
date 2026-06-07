@@ -53,6 +53,11 @@ export function AulaExercicio({ bloco, codigoSalvo, aprovado, onAprovado, onCodi
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const isMounted = useRef(true);
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
+
 
 
   useEffect(() => {
@@ -86,41 +91,27 @@ export function AulaExercicio({ bloco, codigoSalvo, aprovado, onAprovado, onCodi
 
 
   const handleSubmit = async () => {
-
     setSubmitting(true);
-
     setFeedback(null);
-
     onCodigoChange(codigo);
-
     try {
-
       const res = await api.post('/exercicios/validar', {
-
         codigo,
-
         linguagem: bloco.linguagem,
-
         testes: bloco.testes,
-
       });
-
+      if (!isMounted.current) return;
       const result = unwrap(res) as ValidarCodigoResult;
-
       setFeedback({ ok: result.aprovado, text: result.feedback });
-
       if (result.aprovado) onAprovado(codigo);
-
     } catch (err: any) {
-
+      if (!isMounted.current) return;
       setFeedback({ ok: false, text: err.response?.data?.message || 'Erro ao validar código' });
-
     } finally {
-
-      setSubmitting(false);
-
+      if (isMounted.current) {
+        setSubmitting(false);
+      }
     }
-
   };
 
 

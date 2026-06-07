@@ -12,27 +12,59 @@ api.interceptors.request.use(config => {
   return config
 })
 
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: Function; reject: Function }> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(p => error ? p.reject(error) : p.resolve(token));
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   res => res,
   async error => {
-    const isAuthEndpoint = error.config?.url?.includes('/auth/')
-    if (error.response?.status === 401 && !error.config._retry && !isAuthEndpoint) {
-      error.config._retry = true
+    const originalRequest = error.config;
+    const isAuthEndpoint = originalRequest?.url?.includes('/auth/');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+      if (isRefreshing) {
+        return new Promise(function(resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
       try {
-        const refresh = localStorage.getItem('refreshToken')
+        const refresh = localStorage.getItem('refreshToken');
         const { data } = await axios.post(
           `http://127.0.0.1:${apiPort}/api/auth/refresh?token=${refresh}`
-        )
-        localStorage.setItem('accessToken', data.data.accessToken)
-        localStorage.setItem('refreshToken', data.data.refreshToken)
-        error.config.headers.Authorization = `Bearer ${data.data.accessToken}`
-        return api(error.config)
-      } catch {
-        localStorage.clear()
-        window.location.href = '/login'
+        );
+        
+        const newToken = data.data.accessToken;
+        localStorage.setItem('accessToken', newToken);
+        localStorage.setItem('refreshToken', data.data.refreshToken);
+        
+        processQueue(null, newToken);
+        
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
+        localStorage.clear();
+        window.dispatchEvent(new CustomEvent('auth:logout'))
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
 )
 

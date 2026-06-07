@@ -112,6 +112,12 @@ const idx = (x, y) => y * W + x;
     return out;
   }
 
+export interface MapEngine {
+  build: () => void;
+  nodeAnchors: number[][];
+  stop: () => void;
+}
+
 export function makeRenderer(displayCanvas) {
   const ctx = displayCanvas.getContext('2d');
     displayCanvas.width = W; displayCanvas.height = H;
@@ -571,6 +577,7 @@ export function makeRenderer(displayCanvas) {
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 6.2832); ctx.fill();
     }
 
+    let reqId;
     function frame(time) {
       const t = time / 1000;
       ctx.globalCompositeOperation = 'source-over';
@@ -589,8 +596,8 @@ export function makeRenderer(displayCanvas) {
       if (flick > 0.4) {
         ctx.globalCompositeOperation = 'source-over';
         ctx.strokeStyle = '#d83a4a'; ctx.lineWidth = 1;
-        const ty = by + 16 + (flick - 0.4) * 12;
-        ctx.beginPath(); ctx.moveTo(bx, by + 14); ctx.lineTo(bx, ty);
+        const ty = by + 14 + (flick - 0.4) * 10;
+        ctx.beginPath(); ctx.moveTo(bx, by + 8); ctx.lineTo(bx, ty);
         ctx.moveTo(bx, ty); ctx.lineTo(bx - 2, ty + 3); ctx.moveTo(bx, ty); ctx.lineTo(bx + 2, ty + 3); ctx.stroke();
         ctx.globalCompositeOperation = 'lighter';
       }
@@ -605,13 +612,14 @@ export function makeRenderer(displayCanvas) {
         ctx.fillRect(Math.round(mx), Math.round(my), 1, 1);
       }
       ctx.globalCompositeOperation = 'source-over';
-      requestAnimationFrame(frame);
+      reqId = requestAnimationFrame(frame);
     }
 
   return {
     // paint the static scene to the display canvas synchronously, THEN start the
     // animation loop — so the map is visible even when rAF is throttled/paused.
     build() { buildStatic(); ctx.drawImage(base, 0, 0); frame(performance.now()); },
+    stop() { cancelAnimationFrame(reqId); },
     nodeAnchors: nodePositions, nodes: NODES, boss: BOSS, W, H,
   };
 }
