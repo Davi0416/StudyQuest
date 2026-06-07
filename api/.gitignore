@@ -46,6 +46,7 @@ nb-configuration.xml
 
 # JWT Keys — nunca comite chaves privadas
 privateKey.pem
+serverPrivateKey.pem
 
 # SQLite dev
 *.db
