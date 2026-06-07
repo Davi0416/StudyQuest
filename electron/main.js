@@ -94,10 +94,6 @@ function buildBackendEnv() {
     CORS_ORIGINS: '*',
     // E-mail SMTP — carregado de mail.config.js (gitignored)
     ...mailCfg,
-    // Neon — ranking semanal global (somente leitura), lido de mail.config.js
-    STUDYQUEST_NEON_RANKING_URL:      mailCfg.NEON_RANKING_URL      || '',
-    STUDYQUEST_NEON_RANKING_USER:     mailCfg.NEON_RANKING_USER     || '',
-    STUDYQUEST_NEON_RANKING_PASSWORD: mailCfg.NEON_RANKING_PASSWORD || '',
   }
 
   const python = bundledPythonPath()
@@ -128,9 +124,25 @@ function resolveBackendLaunch() {
   return null
 }
 
+// Abre o log de backend uma vez; fica aberto até o app fechar
+const logPath = path.join(app.getPath('userData'), 'backend.log')
+const logStream = fs.createWriteStream(logPath, { flags: 'a' })
+
+function log(line) {
+  const ts = new Date().toISOString()
+  logStream.write(`${ts} ${line}\n`)
+}
+
 function startBackend() {
   const launch = resolveBackendLaunch()
+
+  log(`[START] backendDir: ${backendDir}`)
+  log(`[START] nativeBinary existe: ${fs.existsSync(nativeBinary)}`)
+  log(`[START] jvmJava existe: ${fs.existsSync(jvmJava)}`)
+  log(`[START] quarkusRunJar existe: ${fs.existsSync(quarkusRunJar)}`)
+
   if (!launch) {
+    log(`[ERROR] Nenhum runtime encontrado em ${backendDir}`)
     dialog.showErrorBox(
       'Backend não encontrado',
       `Nenhum runtime embutido encontrado em:\n${backendDir}\n\nExecute .\\scripts\\build-desktop.ps1 para gerar o instalador.`
@@ -139,6 +151,13 @@ function startBackend() {
     return
   }
 
+  log(`[START] Tentando iniciar backend em: ${launch.cmd}`)
+  log(`[START] args: ${JSON.stringify(launch.args)}`)
+  log(`[START] cwd: ${launch.cwd}`)
+  log(`[START] Arquivo existe: ${fs.existsSync(launch.cmd)}`)
+  log(`[START] __dirname: ${__dirname}`)
+  log(`[START] process.cwd(): ${process.cwd()}`)
+
   if (process.platform !== 'win32' && launch.cmd === nativeBinary) {
     fs.chmodSync(nativeBinary, 0o755)
   }
@@ -146,38 +165,50 @@ function startBackend() {
   backendProcess = spawn(launch.cmd, launch.args, {
     env: buildBackendEnv(),
     cwd: launch.cwd,
-    stdio: isDev ? 'inherit' : 'pipe',
+    stdio: 'pipe',
     windowsHide: true,
+    shell: true,
   })
 
-  if (!isDev && backendProcess.stderr) {
-    backendProcess.stderr.on('data', (chunk) => {
-      console.error('[backend]', chunk.toString())
-    })
-  }
+  backendProcess.stdout.on('data', (data) => log(`[OUT] ${data.toString().trimEnd()}`))
+  backendProcess.stderr.on('data', (data) => log(`[ERR] ${data.toString().trimEnd()}`))
 
   backendProcess.on('error', (err) => {
+    log(`[SPAWN ERROR] ${err.message}`)
     dialog.showErrorBox(
       'Erro ao iniciar o backend',
-      `Não foi possível iniciar o servidor local.\n\nDetalhe: ${err.message}`
+      `Não foi possível iniciar o servidor local.\n\nDetalhe: ${err.message}\n\nLog: ${logPath}`
     )
     app.quit()
   })
 
   backendProcess.on('exit', (code, signal) => {
+    log(`[EXIT] code=${code} signal=${signal}`)
     if (code !== 0 && code !== null && !app.isQuitting) {
-      dialog.showErrorBox(
-        'Backend encerrado',
-        `O servidor local parou inesperadamente (código ${code}${signal ? `, ${signal}` : ''}).`
-      )
-      app.quit()
+      // Aguarda 500ms para o log ser gravado antes de exibir o dialog
+      setTimeout(() => {
+        dialog.showErrorBox(
+          'Backend encerrado',
+          `O servidor local parou inesperadamente (código ${code}${signal ? `, ${signal}` : ''}).\n\nLog completo em:\n${logPath}`
+        )
+        app.quit()
+      }, 500)
     }
   })
 }
 
 function killBackend() {
   if (backendProcess) {
-    backendProcess.kill()
+    try {
+      if (process.platform === 'win32') {
+        const { execSync } = require('child_process')
+        execSync(`taskkill /pid ${backendProcess.pid} /f /t`, { stdio: 'ignore' })
+      } else {
+        backendProcess.kill('SIGTERM')
+      }
+    } catch (e) {
+      console.error('Failed to kill backend:', e)
+    }
     backendProcess = null
   }
 }
@@ -415,5 +446,13 @@ app.on('activate', () => {
 
 app.on('before-quit', () => {
   app.isQuitting = true
+  killBackend()
+})
+
+app.on('will-quit', () => {
+  killBackend()
+})
+
+process.on('exit', () => {
   killBackend()
 })
