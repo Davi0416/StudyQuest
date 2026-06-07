@@ -197,19 +197,21 @@ function startBackend() {
 }
 
 function killBackend() {
-  if (backendProcess) {
-    try {
-      if (process.platform === 'win32') {
-        const { execSync } = require('child_process')
-        execSync(`taskkill /pid ${backendProcess.pid} /f /t`, { stdio: 'ignore' })
-      } else {
-        backendProcess.kill('SIGTERM')
-      }
-    } catch (e) {
-      console.error('Failed to kill backend:', e)
+  if (!backendProcess) return
+  const pid = backendProcess.pid
+  backendProcess.removeAllListeners()
+  backendProcess = null
+  try {
+    if (process.platform === 'win32') {
+      const { execSync } = require('child_process')
+      execSync(`taskkill /pid ${pid} /f /t`, { stdio: 'ignore' })
+    } else {
+      process.kill(pid, 'SIGTERM')
     }
-    backendProcess = null
+  } catch (_) {
+    // processo já encerrado
   }
+  try { logStream.end() } catch (_) {}
 }
 
 function waitForApi(retries = 80, delayMs = 500) {
