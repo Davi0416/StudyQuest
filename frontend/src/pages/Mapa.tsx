@@ -357,7 +357,26 @@ export function Mapa() {
                 </div>
 
                 <h3 className="font-cinzel font-bold text-[23px] leading-[1.15] mb-2">{selectedNode.titulo}</h3>
-                <p className="text-text-dim text-[13.5px] leading-[1.55] mb-5">{selectedNode.conteudo}</p>
+                <div className="text-text-dim text-[13.5px] leading-[1.6] mb-5 flex flex-col gap-1.5">
+                  {(selectedNode.conteudo ?? '').split('\n').map((line, i) => {
+                    const trimmed = line.trim();
+                    if (!trimmed) return null;
+                    if (/^#{1,3}\s/.test(trimmed)) {
+                      const text = trimmed.replace(/^#{1,3}\s+/, '');
+                      return <p key={i} className="font-semibold text-text text-[14px]">{text}</p>;
+                    }
+                    if (trimmed.startsWith('• ') || trimmed.startsWith('- ')) {
+                      const text = trimmed.slice(2);
+                      return (
+                        <div key={i} className="flex gap-2">
+                          <span className="text-gold mt-0.5 shrink-0">•</span>
+                          <span>{text}</span>
+                        </div>
+                      );
+                    }
+                    return <p key={i}>{trimmed}</p>;
+                  })}
+                </div>
 
                 <div className="flex items-center gap-3 p-3.5 rounded-md border-[0.5px] border-gold/30 mb-5" style={{ background: 'linear-gradient(155deg, rgba(240,192,96,.12), rgba(240,192,96,.03))' }}>
                   <IconBolt size={22} className="text-gold" />
