@@ -31,15 +31,18 @@ public class RevisaoService {
     FlashcardRepository flashcardRepository;
 
     public RevisaoHojeResponse hoje(UUID userId) {
-        // SQLite armazena LocalDate como texto ISO ("YYYY-MM-DD"); comparação léxica funciona corretamente
-        String amanha = LocalDate.now().plusDays(1).toString();
+        // O Hibernate (dialeto SQLite) persiste LocalDate como epoch millis (INTEGER).
+        // Comparar com texto ISO quebra: no SQLite todo INTEGER é < qualquer TEXT,
+        // então a query retornaria TODOS os cards. Comparamos epoch millis numericamente.
+        long startOfTomorrow = LocalDate.now().plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
         @SuppressWarnings("unchecked")
         List<Object[]> rows = localDb.read(em -> (List<Object[]>) em.createNativeQuery(
                         "SELECT id, flashcardId, caixa FROM leitner_cards " +
                         "WHERE userId = :userId AND proximaRevisao < :startOfTomorrow")
                 .setParameter("userId", userId.toString())
-                .setParameter("startOfTomorrow", amanha)
+                .setParameter("startOfTomorrow", startOfTomorrow)
                 .getResultList());
 
         if (rows.isEmpty()) return new RevisaoHojeResponse(0, Map.of());
@@ -114,9 +117,8 @@ public class RevisaoService {
                     Long leitnerCardId = ((Number) r[0]).longValue();
                     Long flashcardId   = ((Number) r[1]).longValue();
                     int caixa          = ((Number) r[2]).intValue();
-                    // SQLite devolve LocalDate como String ISO ("YYYY-MM-DD")
-                    long proxRevisao   = isoDateToEpochMillis(r[3]);
-                    long ultRevisao    = isoDateToEpochMillis(r[4]);
+                    long proxRevisao   = toEpochMillis(r[3]);
+                    long ultRevisao    = toEpochMillis(r[4]);
                     Flashcard f = flashcardsMap.get(flashcardId);
                     if (f == null) return null;
                     return new TodosCardsResponse.CardDetalhe(leitnerCardId, f.getId(), f.getFrente(), f.getVerso(), caixa, proxRevisao, ultRevisao);
@@ -128,11 +130,13 @@ public class RevisaoService {
     }
 
     /**
-     * Converte o valor de coluna LocalDate devolvido pelo driver SQLite (Xerial) para epoch millis.
-     * O Xerial devolve datas como String ISO "YYYY-MM-DD" — nenhum outro tipo é esperado aqui.
+     * Converte o valor de coluna LocalDate devolvido pela query nativa para epoch millis.
+     * O Hibernate (dialeto SQLite) persiste LocalDate como epoch millis (INTEGER), então o
+     * caso normal é Number. String ISO é tratada como fallback defensivo.
      */
-    private static long isoDateToEpochMillis(Object val) {
+    private static long toEpochMillis(Object val) {
         if (val == null) return 0L;
+        if (val instanceof Number n) return n.longValue();
         if (val instanceof String s && !s.isBlank()) {
             try {
                 return LocalDate.parse(s).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();

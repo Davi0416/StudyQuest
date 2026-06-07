@@ -122,7 +122,7 @@ class RevisaoServiceTest {
     // ---- filtro de revisão do dia ----
 
     @Test
-    void hoje_filtraComStringIsoNaoComEpochMillis() {
+    void hoje_filtraComEpochMillisNaoComStringIso() {
         Query query = mockQueryReturning(List.of());
         when(localEm.createNativeQuery(contains("proximaRevisao"))).thenReturn(query);
 
@@ -133,36 +133,40 @@ class RevisaoServiceTest {
         verify(query, atLeastOnce()).setParameter(eq("startOfTomorrow"), captor.capture());
 
         Object param = captor.getValue();
-        assertInstanceOf(String.class, param,
-                "Parâmetro :startOfTomorrow deve ser String ISO, não epoch millis (Long). " +
+        // O Hibernate persiste LocalDate como epoch millis (INTEGER) no SQLite.
+        // Comparar com String quebra: no SQLite todo INTEGER < qualquer TEXT, retornando tudo.
+        assertInstanceOf(Long.class, param,
+                "Parâmetro :startOfTomorrow deve ser epoch millis (Long), não String ISO. " +
                 "Tipo encontrado: " + (param == null ? "null" : param.getClass().getSimpleName()));
 
-        // Deve ter formato "YYYY-MM-DD" e ser exatamente amanhã
-        String isoAmanha = LocalDate.now().plusDays(1).toString();
-        assertEquals(isoAmanha, param,
-                "Filtro deve usar a data de amanhã em formato ISO");
+        long esperado = LocalDate.now().plusDays(1)
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+        assertEquals(esperado, param,
+                "Filtro deve usar epoch millis do início de amanhã (timezone do sistema)");
     }
 
     @Test
     void hoje_cardVencidoHoje_apareceNoFiltro() {
-        // Verifica que um card com proximaRevisao = hoje passa pelo filtro (ISO léxico: hoje < amanhã)
-        String hoje = LocalDate.now().toString();
-        String amanha = LocalDate.now().plusDays(1).toString();
+        // Card com proximaRevisao = hoje deve passar (hoje < início de amanhã)
+        long hoje = LocalDate.now()
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long startOfTomorrow = LocalDate.now().plusDays(1)
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-        // A comparação que a query faz: hoje < amanhã → true → card deve aparecer
-        assertTrue(hoje.compareTo(amanha) < 0,
-                "Comparação léxica ISO deve incluir card de hoje ('" + hoje + "' < '" + amanha + "')");
+        assertTrue(hoje < startOfTomorrow,
+                "Card de hoje deve passar pelo filtro 'proximaRevisao < amanhã'");
     }
 
     @Test
     void hoje_cardVencidoAmanha_naoApareceFiltro() {
-        // Card com proximaRevisao = amanhã NÃO deve aparecer na revisão de hoje
-        String amanha = LocalDate.now().plusDays(1).toString();
-        String limiteExclusivo = LocalDate.now().plusDays(1).toString();
+        // Card com proximaRevisao = amanhã NÃO deve aparecer (amanhã < amanhã = false)
+        long amanha = LocalDate.now().plusDays(1)
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+        long startOfTomorrow = LocalDate.now().plusDays(1)
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-        // amanhã < amanhã → false → card correto não aparece
-        assertFalse(amanha.compareTo(limiteExclusivo) < 0,
-                "Card com proximaRevisao = amanhã não deve passar pelo filtro 'proximaRevisao < amanhã'");
+        assertFalse(amanha < startOfTomorrow,
+                "Card de amanhã não deve passar pelo filtro 'proximaRevisao < amanhã'");
     }
 
     @Test
