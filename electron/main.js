@@ -167,7 +167,6 @@ function startBackend() {
     cwd: launch.cwd,
     stdio: 'pipe',
     windowsHide: true,
-    shell: true,
   })
 
   backendProcess.stdout.on('data', (data) => log(`[OUT] ${data.toString().trimEnd()}`))
