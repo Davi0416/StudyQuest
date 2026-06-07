@@ -76,9 +76,8 @@ studyquest/
 │   ├── preload.js
 │   └── package.json                 electron-builder config
 │
-├── scripts/
-│   ├── build-desktop.sh             build completo (Linux/macOS)
-│   └── build-desktop.ps1            build completo (Windows)
+├── build-desktop.ps1                build completo (Windows)
+├── build-desktop.sh                 build completo (Linux/macOS)
 │
 ├── ARCHITECTURE.md
 └── README.md
@@ -158,15 +157,12 @@ cd ../electron && npx electron .
 
 ```powershell
 # Windows — gera o instalador .exe (JRE + Python embutidos)
-.\scripts\build-desktop.ps1
-
-# Opcional: binário GraalVM nativo (requer Docker Desktop rodando)
-.\scripts\build-desktop.ps1 -Native
+.\build-desktop.ps1
 ```
 
 ```bash
 # Linux / macOS
-bash scripts/build-desktop.sh
+bash build-desktop.sh
 ```
 
 O script executa automaticamente:
@@ -176,7 +172,7 @@ O script executa automaticamente:
 4. `vite build` → React estático
 5. `electron-builder` → instalador final
 
-**Saída:** `electron/dist-electron/StudyQuest Setup 1.0.0.exe`
+**Saída:** `electron/dist-electron/StudyQuest Setup 1.0.8.exe`
 
 O instalador **não exige** Java, Node, Python ou PostgreSQL na máquina do usuário. Tudo roda embutido:
 - Electron (interface)
@@ -214,8 +210,8 @@ Consulte o [ARCHITECTURE.md](./ARCHITECTURE.md) para detalhes de arquitetura, mo
 - [x] Integração Groq via LangChain4j
 - [x] Gamificação (XP, streak, conquistas, ranking)
 - [x] Shell Electron com binário nativo embutido
-- [ ] Frontend React — Mapa Overworld pixel art
-- [ ] Mini IDE com Monaco Editor (integração completa)
+- [x] Frontend React — Mapa Overworld pixel art
+- [x] Mini IDE com Monaco Editor (integração completa)
 - [ ] Build nativo GraalVM (configuração final de reflection/resources)
 - [ ] Testes de integração
 

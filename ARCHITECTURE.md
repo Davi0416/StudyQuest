@@ -63,7 +63,7 @@ com.studyquest
 ├── auth/
 │   ├── AuthResource.java
 │   ├── AuthService.java
-│   └── dto/  LoginRequest, RegisterRequest, TokenResponse
+│   └── dto/  LoginRequest, RegisterRequest, TokenResponse, RefreshTokenRequest
 │
 ├── usuarios/
 │   ├── UserResource.java
@@ -110,6 +110,8 @@ com.studyquest
 ├── gamificacao/
 │   ├── GamificacaoResource.java
 │   ├── GamificacaoService.java       (XP, nível, streak, conquistas)
+│   ├── NeonRankingService.java       (upsert assíncrono fire-and-forget ao Neon)
+│   ├── RankingCacheStore.java        (leitura/escrita do cache de ranking no SQLite)
 │   ├── Conquista.java, ConquistaUsuario.java, RankingEntry.java
 │   ├── ConquistaRepository.java, ConquistaUsuarioRepository.java, RankingRepository.java
 │   └── dto/  ConquistaResponse, RankingResponse
@@ -190,8 +192,11 @@ O `SyncJob` roda periodicamente. Consome a `sync_queue` do SQLite — eventos co
 ```
 POST /register              cria conta email + senha
 POST /login                 retorna access token + refresh token
-POST /refresh               renova o access token via query param ?token=
+POST /refresh               body: { refreshToken } → renova o access token
+POST /logout                body: { refreshToken } → invalida o refresh token
 ```
+
+> Verificação de e-mail desabilitada temporariamente — endpoints `/verify` e `/verify/resend` removidos. Registro concede acesso imediato com `emailVerified=true`.
 
 ### Usuários — `/api/users`
 
@@ -222,8 +227,15 @@ POST /{id}/concluir         conclui, concede XP, desbloqueia próximos nós
 
 ```
 GET  /{id}                  enunciado, código inicial, linguagem
-POST /{id}/submeter         envia código → Judge0 → salva → retorna feedback
+POST /{id}/submeter         envia código → Judge0/Python local → salva → concede XP se aprovado
 GET  /{id}/submissoes       histórico de tentativas
+```
+
+### Exercícios (feedback) — `/api/exercicios`
+
+```
+POST /validar               valida código contra casos de teste do request (feedback imediato)
+                            NÃO concede XP nem marca missão concluída — uso exclusivo da Mini IDE
 ```
 
 ### Flashcards — `/api/flashcards`
@@ -347,11 +359,13 @@ O assistente é stateless — cada mensagem carrega o contexto necessário.
 ## Segurança
 
 - JWT com access token (15min) + refresh token (7 dias), assinado com RSA
-- `publicKey.pem` commitada no repo (chave pública — não sensível)
-- `privateKey.pem` fora do controle de versão (`.gitignore`); caminho configurável via `JWT_PRIVATE_KEY_LOCATION`
-- CORS configurável via `CORS_ORIGINS` (padrão dev: aceita tudo; produção: restringir ao domínio)
+- **Chaves separadas por perfil**: `desktop` usa `publicKey.pem`/`privateKey.pem` (embutido no app); `neon` usa `serverPublicKey.pem`/`serverPrivateKey.pem` (injetado via secret) — tokens do desktop são rejeitados pelo servidor e vice-versa
+- `privateKey.pem` e `serverPrivateKey.pem` fora do controle de versão (`.gitignore`)
+- CORS: `*` apenas em dev/desktop; perfil neon exige `CORS_ORIGINS` explícito (sem wildcard)
+- X-Forwarded-For: só confiado se o IP remoto estiver na lista `app.trusted-proxies`
 - Senhas armazenadas com BCrypt
 - Todos os endpoints (exceto `/api/auth/**`) exigem Bearer token válido
+- Backend grava log de inicialização em `%APPDATA%\studyquest\backend.log` (desktop)
 
 ---
 
@@ -368,3 +382,5 @@ O assistente é stateless — cada mensagem carrega o contexto necessário.
 | Judge0 externo no MVP | Execução segura de código sem gerenciar containers |
 | LangChain4j + Groq | Gratuito, rápido, integração madura com Quarkus |
 | Sync queue no SQLite | Garante que nenhum evento se perde mesmo sem conexão |
+| JRE embutido como fallback | Se o binário GraalVM nativo não estiver disponível, o Electron detecta e usa `jre/bin/java + quarkus-run.jar` automaticamente — mesmo experiência para o usuário |
+| `NeonRankingService` fire-and-forget | Upsert ao Neon via `Vertx.executeBlocking` fora da transação local — falha de rede não bloqueia nem reverte XP do usuário |
