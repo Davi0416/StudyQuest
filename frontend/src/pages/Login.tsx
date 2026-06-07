@@ -318,20 +318,6 @@ export function Login() {
 
           {mode !== 'verify' && (
             <>
-              <div className="flex items-center gap-4 my-5 text-text-mute text-xs tracking-wide uppercase before:flex-1 before:h-[0.5px] before:bg-border after:flex-1 after:h-[0.5px] after:bg-border">
-                ou
-              </div>
-
-              <button className="flex items-center justify-center gap-3 w-full py-3 rounded-sm border border-border bg-surface-2 text-text font-semibold text-sm hover:border-[#3d444d] hover:bg-[#222936] hover:-translate-y-[2px] transition-all">
-                <svg className="w-[18px] h-[18px]" viewBox="0 0 48 48">
-                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8a12 12 0 1 1 0-24c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 1 0 24 44c11 0 19.5-8 19.5-20 0-1.3-.1-2.3-.4-3.5z"/>
-                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
-                  <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2c-2 1.4-4.6 2.3-7.2 2.3-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/>
-                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C40.9 36 44 30.7 44 24c0-1.3-.1-2.3-.4-3.5z"/>
-                </svg>
-                {mode === 'login' ? 'Continuar com Google' : 'Cadastrar com Google'}
-              </button>
-
               <p className="mt-6 text-center text-[13.5px] text-text-dim">
                 {mode === 'login' ? 'Ainda não tem conta? ' : 'Já tem uma conta? '}
                 <button
