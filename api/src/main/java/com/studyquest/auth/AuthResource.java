@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Context;
+import io.vertx.core.http.HttpServerRequest;
 
 @Path("/api/auth")
 @Produces(MediaType.APPLICATION_JSON)
@@ -20,10 +22,11 @@ public class AuthResource {
 
     @POST
     @Path("/register")
-    public Response register(@Valid RegisterRequest req) {
-        RegisterResponse result = authService.register(req);
+    public Response register(@Valid RegisterRequest req, @Context HttpServerRequest request) {
+        String ip = getClientIp(request);
+        TokenResponse tokens = authService.register(req, ip);
         return Response.status(Response.Status.CREATED)
-                .entity(ApiResponse.ok(result, result.message()))
+                .entity(ApiResponse.ok(tokens, "Conta criada com sucesso!"))
                 .build();
     }
 
@@ -57,5 +60,16 @@ public class AuthResource {
     public ApiResponse<Void> logout(@QueryParam("token") String refreshToken) {
         authService.logout(refreshToken);
         return ApiResponse.ok(null, "Logout realizado");
+    }
+
+    private String getClientIp(HttpServerRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        if (request.remoteAddress() != null) {
+            return request.remoteAddress().hostAddress();
+        }
+        return "unknown";
     }
 }
