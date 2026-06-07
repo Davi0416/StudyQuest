@@ -1,6 +1,6 @@
 {
   "name": "studyquest-desktop",
-  "version": "1.0.9",
+  "version": "1.1.0",
   "description": "StudyQuest – Desktop App",
   "main": "main.js",
   "scripts": {
@@ -35,7 +35,8 @@
       "main.js",
       "preload.js",
       "node_modules/**/*",
-      "package.json"
+      "package.json",
+      "icons/**/*"
     ],
     "extraResources": [
       {
