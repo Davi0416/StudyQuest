@@ -21,6 +21,11 @@ api/.env
 *.env
 electron/mail.config.js
 
+# Scripts de debug temporários (gerados durante desenvolvimento de ícones/fixes)
+electron/fix*.js
+electron/icons/icon_fixed*.png
+electron/icons/icon_padded*.png
+
 # Misc
 .DS_Store
 *.db
