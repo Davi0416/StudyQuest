@@ -31,16 +31,15 @@ public class RevisaoService {
     FlashcardRepository flashcardRepository;
 
     public RevisaoHojeResponse hoje(UUID userId) {
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
-        long startOfTomorrow = LocalDate.now().plusDays(1)
-                .atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        // SQLite armazena LocalDate como texto ISO ("YYYY-MM-DD"); comparação léxica funciona corretamente
+        String amanha = LocalDate.now().plusDays(1).toString();
 
         @SuppressWarnings("unchecked")
         List<Object[]> rows = localDb.read(em -> (List<Object[]>) em.createNativeQuery(
                         "SELECT id, flashcardId, caixa FROM leitner_cards " +
-                        "WHERE hex(userId) = :uid AND proximaRevisao < :startOfTomorrow")
-                .setParameter("uid", uidHex)
-                .setParameter("startOfTomorrow", startOfTomorrow)
+                        "WHERE userId = :userId AND proximaRevisao < :startOfTomorrow")
+                .setParameter("userId", userId.toString())
+                .setParameter("startOfTomorrow", amanha)
                 .getResultList());
 
         if (rows.isEmpty()) return new RevisaoHojeResponse(0, Map.of());
@@ -84,11 +83,10 @@ public class RevisaoService {
     }
 
     public Map<Integer, Long> stats(UUID userId) {
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
         @SuppressWarnings("unchecked")
         List<Object[]> rows = localDb.read(em -> (List<Object[]>) em.createNativeQuery(
-                        "SELECT caixa, COUNT(*) FROM leitner_cards WHERE hex(userId) = :uid GROUP BY caixa")
-                .setParameter("uid", uidHex)
+                        "SELECT caixa, COUNT(*) FROM leitner_cards WHERE userId = :userId GROUP BY caixa")
+                .setParameter("userId", userId.toString())
                 .getResultList());
 
         return rows.stream().collect(Collectors.toMap(
@@ -98,12 +96,11 @@ public class RevisaoService {
     }
 
     public TodosCardsResponse todos(UUID userId) {
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
         @SuppressWarnings("unchecked")
         List<Object[]> rows = localDb.read(em -> (List<Object[]>) em.createNativeQuery(
                         "SELECT id, flashcardId, caixa, proximaRevisao, ultimaRevisao FROM leitner_cards " +
-                        "WHERE hex(userId) = :uid ORDER BY caixa, proximaRevisao")
-                .setParameter("uid", uidHex)
+                        "WHERE userId = :userId ORDER BY caixa, proximaRevisao")
+                .setParameter("userId", userId.toString())
                 .getResultList());
 
         if (rows.isEmpty()) return new TodosCardsResponse(0, Map.of());
@@ -117,8 +114,9 @@ public class RevisaoService {
                     Long leitnerCardId = ((Number) r[0]).longValue();
                     Long flashcardId   = ((Number) r[1]).longValue();
                     int caixa          = ((Number) r[2]).intValue();
-                    long proxRevisao   = toEpochMillis(r[3]);
-                    long ultRevisao    = toEpochMillis(r[4]);
+                    // SQLite devolve LocalDate como String ISO ("YYYY-MM-DD")
+                    long proxRevisao   = isoDateToEpochMillis(r[3]);
+                    long ultRevisao    = isoDateToEpochMillis(r[4]);
                     Flashcard f = flashcardsMap.get(flashcardId);
                     if (f == null) return null;
                     return new TodosCardsResponse.CardDetalhe(leitnerCardId, f.getId(), f.getFrente(), f.getVerso(), caixa, proxRevisao, ultRevisao);
@@ -129,19 +127,25 @@ public class RevisaoService {
         return new TodosCardsResponse(rows.size(), porCaixa);
     }
 
-    private static long toEpochMillis(Object val) {
+    /**
+     * Converte o valor de coluna LocalDate devolvido pelo driver SQLite (Xerial) para epoch millis.
+     * O Xerial devolve datas como String ISO "YYYY-MM-DD" — nenhum outro tipo é esperado aqui.
+     */
+    private static long isoDateToEpochMillis(Object val) {
         if (val == null) return 0L;
-        if (val instanceof Number n) return n.longValue();
-        if (val instanceof LocalDate ld) return ld.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        if (val instanceof String s && !s.isBlank()) {
+            try {
+                return LocalDate.parse(s).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+            } catch (Exception ignored) {}
+        }
         return 0L;
     }
 
     public void adicionarCard(UUID userId, Long flashcardId) {
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
         localDb.write(em -> {
             Long count = ((Number) em.createNativeQuery(
-                            "SELECT COUNT(*) FROM leitner_cards WHERE hex(userId) = :uid AND flashcardId = :fid")
-                    .setParameter("uid", uidHex)
+                            "SELECT COUNT(*) FROM leitner_cards WHERE userId = :userId AND flashcardId = :fid")
+                    .setParameter("userId", userId.toString())
                     .setParameter("fid", flashcardId)
                     .getSingleResult()).longValue();
 
