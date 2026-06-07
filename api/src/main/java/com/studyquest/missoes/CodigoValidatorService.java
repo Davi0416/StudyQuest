@@ -55,6 +55,10 @@ public class CodigoValidatorService {
                 if (passou) aprovados++;
             }
 
+            if (testes.isEmpty()) {
+                return new ValidarCodigoResponse(false, "Nenhum caso de teste fornecido.", 0, 0);
+            }
+
             boolean aprovado = aprovados == testes.size();
             if (aprovado) {
                 feedback.append("Todos os casos passaram!");
