@@ -63,8 +63,14 @@ Get-ChildItem $backend -Depth 0 | ForEach-Object { Write-Host "      $($_.Name)"
 # ── 4. Electron ────────────────────────────────────────────────────────────────
 Step "Build Electron (Windows installer)"
 Set-Location "$root\electron"
+# NODE_NO_WARNINGS=1 suprime o DEP0190 (shell:true em processo filho do electron-builder).
+# Sem isso, o aviso vai pro stderr e zera $?, fazendo o script abortar mesmo com build OK.
+$env:NODE_NO_WARNINGS = "1"
 npm run dist:win
-if (-not $?) { throw "electron-builder falhou" }
+# Valida pela existencia do instalador, nao por $? (aviso em stderr pode mascarar sucesso)
+$version = (Get-Content "$root\electron\package.json" | ConvertFrom-Json).version
+$installer = "$root\electron\dist-electron\StudyQuest Setup $version.exe"
+if (-not (Test-Path $installer)) { throw "electron-builder falhou: instalador nao gerado ($installer)" }
 
 # ── 5. Atualiza o app instalado (sem precisar rodar o instalador) ──────────────
 # Copia o conteudo inteiro de resources/: app.asar (main/preload) + frontend-dist
