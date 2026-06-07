@@ -101,12 +101,11 @@ public class NoService {
             userNo.setStatus("CONCLUIDO");
             userNo.setConcluidoEm(LocalDateTime.now());
 
-            String uidHexC = userId.toString().replace("-", "").toUpperCase();
             @SuppressWarnings("unchecked")
             java.util.List<com.studyquest.offline.UserTrilha> uts = em.createNativeQuery(
-                    "SELECT * FROM user_trilhas WHERE hex(userId) = :uid AND trilhaId = :tid",
+                    "SELECT * FROM user_trilhas WHERE userId = :userId AND trilhaId = :tid",
                     com.studyquest.offline.UserTrilha.class)
-                .setParameter("uid", uidHexC)
+                .setParameter("userId", userId.toString())
                 .setParameter("tid", no.getTrilhaId())
                 .setMaxResults(1)
                 .getResultList();
@@ -182,11 +181,10 @@ public class NoService {
 
     @SuppressWarnings("unchecked")
     private Optional<UserNo> findUserNo(EntityManager em, UUID userId, Long noId) {
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
         List<UserNo> results = (List<UserNo>) em.createNativeQuery(
-                        "SELECT * FROM user_nos WHERE hex(userId) = :uid AND noId = :nid",
+                        "SELECT * FROM user_nos WHERE userId = :userId AND noId = :nid",
                         UserNo.class)
-                .setParameter("uid", uidHex)
+                .setParameter("userId", userId.toString())
                 .setParameter("nid", noId)
                 .setMaxResults(1)
                 .getResultList();

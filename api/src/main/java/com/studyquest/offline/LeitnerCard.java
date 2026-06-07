@@ -2,6 +2,8 @@ package com.studyquest.offline;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -21,6 +23,8 @@ public class LeitnerCard {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(columnDefinition = "TEXT")
     private UUID userId;
 
     private Long flashcardId;

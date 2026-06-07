@@ -52,11 +52,10 @@ public class TrilhaService {
 
     public List<TrilhaResponse> ativas(UUID userId) {
         trilhaSeedLoader.ensureSeeded();
-        String uidHex1 = userId.toString().replace("-", "").toUpperCase();
         @SuppressWarnings("unchecked")
         List<UserTrilha> userTrilhas = localDb.read(em ->
-                (List<UserTrilha>) em.createNativeQuery("SELECT * FROM user_trilhas WHERE hex(userId) = :uid", UserTrilha.class)
-                        .setParameter("uid", uidHex1)
+                (List<UserTrilha>) em.createNativeQuery("SELECT * FROM user_trilhas WHERE userId = :userId", UserTrilha.class)
+                        .setParameter("userId", userId.toString())
                         .getResultList()
         );
 
@@ -86,13 +85,12 @@ public class TrilhaService {
                     if (!noIds.isEmpty()) {
                         // Etapa 2: conta e soma XP dos nós concluídos no SQLite local
                         List<Long> noIdsCopy = noIds; // efetivamente final para lambda
-                        String uidHex2 = userId.toString().replace("-", "").toUpperCase();
                         String inClause = noIdsCopy.stream().map(Object::toString).collect(java.util.stream.Collectors.joining(","));
                         @SuppressWarnings("unchecked")
                         List<Long> concluidosIds = localDb.read(em ->
                             ((List<Object>) em.createNativeQuery(
-                                "SELECT noId FROM user_nos WHERE hex(userId) = :uid AND noId IN (" + inClause + ") AND status = 'CONCLUIDO'")
-                            .setParameter("uid", uidHex2)
+                                "SELECT noId FROM user_nos WHERE userId = :userId AND noId IN (" + inClause + ") AND status = 'CONCLUIDO'")
+                            .setParameter("userId", userId.toString())
                             .getResultList()).stream().map(o -> ((Number)o).longValue()).collect(java.util.stream.Collectors.toList())
                         );
 
@@ -148,11 +146,10 @@ public class TrilhaService {
 
     @SuppressWarnings("unchecked")
     private Optional<UserTrilha> findUserTrilha(EntityManager em, UUID userId, Long trilhaId) {
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
         List<UserTrilha> results = (List<UserTrilha>) em.createNativeQuery(
-                        "SELECT * FROM user_trilhas WHERE hex(userId) = :uid AND trilhaId = :tid",
+                        "SELECT * FROM user_trilhas WHERE userId = :userId AND trilhaId = :tid",
                         UserTrilha.class)
-                .setParameter("uid", uidHex)
+                .setParameter("userId", userId.toString())
                 .setParameter("tid", trilhaId)
                 .setMaxResults(1)
                 .getResultList();

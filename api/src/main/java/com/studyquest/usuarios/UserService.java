@@ -84,18 +84,17 @@ public class UserService {
         LocalDateTime inicioDia = hoje.atStartOfDay();
         LocalDateTime inicioSemana = hoje.with(DayOfWeek.MONDAY).atStartOfDay();
 
-        // UUID armazenado como BLOB no SQLite — hex() garante comparação correta
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
+        String uidStr = userId.toString();
 
         // Nós concluídos (SQLite local) — métrica principal de progresso
         long missoesConcluidas = ((Number) localDb.read(em ->
-            em.createNativeQuery("SELECT COUNT(*) FROM user_nos WHERE hex(userId) = :uidHex AND status = 'CONCLUIDO'")
-            .setParameter("uidHex", uidHex)
+            em.createNativeQuery("SELECT COUNT(*) FROM user_nos WHERE userId = :userId AND status = 'CONCLUIDO'")
+            .setParameter("userId", uidStr)
             .getSingleResult())).longValue();
 
         long missoesConcluidasSemana = ((Number) localDb.read(em ->
-            em.createNativeQuery("SELECT COUNT(*) FROM user_nos WHERE hex(userId) = :uidHex AND status = 'CONCLUIDO' AND concluidoEm >= :inicio")
-            .setParameter("uidHex", uidHex)
+            em.createNativeQuery("SELECT COUNT(*) FROM user_nos WHERE userId = :userId AND status = 'CONCLUIDO' AND concluidoEm >= :inicio")
+            .setParameter("userId", uidStr)
             .setParameter("inicio", Timestamp.valueOf(inicioSemana))
             .getSingleResult())).longValue();
 
@@ -104,13 +103,13 @@ public class UserService {
 
         // Flashcards dominados (caixa 5 no Leitner — SQLite local)
         long flashcardsDominados = ((Number) localDb.read(em ->
-            em.createNativeQuery("SELECT COUNT(*) FROM leitner_cards WHERE hex(userId) = :uidHex AND caixa = 5")
-            .setParameter("uidHex", uidHex)
+            em.createNativeQuery("SELECT COUNT(*) FROM leitner_cards WHERE userId = :userId AND caixa = 5")
+            .setParameter("userId", uidStr)
             .getSingleResult())).longValue();
 
         long flashcardsDominadosHoje = ((Number) localDb.read(em ->
-            em.createNativeQuery("SELECT COUNT(*) FROM leitner_cards WHERE hex(userId) = :uidHex AND caixa = 5 AND ultimaRevisao = :hoje")
-            .setParameter("uidHex", uidHex)
+            em.createNativeQuery("SELECT COUNT(*) FROM leitner_cards WHERE userId = :userId AND caixa = 5 AND ultimaRevisao = :hoje")
+            .setParameter("userId", uidStr)
             .setParameter("hoje", hoje.toString())
             .getSingleResult())).longValue();
 
@@ -119,8 +118,8 @@ public class UserService {
         try {
             @SuppressWarnings("unchecked")
             List<Object> nosHoje = (List<Object>) localDb.read(em ->
-                em.createNativeQuery("SELECT noId FROM user_nos WHERE hex(userId) = :uidHex AND status = 'CONCLUIDO' AND concluidoEm >= :inicio")
-                .setParameter("uidHex", uidHex)
+                em.createNativeQuery("SELECT noId FROM user_nos WHERE userId = :userId AND status = 'CONCLUIDO' AND concluidoEm >= :inicio")
+                .setParameter("userId", uidStr)
                 .setParameter("inicio", Timestamp.valueOf(inicioDia))
                 .getResultList());
 

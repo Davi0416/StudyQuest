@@ -33,12 +33,11 @@ public class AulaProgressService {
                     .map(UserAulaProgress::getPassoAtual)
                     .orElse(0);
 
-            String uidHexR = userId.toString().replace("-", "").toUpperCase();
             @SuppressWarnings("unchecked")
             List<ExercicioProgressoDto> exercicios = ((List<UserExercicioProgress>) em.createNativeQuery(
-                            "SELECT * FROM user_exercicio_progress WHERE hex(userId) = :uid AND noId = :nid",
+                            "SELECT * FROM user_exercicio_progress WHERE userId = :userId AND noId = :nid",
                             UserExercicioProgress.class)
-                    .setParameter("uid", uidHexR)
+                    .setParameter("userId", userId.toString())
                     .setParameter("nid", noId)
                     .getResultList()).stream()
                     .map(ep -> new ExercicioProgressoDto(ep.getExercicioId(), ep.getCodigo(), ep.getAprovado()))
@@ -98,11 +97,10 @@ public class AulaProgressService {
 
     @SuppressWarnings("unchecked")
     private Optional<UserAulaProgress> findAulaProgress(EntityManager em, UUID userId, Long noId) {
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
         List<UserAulaProgress> r = (List<UserAulaProgress>) em.createNativeQuery(
-                        "SELECT * FROM user_aula_progress WHERE hex(userId) = :uid AND noId = :nid",
+                        "SELECT * FROM user_aula_progress WHERE userId = :userId AND noId = :nid",
                         UserAulaProgress.class)
-                .setParameter("uid", uidHex)
+                .setParameter("userId", userId.toString())
                 .setParameter("nid", noId)
                 .setMaxResults(1)
                 .getResultList();
@@ -111,11 +109,10 @@ public class AulaProgressService {
 
     @SuppressWarnings("unchecked")
     private Optional<UserExercicioProgress> findExercicioProgress(EntityManager em, UUID userId, Long noId, String exercicioId) {
-        String uidHex = userId.toString().replace("-", "").toUpperCase();
         List<UserExercicioProgress> r = (List<UserExercicioProgress>) em.createNativeQuery(
-                        "SELECT * FROM user_exercicio_progress WHERE hex(userId) = :uid AND noId = :nid AND exercicioId = :eid",
+                        "SELECT * FROM user_exercicio_progress WHERE userId = :userId AND noId = :nid AND exercicioId = :eid",
                         UserExercicioProgress.class)
-                .setParameter("uid", uidHex)
+                .setParameter("userId", userId.toString())
                 .setParameter("nid", noId)
                 .setParameter("eid", exercicioId)
                 .setMaxResults(1)
