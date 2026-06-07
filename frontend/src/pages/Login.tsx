@@ -4,24 +4,22 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import api from '../lib/api';
 import {
   IconSword, IconSparkles, IconBolt, IconStack2, IconCrown, IconLogin2, IconUserPlus,
-  IconMail, IconLock, IconEye, IconEyeOff, IconCheck, IconFlag2, IconUser, IconShieldCheck,
+  IconMail, IconLock, IconEye, IconEyeOff, IconCheck, IconFlag2, IconUser,
 } from '@tabler/icons-react';
 import { Button } from '../components/ui/Button';
 
-type Mode = 'login' | 'register' | 'verify';
+type Mode = 'login' | 'register';
 
 export function Login() {
   const [mode, setMode] = useState<Mode>('login');
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [code, setCode] = useState('');
   const [keepLoggedIn, setKeepLoggedIn] = useState(true);
 
   const { user, setUser } = useUser();
@@ -46,13 +44,6 @@ export function Login() {
     setInfo('');
 
     try {
-      if (mode === 'verify') {
-        const res = await api.post('/auth/verify', { email, code });
-        const data = res.data.data;
-        await finishLogin(data.accessToken, data.refreshToken);
-        return;
-      }
-
       if (mode === 'login') {
         const res = await api.post('/auth/login', { email, password });
         const data = res.data.data;
@@ -61,40 +52,12 @@ export function Login() {
       }
 
       const res = await api.post('/auth/register', { name, email, password });
-      if (res.data.data && res.data.data.accessToken) {
-        await finishLogin(res.data.data.accessToken, res.data.data.refreshToken);
-        return;
-      }
-      setInfo(res.data.message || 'Enviamos um código para o seu e-mail.');
-      setCode('');
-      setMode('verify');
+      await finishLogin(res.data.data.accessToken, res.data.data.refreshToken);
     } catch (err: any) {
-      const status = err.response?.status;
       const message = err.response?.data?.message || err.message || 'Erro de autenticação';
-
-      if (mode === 'login' && status === 403) {
-        setInfo(message);
-        setMode('verify');
-        return;
-      }
-
       setError(message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleResend = async () => {
-    setResending(true);
-    setError('');
-    setInfo('');
-    try {
-      const res = await api.post('/auth/verify/resend', { email });
-      setInfo(res.data.message || 'Novo código enviado.');
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Não foi possível reenviar o código');
-    } finally {
-      setResending(false);
     }
   };
 
@@ -160,45 +123,35 @@ export function Login() {
         </aside>
 
         <section className="p-8 md:p-11 flex flex-col">
-          {mode !== 'verify' ? (
-            <div className="grid grid-cols-2 gap-1 bg-surface-2 border border-border rounded-md p-1.5 mb-7 relative">
-              <div
-                className="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] rounded-md transition-transform duration-300 ease-[cubic-bezier(.2,.7,.2,1)]"
-                style={{
-                  background: 'linear-gradient(150deg,#f0c060,#d8a945)',
-                  boxShadow: '0 6px 16px -8px rgba(240,192,96,.7)',
-                  transform: mode === 'register' ? 'translateX(100%)' : 'translateX(0)',
-                }}
-              />
-              <button
-                className={`relative z-10 py-2.5 rounded-md font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${mode === 'login' ? 'text-[#1a1206]' : 'text-text-dim'}`}
-                onClick={() => { setMode('login'); setError(''); setInfo(''); }}
-              >
-                <IconLogin2 size={16} /> Entrar
-              </button>
-              <button
-                className={`relative z-10 py-2.5 rounded-md font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${mode === 'register' ? 'text-[#1a1206]' : 'text-text-dim'}`}
-                onClick={() => { setMode('register'); setError(''); setInfo(''); }}
-              >
-                <IconUserPlus size={16} /> Criar conta
-              </button>
-            </div>
-          ) : (
-            <div className="mb-7 flex items-center gap-2 text-gold text-sm font-semibold">
-              <IconShieldCheck size={18} /> Verificação de e-mail
-            </div>
-          )}
+          <div className="grid grid-cols-2 gap-1 bg-surface-2 border border-border rounded-md p-1.5 mb-7 relative">
+            <div
+              className="absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] rounded-md transition-transform duration-300 ease-[cubic-bezier(.2,.7,.2,1)]"
+              style={{
+                background: 'linear-gradient(150deg,#f0c060,#d8a945)',
+                boxShadow: '0 6px 16px -8px rgba(240,192,96,.7)',
+                transform: mode === 'register' ? 'translateX(100%)' : 'translateX(0)',
+              }}
+            />
+            <button
+              className={`relative z-10 py-2.5 rounded-md font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${mode === 'login' ? 'text-[#1a1206]' : 'text-text-dim'}`}
+              onClick={() => { setMode('login'); setError(''); setInfo(''); }}
+            >
+              <IconLogin2 size={16} /> Entrar
+            </button>
+            <button
+              className={`relative z-10 py-2.5 rounded-md font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${mode === 'register' ? 'text-[#1a1206]' : 'text-text-dim'}`}
+              onClick={() => { setMode('register'); setError(''); setInfo(''); }}
+            >
+              <IconUserPlus size={16} /> Criar conta
+            </button>
+          </div>
 
           <div className="mb-6">
             <h2 className="font-cinzel font-bold text-2xl mb-1.5">
-              {mode === 'login' && 'Bem-vindo de volta'}
-              {mode === 'register' && 'Crie sua conta'}
-              {mode === 'verify' && 'Confirme seu e-mail'}
+              {mode === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta'}
             </h2>
             <p className="text-text-dim text-sm">
-              {mode === 'login' && 'Continue de onde parou na sua jornada.'}
-              {mode === 'register' && 'Comece sua jornada e ganhe seus primeiros 50 XP.'}
-              {mode === 'verify' && `Digite o código de 6 dígitos enviado para ${email}.`}
+              {mode === 'login' ? 'Continue de onde parou na sua jornada.' : 'Comece sua jornada e ganhe seus primeiros 50 XP.'}
             </p>
           </div>
 
@@ -206,39 +159,8 @@ export function Login() {
             {error && <div className="mb-4 text-red text-sm">{error}</div>}
             {info && <div className="mb-4 text-green text-sm">{info}</div>}
 
-            {mode === 'verify' ? (
-              <>
-                <div className="mb-4">
-                  <label className="block text-[12.5px] font-semibold text-text-dim mb-1.5 tracking-wide">Código de verificação</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="\d{6}"
-                    maxLength={6}
-                    value={code}
-                    onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className="w-full bg-surface-2 border border-border rounded-sm text-text text-center text-2xl tracking-[0.5em] py-3 px-3.5 focus:border-gold focus:ring-[3px] focus:ring-gold/15 outline-none transition-all"
-                    placeholder="000000"
-                    required
-                    autoFocus
-                  />
-                </div>
-                <Button type="submit" disabled={loading || code.length !== 6} className="w-full gap-2">
-                  <IconShieldCheck size={18} />
-                  {loading ? 'Verificando...' : 'Confirmar e entrar'}
-                </Button>
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={resending}
-                  className="mt-4 w-full text-sm text-text-dim hover:text-gold transition-colors"
-                >
-                  {resending ? 'Reenviando...' : 'Reenviar código'}
-                </button>
-              </>
-            ) : (
-              <>
-                {mode === 'register' && (
+            <>
+              {mode === 'register' && (
                   <div className="mb-4">
                     <label className="block text-[12.5px] font-semibold text-text-dim mb-1.5 tracking-wide">Nome de aventureiro</label>
                     <div className="relative flex items-center bg-surface-2 border border-border rounded-sm focus-within:border-gold focus-within:ring-[3px] focus-within:ring-gold/15 transition-all">
@@ -308,40 +230,23 @@ export function Login() {
                   </p>
                 )}
 
-                <Button type="submit" disabled={loading} className="w-full gap-2">
-                  {mode === 'login' ? <IconSword size={18} /> : <IconFlag2 size={18} />}
-                  {loading ? 'Carregando...' : mode === 'login' ? 'Entrar na aventura' : 'Criar conta e começar'}
-                </Button>
-              </>
-            )}
+              <Button type="submit" disabled={loading} className="w-full gap-2">
+                {mode === 'login' ? <IconSword size={18} /> : <IconFlag2 size={18} />}
+                {loading ? 'Carregando...' : mode === 'login' ? 'Entrar na aventura' : 'Criar conta e começar'}
+              </Button>
+            </>
           </form>
 
-          {mode !== 'verify' && (
-            <>
-              <p className="mt-6 text-center text-[13.5px] text-text-dim">
-                {mode === 'login' ? 'Ainda não tem conta? ' : 'Já tem uma conta? '}
-                <button
-                  type="button"
-                  className="text-gold font-semibold hover:underline"
-                  onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setInfo(''); }}
-                >
-                  {mode === 'login' ? 'Criar conta grátis' : 'Fazer login'}
-                </button>
-              </p>
-            </>
-          )}
-
-          {mode === 'verify' && (
-            <p className="mt-6 text-center text-[13.5px] text-text-dim">
-              <button
-                type="button"
-                className="text-gold font-semibold hover:underline"
-                onClick={() => { setMode('login'); setError(''); setInfo(''); }}
-              >
-                Voltar para o login
-              </button>
-            </p>
-          )}
+          <p className="mt-6 text-center text-[13.5px] text-text-dim">
+            {mode === 'login' ? 'Ainda não tem conta? ' : 'Já tem uma conta? '}
+            <button
+              type="button"
+              className="text-gold font-semibold hover:underline"
+              onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); setInfo(''); }}
+            >
+              {mode === 'login' ? 'Criar conta grátis' : 'Fazer login'}
+            </button>
+          </p>
         </section>
       </main>
     </div>
