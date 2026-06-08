@@ -1,84 +1,36 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Topbar } from '../components/Topbar';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
 import { useUser } from '../context/UserContext';
 import api, { unwrap } from '../lib/api';
 import type { Conquista } from '../types';
-import {
-  IconBolt, IconFlame, IconTrendingUp,
-  IconHistory, IconMedal, IconChevronRight, IconX, IconCheck,
-  IconCamera, IconShieldHalfFilled,
-  IconTrophy, IconPencil,
-  IconPlayerPlayFilled, IconStarFilled, IconLogout, IconTrash, IconAward,
-} from '@tabler/icons-react';
-
-const AVATAR_GRADS = [
-  'linear-gradient(150deg,#f0c060,#caa244)',
-  'linear-gradient(150deg,#58a6ff,#2f73a0)',
-  'linear-gradient(150deg,#7ee787,#3fa05a)',
-  'linear-gradient(150deg,#e06c75,#a84a52)',
-  'linear-gradient(150deg,#bc8cff,#7d56b8)',
-  'linear-gradient(150deg,#9aa7b4,#6e7b89)',
-];
-
-const CAT_THEME: Record<string, { c: string; g1: string; g2: string; b: string }> = {
-  red:    { c: 'var(--color-red, #e06c75)',    g1: 'rgba(224,108,117,.22)', g2: 'rgba(224,108,117,.04)', b: 'rgba(224,108,117,.45)' },
-  gold:   { c: 'var(--color-gold, #f0c060)',   g1: 'rgba(240,192,96,.22)',  g2: 'rgba(240,192,96,.04)',  b: 'rgba(240,192,96,.45)' },
-  blue:   { c: 'var(--color-blue, #58a6ff)',   g1: 'rgba(88,166,255,.22)',  g2: 'rgba(88,166,255,.04)',  b: 'rgba(88,166,255,.45)' },
-  green:  { c: 'var(--color-green, #7ee787)',  g1: 'rgba(126,231,135,.20)', g2: 'rgba(126,231,135,.03)', b: 'rgba(126,231,135,.45)' },
-  purple: { c: 'var(--color-purple, #bc8cff)', g1: 'rgba(188,140,255,.22)', g2: 'rgba(188,140,255,.04)', b: 'rgba(188,140,255,.45)' },
-};
-
 
 export function Perfil() {
-  const { user, logout } = useUser();
+  const { user, logout, setUser } = useUser();
   const navigate = useNavigate();
   const [conquistas, setConquistas] = useState<Conquista[]>([]);
   const [resetConfirm, setResetConfirm] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [draftName, setDraftName] = useState('');
-  const [draftGrad, setDraftGrad] = useState(AVATAR_GRADS[0]);
-  const [savedName, setSavedName] = useState('');
-  const [savedGrad, setSavedGrad] = useState(AVATAR_GRADS[0]);
-  const lvlBarRef = useRef<HTMLDivElement>(null);
-  const achBarRef = useRef<HTMLDivElement>(null);
+  const [draftAvatarUrl, setDraftAvatarUrl] = useState('');
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
-    if (user) setSavedName(user.name);
     api.get('/gamificacao/conquistas')
       .then(r => setConquistas(unwrap(r)))
       .catch(() => {});
+    
+    api.get('/users/me/stats')
+      .then(r => setStats(unwrap(r)))
+      .catch(() => {});
   }, [user]);
-
-  useEffect(() => {
-    if (!user) return;
-    // TODO: O backend deveria retornar o XP base do nível atual e o XP limite (ex: user.xpAtualNoNivel, user.xpProximoNivel)
-    const xpForLvl = (user as any).xpProximoNivel ?? 5500;
-    const xpCur = (user as any).xpAtualNoNivel ?? (user.totalXp % xpForLvl);
-    const pct = Math.min(100, Math.round(xpCur / xpForLvl * 100));
-    setTimeout(() => {
-      if (lvlBarRef.current) lvlBarRef.current.style.width = `${pct}%`;
-    }, 350);
-  }, [user]);
-
-  useEffect(() => {
-    if (conquistas.length === 0) return;
-    const unlocked = conquistas.filter(c => c.desbloqueada).length;
-    const pct = Math.round(unlocked / conquistas.length * 100);
-    setTimeout(() => {
-      if (achBarRef.current) achBarRef.current.style.width = `${pct}%`;
-    }, 350);
-  }, [conquistas]);
 
   if (!user) return null;
 
-  const displayName = savedName || user.name;
   const unlockedConquistas = conquistas.filter(c => c.desbloqueada);
   const achTotal = conquistas.length;
   const achUnlocked = unlockedConquistas.length;
-  // TODO: Novamente, backend deve fornecer a progressão exata dentro do nível atual
+  
   const xpForLevel = (user as any).xpProximoNivel ?? 5500;
   const xpCurrent = (user as any).xpAtualNoNivel ?? (user.totalXp % xpForLevel);
   const xpPct = Math.round(xpCurrent / xpForLevel * 100);
@@ -87,287 +39,292 @@ export function Perfil() {
     try {
       await api.post('/auth/dev/reset');
     } catch (e) {
-      // mesmo que falhe, faz logout local
     }
     logout();
   }
 
   function openModal() {
-    setDraftName(displayName);
-    setDraftGrad(savedGrad);
+    setDraftName(user?.name || '');
+    setDraftAvatarUrl(user?.avatarUrl || '');
     setModalOpen(true);
   }
 
-  function saveModal() {
-    setSavedName(draftName.trim() || 'Aventureiro');
-    setSavedGrad(draftGrad);
-    setModalOpen(false);
+  async function saveModal() {
+    try {
+      const updatedName = draftName.trim() || 'Aventureiro';
+      const updatedAvatarUrl = draftAvatarUrl.trim() || undefined;
+      await api.put('/users/me', {
+        name: updatedName,
+        avatarUrl: updatedAvatarUrl
+      });
+      setUser({ ...user, name: updatedName, avatarUrl: updatedAvatarUrl });
+      setModalOpen(false);
+    } catch (err) {
+      console.error('Failed to update profile', err);
+      alert('Erro ao atualizar o perfil.');
+    }
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md selection:bg-primary-container selection:text-on-primary-container">
       <Topbar />
 
-      <main className="w-full max-w-[1240px] mx-auto px-7 py-8 pb-20">
-
-        {/* HERO DO PERFIL */}
-        <section className="bg-surface border border-border rounded-xl mb-6 overflow-hidden relative reveal" style={{ '--d': '.02s' } as any}>
-          {/* Banner */}
-          <div className="h-24 relative border-b border-border" style={{ background: 'radial-gradient(700px 200px at 20% 120%, rgba(240,192,96,.18), transparent 70%), radial-gradient(600px 200px at 85% -40%, rgba(88,166,255,.16), transparent 70%), linear-gradient(180deg, #131a24, #10151d)' }}>
-            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 text-text-mute text-[12px] tracking-[1.5px] uppercase font-semibold">
-              <IconShieldHalfFilled size={16} className="text-gold" /> Ficha de Aventureiro
+      <main className="flex-grow w-full max-w-container-max mx-auto px-md py-lg grid grid-cols-1 md:grid-cols-12 gap-md">
+        
+        {/* Left Column: Character Stats & Identity */}
+        <div className="md:col-span-4 flex flex-col gap-md">
+          
+          <div className="bg-surface-container-high border-border-width border-outline-variant neo-shadow flex flex-col">
+            <div className="bg-surface-container-highest border-b-border-width border-outline-variant px-sm py-xs flex justify-between items-center">
+              <span className="font-label-caps text-label-caps text-primary">IDENTIDADE DO HERÓI</span>
+              <span className="material-symbols-outlined text-outline-variant text-sm">person</span>
             </div>
-          </div>
-
-          <div className="flex items-end gap-6 flex-wrap px-7 pb-7 -mt-11">
-            {/* Avatar grande */}
-            <div className="relative w-[108px] h-[108px] shrink-0 rounded-[18px] grid place-items-center font-cinzel font-bold text-[44px] text-[#0d1117] border-2 border-[rgba(13,17,23,.9)] shadow-[0_0_0_3px_rgba(240,192,96,.4)]"
-                 style={{ background: savedGrad }}>
-              {displayName.charAt(0).toUpperCase()}
-              <button className="absolute top-[-6px] right-[-6px] w-[30px] h-[30px] rounded-full grid place-items-center bg-surface-2 border border-border text-text-dim text-[14px] transition-all hover:text-gold hover:border-gold hover:scale-105"
-                      onClick={openModal} title="Editar avatar">
-                <IconCamera size={14} />
-              </button>
-              <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-surface-2 border border-gold/50 text-gold font-bold text-[12px] px-2.5 py-0.5 rounded-full whitespace-nowrap shadow-sm">
-                <IconStarFilled size={13} /> Nível {user.lvl}
-              </div>
-            </div>
-
-            {/* Identidade */}
-            <div className="flex-1 min-w-0 pb-1 pt-6">
-              <div className="text-[12px] text-gold font-semibold tracking-[1.5px] uppercase flex items-center gap-2 mb-1.5">
-                {/* TODO: Cargo do usuário deve vir do backend */}
-                {(user as any).cargo ?? 'Caçador de Conhecimento'}
-              </div>
-              <h1 className="font-cinzel font-bold text-[32px] leading-[1.1]">{displayName}</h1>
-              <div className="flex items-center gap-2.5 flex-wrap mt-2.5">
-                <span className="text-[13px] text-text-mute flex items-center gap-1.5">
-                  {user.email}
-                </span>
-              </div>
-            </div>
-
-            {/* Ações */}
-            <div className="flex items-center gap-2.5 pb-1 flex-wrap">
-              <Button variant="ghost" className="gap-2" onClick={openModal}>
-                <IconPencil size={16} /> Editar perfil
-              </Button>
-              <Button className="gap-2" onClick={() => navigate('/mapa')}>
-                <IconPlayerPlayFilled size={16} /> Continuar jornada
-              </Button>
-              <Button variant="ghost" className="gap-2 !text-text-mute hover:!text-text" onClick={logout}>
-                <IconLogout size={16} /> Sair
-              </Button>
-              <Button
-                variant="ghost"
-                className="gap-2 !text-red/70 hover:!text-red hover:!border-red/40"
-                onClick={() => setResetConfirm(true)}
-              >
-                <IconTrash size={16} /> Limpar dados
-              </Button>
-            </div>
-          </div>
-
-          {/* Barra de nível */}
-          <div className="flex items-center gap-6 flex-wrap px-7 pt-5 pb-6 border-t border-border bg-gradient-to-b from-gold/3 to-transparent">
-            <div className="flex flex-col items-center gap-1 shrink-0">
-              <div className="w-[46px] h-[46px] rounded-xl grid place-items-center font-cinzel font-bold text-[19px] text-gold bg-gold/12 border border-gold/40">{user.lvl}</div>
-              <small className="text-[10px] uppercase tracking-[.8px] text-text-mute font-semibold">Atual</small>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-baseline justify-between gap-3 mb-2">
-                <div><b className="font-cinzel font-bold text-base">Progresso de Nível</b><small className="text-text-dim text-[13px] ml-2">{xpCurrent.toLocaleString('pt-BR')} / {xpForLevel.toLocaleString('pt-BR')} XP</small></div>
-                <div className="text-[13px] text-gold font-semibold flex items-center gap-1">
-                  <IconBolt size={14} /> faltam {(xpForLevel - xpCurrent).toLocaleString('pt-BR')} XP para o Nível {user.lvl + 1}
+            
+            <div className="p-sm flex flex-col items-center text-center gap-sm">
+              <div className="w-32 h-32 border-border-width border-primary p-1 bg-surface-container-lowest neo-shadow relative flex items-center justify-center">
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt="Avatar do Herói"
+                    className="w-full h-full object-cover grayscale contrast-125"
+                    onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }}
+                  />
+                ) : null}
+                <div className="w-full h-full bg-surface-container flex items-center justify-center text-4xl text-on-surface font-code" style={{ display: user.avatarUrl ? 'none' : 'flex' }}>
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="absolute -bottom-3 -right-3 bg-tertiary-container border-border-width border-surface-container-lowest px-2 py-1 neo-shadow">
+                  <span className="font-label-caps text-label-caps text-on-tertiary-container">NÍVEL {user.lvl}</span>
                 </div>
               </div>
-              <div className="h-3.5 rounded-full bg-surface-2 border border-border overflow-hidden relative">
-                <div ref={lvlBarRef} className="h-full rounded-full bg-gradient-to-r from-gold to-[#ffe39b] shadow-[0_0_14px_rgba(240,192,96,.4)]"
-                     style={{ width: '0%', transition: 'width 1.6s cubic-bezier(.2,.7,.2,1)' }} />
-                <span className="absolute top-1/2 right-2.5 -translate-y-1/2 text-[10px] font-bold text-[#1a1206]">{xpPct}%</span>
+              
+              <div className="mt-xs">
+                <h1 className="font-h3 text-h3 text-on-surface mb-1 uppercase">{user.name}</h1>
+                <p className="font-code text-code text-primary uppercase">{stats?.cargo ?? 'Aventureiro'}</p>
               </div>
-            </div>
-            <div className="flex flex-col items-center gap-1 shrink-0">
-              <div className="w-[46px] h-[46px] rounded-xl grid place-items-center font-cinzel font-bold text-[19px] text-text-mute bg-surface-2 border border-border">{user.lvl + 1}</div>
-              <small className="text-[10px] uppercase tracking-[.8px] text-text-mute font-semibold">Próximo</small>
-            </div>
-          </div>
-        </section>
 
-        {/* STATS */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          {[
-            { icon: <IconBolt size={20} />, color: 'gold', val: user.totalXp.toLocaleString('pt-BR'), lbl: 'XP Total', delta: `Nível ${user.lvl}`, deltaColor: 'text-gold', deltaIcon: <IconTrendingUp size={14}/> },
-            { icon: <IconFlame size={20} />, color: 'red', val: String(user.currentStreak), lbl: 'Streak Atual', delta: user.currentStreak > 0 ? 'em chamas · não quebre!' : 'comece hoje!', deltaColor: 'text-red', deltaIcon: <IconFlame size={14}/> },
-            { icon: <IconAward size={20} />, color: 'blue', val: String(user.maxStreak), lbl: 'Streak Máximo', delta: 'recorde pessoal', deltaColor: 'text-text-mute', deltaIcon: <IconTrophy size={14}/> },
-            { icon: <IconMedal size={20} />, color: 'purple', val: String(achUnlocked), lbl: 'Conquistas', delta: achTotal > 0 ? `de ${achTotal} disponíveis` : 'carregando…', deltaColor: 'text-text-mute', deltaIcon: <IconTrophy size={14}/> },
-          ].map((s, i) => (
-            <Card key={i} className={`p-5 reveal`} style={{ '--d': `${.06 + i * .06}s` } as any}>
-              <div className={`w-10 h-10 rounded-lg grid place-items-center mb-4 border-[0.5px] text-${s.color} bg-${s.color}/10 border-${s.color}/25`}>{s.icon}</div>
-              <div className="font-cinzel font-bold text-[30px] leading-none">{s.val}</div>
-              <div className="text-text-dim text-[13px] mt-1.5">{s.lbl}</div>
-              <div className={`mt-3 text-[12.5px] font-semibold flex items-center gap-1 ${s.deltaColor}`}>
-                {s.deltaIcon} {s.delta}
-              </div>
-            </Card>
-          ))}
-        </section>
-
-        {/* GRID 2 COLUNAS */}
-        <div className="grid lg:grid-cols-[1.5fr_1fr] gap-6 items-start">
-
-          {/* HISTÓRICO */}
-          <Card className="p-6 reveal !hover:translate-y-0" style={{ '--d': '.30s' } as any}>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-cinzel font-semibold text-lg flex items-center gap-2">
-                <IconHistory size={18} className="text-gold" /> Atividade Recente
-              </h2>
-              <span className="text-[13px] text-text-dim flex items-center gap-1">
-                <IconHistory size={14} /> Últimos 7 dias
-              </span>
-            </div>
-            {/* TODO: endpoint pendente para histórico de atividade (/users/me/historico) */}
-            <div className="flex flex-col items-center justify-center py-10 text-center text-text-mute gap-2">
-              <IconHistory size={32} className="text-text-dim mb-1" />
-              <span className="text-[14px]">Nenhuma atividade recente</span>
-              <span className="text-[12px] text-text-dim">Complete missões e revisões para ver seu histórico aqui.</span>
-            </div>
-          </Card>
-
-          {/* CONQUISTAS */}
-          <Card className="p-6 reveal !hover:translate-y-0" style={{ '--d': '.36s' } as any}>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-cinzel font-semibold text-lg flex items-center gap-2">
-                <IconMedal size={18} className="text-gold" /> Conquistas
-              </h2>
-              <button className="text-[13px] text-text-dim flex items-center gap-1 hover:text-blue transition-colors" onClick={() => navigate('/conquistas')}>
-                Galeria completa <IconChevronRight size={16} />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              {unlockedConquistas.length === 0 ? (
-                <div className="col-span-2 flex flex-col items-center justify-center py-8 text-center text-text-mute gap-2">
-                  <IconMedal size={28} className="text-text-dim mb-1" />
-                  <span className="text-[13px]">Nenhuma conquista ainda</span>
-                  <span className="text-[11px] text-text-dim">Continue estudando para desbloquear medalhas.</span>
-                </div>
-              ) : unlockedConquistas.slice(0, 8).map((item, i) => {
-                const t = CAT_THEME['gold'];
-                return (
-                  <div key={i} className="flex items-center gap-3 p-3.5 rounded-lg bg-surface-2 border border-border transition-all hover:-translate-y-0.5">
-                    <div className="w-[42px] h-[42px] shrink-0 rounded-full grid place-items-center relative"
-                         style={{ background: `linear-gradient(155deg, ${t.g1}, ${t.g2})`, border: `0.5px solid ${t.b}`, color: t.c }}>
-                      <IconTrophy size={20} />
-                    </div>
-                    <div className="min-w-0">
-                      <b className="block font-cinzel font-bold text-[13.5px] leading-tight">{item.titulo}</b>
-                      <small className="text-[11px] text-text-mute">
-                        {item.desbloqueadaEm ? new Date(item.desbloqueadaEm).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) : '—'}
-                      </small>
-                    </div>
+              {/* Primary Stats */}
+              <div className="w-full flex flex-col gap-xs mt-sm">
+                <div className="flex items-center gap-xs">
+                  <span className="font-label-caps text-label-caps text-error w-10 text-right">HP</span>
+                  <div className="flex-grow h-4 border-border-width border-outline-variant bg-surface-container-lowest flex relative">
+                    <div className="bg-error progress-segment" style={{ width: '100%' }}></div>
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] text-black font-bold mix-blend-difference">
+                       {stats?.flashcardsDominados ?? 0} FLASHCARDS
+                    </span>
                   </div>
-                );
-              })}
-            </div>
-
-            <div className="flex items-center justify-between gap-3.5 mt-4 pt-4 border-t border-border">
-              <span className="text-[13px] text-text-dim"><b className="text-gold font-bold">{achUnlocked}</b>{achTotal > 0 ? ` de ${achTotal} desbloqueadas` : ' desbloqueadas'}</span>
-              <div className="flex-1 h-[7px] rounded-full bg-surface-2 border border-border overflow-hidden max-w-[180px]">
-                <div ref={achBarRef} className="h-full rounded-full bg-gradient-to-r from-gold to-[#ffe39b]"
-                     style={{ width: '0%', transition: 'width 1.4s cubic-bezier(.2,.7,.2,1)' }} />
+                </div>
+                
+                <div className="flex items-center gap-xs">
+                  <span className="font-label-caps text-label-caps text-secondary w-10 text-right">MP</span>
+                  <div className="flex-grow h-4 border-border-width border-outline-variant bg-surface-container-lowest flex relative">
+                    <div className="bg-secondary progress-segment" style={{ width: '100%' }}></div>
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] text-black font-bold mix-blend-difference">
+                       {stats?.missoesConcluidas ?? 0} MISSÕES
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-xs">
+                  <span className="font-label-caps text-label-caps text-primary w-10 text-right">XP</span>
+                  <div className="flex-grow h-4 border-border-width border-outline-variant bg-surface-container-lowest flex relative">
+                    <div className="bg-primary progress-segment" style={{ width: `${xpPct}%` }}></div>
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] text-black font-bold mix-blend-difference">
+                       {xpCurrent} / {xpForLevel}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
-          </Card>
+          </div>
+
+          <div className="flex flex-col gap-xs">
+            <button onClick={openModal} className="bg-primary border-border-width border-outline-variant text-on-primary font-label-caps text-label-caps py-sm px-sm neo-shadow neo-button-active w-full flex justify-center items-center gap-xs transition-colors hover:bg-primary-fixed cursor-pointer">
+              <span className="material-symbols-outlined text-base">edit</span>
+              EDITAR PERSONAGEM
+            </button>
+            <button onClick={logout} className="bg-surface-container border-border-width border-outline-variant text-on-surface font-label-caps text-label-caps py-sm px-sm neo-shadow neo-button-active w-full flex justify-center items-center gap-xs transition-colors hover:bg-surface-container-highest cursor-pointer">
+              <span className="material-symbols-outlined text-base">logout</span>
+              SAIR
+            </button>
+            <button onClick={() => setResetConfirm(true)} className="bg-error border-border-width border-outline-variant text-on-error font-label-caps text-label-caps py-sm px-sm neo-shadow neo-button-active w-full flex justify-center items-center gap-xs transition-colors hover:bg-error-container hover:text-on-error-container mt-4 cursor-pointer">
+              <span className="material-symbols-outlined text-base">delete</span>
+              APAGAR DADOS
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Achievements */}
+        <div className="md:col-span-8 flex flex-col gap-md">
+          
+          {/* Attributes Panel (Stats) */}
+          <div className="bg-surface-container-high border-border-width border-outline-variant neo-shadow flex flex-col">
+            <div className="bg-surface-container-highest border-b-border-width border-outline-variant px-sm py-xs flex justify-between items-center">
+              <span className="font-label-caps text-label-caps text-secondary">ATRIBUTOS E HABILIDADES</span>
+              <span className="material-symbols-outlined text-outline-variant text-sm">bar_chart</span>
+            </div>
+            <div className="p-sm grid grid-cols-1 sm:grid-cols-2 gap-sm">
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-end">
+                  <span className="font-code text-code text-on-surface uppercase">OFENSIVA (DIAS)</span>
+                  <span className="font-label-caps text-label-caps text-primary">{user.currentStreak}</span>
+                </div>
+                <div className="w-full h-3 border-border-width border-outline-variant bg-surface-container-lowest flex">
+                  <div className="bg-primary" style={{ width: `${Math.min(user.currentStreak * 10, 100)}%` }}></div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-end">
+                  <span className="font-code text-code text-on-surface uppercase">XP TOTAL</span>
+                  <span className="font-label-caps text-label-caps text-tertiary">{user.totalXp}</span>
+                </div>
+                <div className="w-full h-3 border-border-width border-outline-variant bg-surface-container-lowest flex">
+                  <div className="bg-tertiary" style={{ width: `100%` }}></div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-end">
+                  <span className="font-code text-code text-on-surface uppercase">OFENSIVA MÁXIMA</span>
+                  <span className="font-label-caps text-label-caps text-error">{user.maxStreak}</span>
+                </div>
+                <div className="w-full h-3 border-border-width border-outline-variant bg-surface-container-lowest flex">
+                  <div className="bg-error" style={{ width: `${Math.min(user.maxStreak * 10, 100)}%` }}></div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <div className="flex justify-between items-end">
+                  <span className="font-code text-code text-on-surface uppercase">CONQUISTAS</span>
+                  <span className="font-label-caps text-label-caps text-secondary">{achUnlocked} / {achTotal}</span>
+                </div>
+                <div className="w-full h-3 border-border-width border-outline-variant bg-surface-container-lowest flex">
+                  <div className="bg-secondary" style={{ width: `${achTotal ? (achUnlocked/achTotal)*100 : 0}%` }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Equipped Gear (Achievements) */}
+          <div className="flex flex-col gap-xs">
+            <div className="flex justify-between items-end mb-xs mt-2">
+              <h2 className="font-h3 text-h3 text-on-surface uppercase">ARMORIAL</h2>
+              <span className="font-code text-code text-outline-variant">Espaços: {achUnlocked}/{achTotal}</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-sm">
+              
+              {unlockedConquistas.map((item, i) => (
+                <div key={i} className="bg-surface-container border-border-width border-outline-variant p-sm flex items-start gap-sm hover:border-primary transition-colors cursor-pointer group neo-shadow">
+                  <div className="w-16 h-16 border-border-width border-outline-variant bg-surface-container-lowest flex items-center justify-center group-hover:bg-primary-container transition-colors shrink-0">
+                    <span className="material-symbols-outlined text-h2 text-on-surface group-hover:text-on-primary-container">stars</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-label-caps text-label-caps text-primary uppercase">{item.titulo}</span>
+                      <span className="bg-surface-container-highest border-border-width border-outline-variant px-1 text-[10px] font-code text-on-surface">MEDALHA</span>
+                    </div>
+                    <p className="font-body-md text-body-md text-on-surface-variant text-sm line-clamp-2">{item.descricao}</p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Empty Slots */}
+              {Array.from({ length: Math.max(0, 4 - unlockedConquistas.length) }).map((_, i) => (
+                <div key={`empty-${i}`} className="bg-surface-container-lowest border-border-width border-dashed border-outline-variant p-sm flex items-center justify-center gap-sm opacity-50 h-[96px]">
+                  <div className="flex flex-col items-center justify-center text-outline-variant gap-2">
+                    <span className="material-symbols-outlined text-h2">lock</span>
+                    <span className="font-label-caps text-label-caps uppercase">ESPAÇO BLOQUEADO</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </main>
 
       {/* MODAL RESET */}
       {resetConfirm && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-[rgba(8,10,14,.72)] backdrop-blur-[4px]"
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
              onClick={e => { if (e.target === e.currentTarget) setResetConfirm(false); }}>
-          <div className="w-full max-w-[420px] bg-surface border border-border rounded-xl shadow-[0_24px_60px_-20px_rgba(0,0,0,.8)] overflow-hidden">
-            <div className="flex items-center gap-3 px-6 py-4 border-b border-border">
-              <div className="w-9 h-9 rounded-lg grid place-items-center bg-red/10 border border-red/30 text-red shrink-0">
-                <IconTrash size={18} />
-              </div>
-              <h3 className="font-cinzel font-bold text-lg text-red">Limpar banco de dados</h3>
+          <div className="w-full max-w-[420px] bg-surface-container border-border-width border-error neo-shadow">
+            <div className="flex items-center gap-3 px-6 py-4 bg-error text-on-error border-b-border-width border-error">
+              <span className="material-symbols-outlined text-2xl">delete</span>
+              <h3 className="font-h3 text-lg uppercase tracking-widest">APAGAR DADOS</h3>
             </div>
             <div className="p-6">
-              <p className="text-text-dim text-[14px] leading-relaxed">
-                Isso vai apagar <b className="text-text">todos os usuários</b> do banco de dados local e fazer logout.
-                <br /><br />
-                Útil para testar o fluxo de cadastro do zero.
+              <p className="text-on-surface text-sm font-code leading-relaxed mb-4">
+                AVISO: ISSO APAGARÁ TODOS OS USUÁRIOS DO BANCO DE DADOS LOCAL E DESLOGARÁ VOCÊ.
               </p>
+              <p className="text-on-surface-variant text-xs font-code">ÚTIL PARA TESTAR O FLUXO DE REGISTRO.</p>
             </div>
-            <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-border bg-bg">
-              <Button variant="ghost" onClick={() => setResetConfirm(false)}>Cancelar</Button>
-              <Button
-                className="gap-2 !bg-red/10 !border-red/40 !text-red hover:!bg-red/20"
+            <div className="flex items-center justify-end gap-4 px-6 py-4 border-t-border-width border-error bg-surface">
+              <button onClick={() => setResetConfirm(false)} className="text-on-surface hover:text-primary font-label-caps text-sm cursor-pointer">CANCELAR</button>
+              <button
+                className="bg-error text-on-error border-border-width border-black px-4 py-2 font-label-caps neo-shadow active-press flex items-center gap-2 cursor-pointer"
                 onClick={() => { setResetConfirm(false); handleResetAndLogout(); }}
               >
-                <IconTrash size={15} /> Confirmar e sair
-              </Button>
+                <span className="material-symbols-outlined text-base">delete</span> CONFIRMAR EXCLUSÃO
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL */}
+      {/* MODAL EDIT */}
       {modalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[rgba(8,10,14,.66)] backdrop-blur-[4px]"
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
              onClick={e => { if (e.target === e.currentTarget) setModalOpen(false); }}>
-          <div className="w-full max-w-[480px] bg-surface border border-border rounded-xl shadow-[0_24px_60px_-20px_rgba(0,0,0,.8)] overflow-hidden">
-            <div className="flex items-center justify-between gap-3 px-6 py-4 border-b border-border">
-              <h3 className="font-cinzel font-bold text-lg flex items-center gap-2">
-                <IconPencil size={18} className="text-gold" /> Editar Perfil
+          <div className="w-full max-w-[480px] bg-surface-container border-border-width border-primary neo-shadow">
+            <div className="flex items-center justify-between gap-3 px-6 py-4 bg-primary text-on-primary border-b-border-width border-primary">
+              <h3 className="font-h3 text-lg uppercase tracking-widest flex items-center gap-2">
+                <span className="material-symbols-outlined text-xl">edit</span> CONFIGURAÇÃO DE PERFIL
               </h3>
-              <button onClick={() => setModalOpen(false)} className="w-8 h-8 rounded-lg grid place-items-center text-text-dim border border-border bg-surface-2 hover:text-red hover:border-red transition-colors">
-                <IconX size={16} />
+              <button onClick={() => setModalOpen(false)} className="w-8 h-8 flex items-center justify-center border-border-width border-black hover:bg-black hover:text-primary transition-colors cursor-pointer">
+                <span className="material-symbols-outlined text-sm">close</span>
               </button>
             </div>
 
-            <div className="p-6">
-              {/* Preview */}
-              <div className="flex items-center gap-4 mb-6 p-4 rounded-lg bg-surface-2 border border-border">
-                <div className="w-[60px] h-[60px] shrink-0 rounded-xl grid place-items-center font-cinzel font-bold text-[26px] text-[#0d1117] border border-[rgba(13,17,23,.8)] shadow-[0_0_0_2px_rgba(240,192,96,.3)]"
-                     style={{ background: draftGrad }}>
-                  {(draftName.trim()[0] || 'A').toUpperCase()}
+            <div className="p-6 space-y-6">
+              <div className="flex items-center gap-4 p-4 bg-surface-container-lowest border-border-width border-outline">
+                <div className="w-16 h-16 shrink-0 flex items-center justify-center font-bold text-2xl text-on-surface border-border-width border-primary bg-surface-container overflow-hidden">
+                  {draftAvatarUrl ? (
+                    <img
+                      src={draftAvatarUrl}
+                      alt="Avatar"
+                      className="w-full h-full object-cover grayscale contrast-125"
+                      onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'inline'); }}
+                    />
+                  ) : null}
+                  <span className="font-code" style={{ display: draftAvatarUrl ? 'none' : 'inline' }}>{(draftName.trim()[0] || 'A').toUpperCase()}</span>
                 </div>
                 <div>
-                  <b className="font-cinzel font-bold text-[17px] block">{draftName.trim() || 'Aventureiro'}</b>
-                  {/* TODO: Cargo do usuário deve vir do backend */}
-                  <small className="text-text-mute text-[12px]">Nível {user.lvl} · {(user as any).cargo ?? 'Aprendiz'}</small>
+                  <b className="block text-primary text-lg uppercase font-h3">{draftName.trim() || 'Aventureiro'}</b>
+                  <small className="text-on-surface-variant font-code text-xs">LVL {user.lvl}</small>
                 </div>
               </div>
 
-              {/* Nome */}
-              <div className="mb-6">
-                <label className="block text-[12px] uppercase tracking-[.8px] text-text-mute font-bold mb-2.5">Nome de aventureiro</label>
+              <div>
+                <label className="block text-xs uppercase text-on-surface-variant font-label-caps mb-2">NOME / APELIDO</label>
                 <input type="text" maxLength={22} value={draftName}
                        onChange={e => setDraftName(e.target.value)}
-                       className="w-full px-3.5 py-3 rounded-lg bg-bg border border-border text-text font-inherit text-[15px] focus:outline-none focus:border-gold transition-colors" />
+                       className="w-full px-4 py-3 bg-surface-container-lowest border-border-width border-outline text-on-surface font-code text-sm focus:outline-none focus:border-primary placeholder:text-outline-variant" placeholder="SEU NOME..." />
               </div>
 
-              {/* Cores do avatar */}
               <div>
-                <label className="block text-[12px] uppercase tracking-[.8px] text-text-mute font-bold mb-2.5">Cor do avatar</label>
-                <div className="flex gap-2.5 flex-wrap">
-                  {AVATAR_GRADS.map((g, i) => (
-                    <button key={i} onClick={() => setDraftGrad(g)}
-                            className={`w-[42px] h-[42px] rounded-xl border-2 transition-transform hover:scale-105 relative ${draftGrad === g ? 'border-text shadow-[0_0_0_2px_var(--color-bg),0_0_0_4px_rgba(240,192,96,.5)]' : 'border-transparent'}`}
-                            style={{ background: g }}>
-                      {draftGrad === g && <span className="absolute inset-0 grid place-items-center text-[#0d1117] font-bold text-base">✓</span>}
-                    </button>
-                  ))}
-                </div>
+                <label className="block text-xs uppercase text-on-surface-variant font-label-caps mb-2 flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm">image</span> URL DO AVATAR
+                </label>
+                <input type="url" value={draftAvatarUrl}
+                       onChange={e => setDraftAvatarUrl(e.target.value)}
+                       className="w-full px-4 py-3 bg-surface-container-lowest border-border-width border-outline text-on-surface font-code text-sm focus:outline-none focus:border-primary placeholder:text-outline-variant" placeholder="https://imgur.com/suafoto.png" />
+                <p className="text-[10px] text-on-surface-variant mt-2 font-code">COLE UM LINK DIRETO DE UMA IMAGEM PARA SEU PERFIL.</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2.5 px-6 py-4 border-t border-border bg-bg">
-              <Button variant="ghost" onClick={() => setModalOpen(false)}>Cancelar</Button>
-              <Button className="gap-2" onClick={saveModal}><IconCheck size={16} /> Salvar alterações</Button>
+            <div className="flex items-center justify-end gap-4 px-6 py-4 border-t-border-width border-primary bg-surface-container-lowest">
+              <button onClick={() => setModalOpen(false)} className="text-on-surface-variant hover:text-primary font-label-caps text-sm cursor-pointer">CANCELAR</button>
+              <button className="bg-primary text-on-primary border-border-width border-black px-4 py-2 font-label-caps neo-shadow active-press flex items-center gap-2 cursor-pointer" onClick={saveModal}>
+                <span className="material-symbols-outlined text-sm">check</span> SALVAR ALTERAÇÕES
+              </button>
             </div>
           </div>
         </div>
@@ -375,4 +332,3 @@ export function Perfil() {
     </div>
   );
 }
-

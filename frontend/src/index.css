@@ -3,35 +3,12 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --bg:        #0d1117;
-    --surface:   #161b22;
-    --surface-2: #1c222b;
-    --border:    #30363d;
-    --text:      #e6edf3;
-    --text-dim:  #8b949e;
-    --text-mute: #6e7681;
-  
-    --gold:  #f0c060;
-    --green: #7ee787;
-    --blue:  #58a6ff;
-    --red:   #e06c75;
-  
-    --r-sm: 8px;
-    --r-md: 10px;
-    --r-lg: 12px;
-    --hairline: 0.5px solid var(--border);
-    --shadow-soft: 0 8px 24px -12px rgba(0,0,0,.7);
-  }
-  
-  *, ::before, ::after {
-    border-color: var(--border);
-  }
-  
   body {
-    background-color: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
+    @apply bg-background text-on-background font-body-md;
+  }
+
+  *, ::before, ::after {
+    border-color: theme('colors.outline');
   }
 }
 
@@ -54,32 +31,57 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+
+  /* Neo-brutalism utilities */
+  .pixel-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+  }
+  .pixel-shadow-hover:hover {
+    box-shadow: 2px 2px 0px 0px rgba(0,0,0,1);
+    transform: translate(2px, 2px);
+  }
+  .pixel-shadow-active:active {
+    box-shadow: 0px 0px 0px 0px transparent;
+    transform: translate(4px, 4px);
+  }
+
+  /* Classes from Stitch */
+  .hard-shadow-primary { box-shadow: 4px 4px 0px 0px theme('colors.primary-container'); }
+  .hard-shadow-secondary { box-shadow: 4px 4px 0px 0px theme('colors.secondary-container'); }
+  .hard-shadow-tertiary { box-shadow: 4px 4px 0px 0px theme('colors.tertiary-container'); }
+  .hard-shadow-surface { box-shadow: 4px 4px 0px 0px theme('colors.surface-container-high'); }
+  .active-press:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px transparent; }
+  
+  .progress-bar-segment, .stat-bar-segment {
+      background-image: repeating-linear-gradient(to right, transparent, transparent calc(10% - 2px), rgba(0,0,0,0.5) calc(10% - 2px), rgba(0,0,0,0.5) 10%);
+  }
 }
 
-/* ── Scrollbar global fino e discreto ── */
+/* ── Scrollbar global ── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #30363d transparent;
+  scrollbar-color: theme('colors.surface-container-high') theme('colors.surface-dim');
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: theme('colors.surface-dim');
+  border-left: 2px solid theme('colors.outline');
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #30363d;
-  border-radius: 99px;
+  background: theme('colors.surface-container-high');
+  border: 2px solid theme('colors.outline');
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #484f58;
+  background: theme('colors.outline-variant');
 }
 
 ::-webkit-scrollbar-corner {
-  background: transparent;
+  background: theme('colors.surface-dim');
 }

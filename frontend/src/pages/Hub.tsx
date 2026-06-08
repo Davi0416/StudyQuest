@@ -4,10 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Topbar } from '../components/Topbar';
 import api, { unwrap } from '../lib/api';
 import type {  RevisaoHoje, Trilha, RankingResponse, Conquista, No  } from "../types";
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { ProgressBar } from '../components/ui/ProgressBar';
-import { IconStack2, IconSparkles, IconTargetArrow, IconCards, IconFlame, IconBolt, IconCircleCheck, IconAward, IconTrendingUp, IconLock, IconSword, IconHelpCircle, IconMap2, IconTrophy, IconChevronRight, IconCrown, IconCoffee, IconPlayerPlayFilled } from '@tabler/icons-react';
 
 export function Hub() {
   const { user } = useUser();
@@ -18,32 +14,27 @@ export function Hub() {
   const [revisao, setRevisao] = useState<RevisaoHoje | null>(null);
   const [ranking, setRanking] = useState<RankingResponse | null>(null);
   const [conquistas, setConquistas] = useState<Conquista[]>([]);
-  // TODO: endpoint pendente para estatísticas gerais (missões, flashcards dominados, xp hoje, etc)
   const [stats, setStats] = useState<any>(null);
-  const [leitnerStats, setLeitnerStats] = useState<Record<number, number>>({});
   const [activeNos, setActiveNos] = useState<No[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [trilhasRes, revRes, rankRes, conqRes, allTrilhasRes, leitnerRes] = await Promise.all([
+        const [trilhasRes, revRes, rankRes, conqRes, allTrilhasRes] = await Promise.all([
           api.get('/trilhas/ativas'),
           api.get('/revisao/hoje'),
           api.get('/gamificacao/ranking/semanal'),
           api.get('/gamificacao/conquistas'),
           api.get('/trilhas'),
-          api.get('/revisao/stats'),
         ]);
 
         setTrilhas(unwrap(trilhasRes));
         setCatalogo(unwrap(allTrilhasRes));
         setRevisao(unwrap(revRes));
         setRanking(unwrap(rankRes));
-        setConquistas(unwrap(conqRes).slice(0, 4)); // Get latest 4
-        setLeitnerStats(unwrap(leitnerRes) ?? {});
+        setConquistas(unwrap(conqRes).slice(0, 4));
 
-        // TODO: endpoint pendente para /users/me/stats
         try {
           const statsRes = await api.get('/users/me/stats');
           setStats(unwrap(statsRes));
@@ -70,7 +61,7 @@ export function Hub() {
     fetchData();
   }, []);
 
-  if (!user || loading) return <div className="min-h-screen bg-bg grid place-items-center">Carregando...</div>;
+  if (!user || loading) return <div className="min-h-screen bg-background text-on-background grid place-items-center">Carregando...</div>;
 
   const activeTrilha = trilhas.length > 0 ? trilhas[0] : null;
   const activeIds = new Set(trilhas.map(t => t.id));
@@ -93,10 +84,7 @@ export function Hub() {
     }
   };
 
-  const nosConcluidosCount = activeNos.filter(n => n.status === 'CONCLUIDO').length;
-  const totalNosTrilha = activeNos.length > 0 ? activeNos.length : (stats?.totalNosTrilha ?? '-');
   const xpGanho = activeNos.filter(n => n.status === 'CONCLUIDO').reduce((acc, n) => acc + n.xpRecompensa, 0);
-
   const progressPct = activeTrilha && activeTrilha.xpTotal > 0
     ? Math.min(100, Math.round((xpGanho / activeTrilha.xpTotal) * 100))
     : 0;
@@ -105,287 +93,239 @@ export function Hub() {
   const proximoNoTitulo = proximoNo?.titulo ?? 'Não disponível';
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col font-body-md bg-background text-on-background">
       <Topbar />
 
-      <main className="w-full max-w-[1440px] mx-auto px-7 py-8 pb-[70px]">
-        {/* HERO */}
-        <section className="flex items-end justify-between gap-7 flex-wrap mb-8 reveal" style={{ '--d': '.02s' } as any}>
-          <div>
-            <div className="text-[13px] text-gold font-semibold tracking-[1.5px] uppercase flex items-center gap-2">
-              <IconSparkles size={16} /> {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).replace(/^\w/, c => c.toUpperCase())}
-            </div>
-            <h1 className="font-cinzel font-bold text-[34px] leading-[1.15] my-3">
-              Bem-vindo de volta, <span className="text-gold">{user.name}</span>
-            </h1>
-            <div className="flex gap-3 flex-wrap mt-2">
-              <div className="flex items-center gap-3 py-2 px-3.5 rounded-sm bg-surface border border-border">
-                <IconTargetArrow size={18} className="text-gold" />
-                <span className="text-text-dim text-[13px]"><b className="font-bold text-text">{stats?.missoesPendentes ?? '-'}</b> missões pendentes</span>
-              </div>
-              <div className="flex items-center gap-3 py-2 px-3.5 rounded-sm bg-surface border border-border">
-                <IconCards size={18} className="text-blue" />
-                <span className="text-text-dim text-[13px]"><b className="font-bold text-text">{revisao?.totalPendentes || 0}</b> flashcards para revisar</span>
-              </div>
-              <div className="flex items-center gap-3 py-2 px-3.5 rounded-sm bg-surface border border-border">
-                <IconFlame size={18} className="text-red" />
-                <span className="text-text-dim text-[13px]"><b className="font-bold text-text">{user.currentStreak}</b> dias de streak — não quebre!</span>
-              </div>
-            </div>
-          </div>
-          <Button className="gap-2" onClick={() => navigate('/mapa')}>
-            <IconPlayerPlayFilled size={18} /> Continuar de onde parou
-          </Button>
-        </section>
-
-        {/* STATS */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <Card className="p-5 reveal border-t-[3px] border-t-gold" style={{ '--d': '.06s' } as any}>
-            <div className="w-10 h-10 rounded-md grid place-items-center text-gold bg-gold/10 border-[0.5px] border-gold/25 mb-4">
-              <IconBolt size={20} />
-            </div>
-            <div className="font-cinzel font-bold text-[30px] leading-none">{user.totalXp}</div>
-            <div className="text-text-dim text-[13px] mt-1.5">XP Total</div>
-            <div className="mt-3 text-[12.5px] font-semibold flex items-center gap-1 text-green">
-              <IconTrendingUp size={16} /> +{stats?.xpHoje ?? '-'} XP hoje
-            </div>
-          </Card>
-          <Card className="p-5 reveal border-t-[3px] border-t-green" style={{ '--d': '.12s' } as any}>
-            <div className="w-10 h-10 rounded-md grid place-items-center text-green bg-green/10 border-[0.5px] border-green/25 mb-4">
-              <IconCircleCheck size={20} />
-            </div>
-            <div className="font-cinzel font-bold text-[30px] leading-none">{stats?.missoesConcluidas ?? '-'}</div>
-            <div className="text-text-dim text-[13px] mt-1.5">Missões Concluídas</div>
-            <div className="mt-3 text-[12.5px] font-semibold flex items-center gap-1 text-green">
-              <IconTrendingUp size={16} /> +{stats?.missoesConcluidasSemana ?? '-'} esta semana
-            </div>
-          </Card>
-          <Card className="p-5 reveal border-t-[3px] border-t-blue" style={{ '--d': '.18s' } as any}>
-            <div className="w-10 h-10 rounded-md grid place-items-center text-blue bg-blue/10 border-[0.5px] border-blue/25 mb-4">
-              <IconCards size={20} />
-            </div>
-            <div className="font-cinzel font-bold text-[30px] leading-none">{stats?.flashcardsDominados ?? '-'}</div>
-            <div className="text-text-dim text-[13px] mt-1.5">Flashcards Dominados</div>
-            <div className="mt-3 text-[12.5px] font-semibold flex items-center gap-1 text-green">
-              <IconTrendingUp size={16} /> +{stats?.flashcardsDominadosHoje ?? '-'} hoje
-            </div>
-          </Card>
-          <Card className="p-5 reveal border-t-[3px] border-t-red" style={{ '--d': '.24s' } as any}>
-            <div className="w-10 h-10 rounded-md grid place-items-center text-red bg-red/10 border-[0.5px] border-red/25 mb-4">
-              <IconFlame size={20} />
-            </div>
-            <div className="font-cinzel font-bold text-[30px] leading-none">{user.maxStreak}</div>
-            <div className="text-text-dim text-[13px] mt-1.5">Streak Máximo</div>
-            <div className="mt-3 text-[12.5px] font-semibold flex items-center gap-1 text-text-mute">
-              <IconAward size={16} /> recorde pessoal
-            </div>
-          </Card>
-        </section>
-
-        {/* GRID PRINCIPAL */}
-        <div className="grid lg:grid-cols-[1.55fr_1fr] gap-6 items-start">
+      <main className="flex-grow w-full max-w-container-max mx-auto px-md py-lg flex flex-col gap-lg">
+        
+        {/* Hero Section (Player Status) */}
+        <section className="bg-surface-container border-border-width border-outline p-md flex flex-col md:flex-row gap-lg items-center relative hard-shadow-surface overflow-hidden">
+          {/* Decorative Fire Streak Background */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ background: 'linear-gradient(45deg, transparent 40%, rgba(240, 192, 96, 0.5) 45%, rgba(255, 180, 171, 0.8) 50%, transparent 60%)' }}></div>
           
-          {/* COLUNA ESQUERDA */}
-          <div className="flex flex-col gap-6">
-            {/* TRILHA ATIVA */}
-            <Card className="p-6 relative overflow-hidden shadow-soft reveal" style={{ '--d': '.30s' } as any}>
-              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
-              <div className="flex items-start justify-between gap-4 mb-5">
-                <div className="flex gap-4">
-                  <div className="w-[54px] h-[54px] shrink-0 rounded-lg grid place-items-center text-[27px] text-gold border-[0.5px] border-gold/40" style={{ background: 'linear-gradient(155deg, rgba(240,192,96,.18), rgba(240,192,96,.04))' }}>
-                    <IconCoffee size={28} />
-                  </div>
-                  <div>
-                    <div className="text-xs text-gold font-semibold tracking-wide uppercase">Trilha ativa</div>
-                    <h3 className="font-cinzel font-bold text-[21px] my-1">{activeTrilha?.titulo || 'Nenhuma trilha ativa'}</h3>
-                    <p className="text-[13px] text-text-dim">{activeTrilha?.descricao || 'Matricule-se em uma trilha para começar sua jornada.'}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="font-cinzel font-bold text-2xl text-green">{progressPct}%</div>
-                  <small className="block text-text-mute text-[11px]">{nosConcluidosCount} / {totalNosTrilha} nós</small>
-                </div>
-              </div>
-
-              <ProgressBar progress={progressPct} />
-              <div className="flex justify-between mt-3 text-[12.5px] text-text-mute">
-                <span>{xpGanho} XP conquistados nesta trilha</span>
-                {/* TODO: Endpoint precisa enviar quanto XP falta para o próximo nível */}
-                <span>{stats?.xpProximoNivel ?? '-'} XP até o próximo nível</span>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 mt-5 pt-5 border-t border-border flex-wrap">
-                <div className="flex items-center gap-3">
-                  <div className="w-[42px] h-[42px] rounded-md grid place-items-center bg-surface-2 border border-border text-text-dim">
-                    <IconLock size={20} />
-                  </div>
-                  <div>
-                    <small className="block text-text-mute text-[11px] uppercase tracking-wide">Próximo nó a desbloquear</small>
-                    <b className="font-semibold text-[14.5px]">{proximoNoTitulo}</b>
-                  </div>
-                </div>
-                <Button className="gap-2" onClick={() => activeTrilha ? navigate('/mapa') : trilhasDisponiveis[0] && handleMatricular(trilhasDisponiveis[0].id)} disabled={!activeTrilha && trilhasDisponiveis.length === 0}>
-                  <IconSword size={18} /> {activeTrilha ? 'Continuar Missão' : 'Iniciar Trilha'}
-                </Button>
-              </div>
-
-              {!activeTrilha && trilhasDisponiveis.length > 0 && (
-                <div className="mt-5 pt-4 border-t border-border">
-                  <div className="text-xs text-gold font-semibold tracking-wide uppercase mb-3">Trilhas disponíveis</div>
-                  <div className="flex flex-col gap-2">
-                    {trilhasDisponiveis.map(t => (
-                      <div key={t.id} className="flex items-center justify-between gap-3 p-3 rounded-md bg-surface-2 border border-border">
-                        <div>
-                          <div className="font-semibold text-sm">{t.titulo}</div>
-                          <div className="text-xs text-text-dim line-clamp-2">{t.descricao}</div>
-                        </div>
-                        <Button className="shrink-0 py-1 px-3 text-xs h-auto" onClick={() => handleMatricular(t.id)}>
-                          Matricular
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </Card>
-
-            {/* REVISÃO DIÁRIA */}
-            <Card className="p-6 reveal" style={{ '--d': '.36s' } as any}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-cinzel font-semibold text-lg tracking-wide flex items-center gap-2">
-                  <IconStack2 size={20} className="text-gold" /> Revisão Diária
-                </h2>
-                <a href="#" className="text-[13px] text-text-dim flex items-center gap-1 hover:text-blue transition-colors">
-                  Sistema Leitner <IconHelpCircle size={16} />
-                </a>
-              </div>
-              <p className="text-text-dim text-[13px] -mt-1.5 mb-4">
-                {revisao?.totalPendentes || 0} flashcards aguardam revisão hoje, organizados por caixa de repetição espaçada.
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-                {[1, 2, 3].map((caixa) => (
-                  <div key={caixa} className="border border-border rounded-md p-4 bg-surface-2 relative overflow-hidden transition-all hover:-translate-y-1 hover:border-gold/50">
-                    <div className={`absolute left-0 top-0 bottom-0 w-[3px] ${caixa === 1 ? 'bg-red' : caixa === 2 ? 'bg-gold' : 'bg-green'}`} />
-                    <div className="text-[11px] uppercase tracking-wide text-text-mute font-semibold">Caixa {caixa}</div>
-                    <div className="font-cinzel font-bold text-[28px] my-1">{leitnerStats[caixa] || 0}</div>
-                    <div className="text-xs text-text-dim">{caixa === 1 ? 'revisão diária' : caixa === 2 ? 'a cada 3 dias' : 'a cada 7 dias'}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-between gap-4">
-                <div className="text-[13px] text-text-dim">
-                  <b className="text-text font-bold">{revisao?.totalPendentes || 0} cards</b>
-                  {/* TODO: Backend deve calcular tempo estimado ou usar uma constante por card */}
-                  {stats?.tempoRevisaoMin && <span> · tempo estimado ~{stats.tempoRevisaoMin} min</span>}
-                </div>
-                <Button className="gap-2" onClick={() => navigate('/revisao')}>
-                  <IconPlayerPlayFilled size={18} /> Iniciar Revisão
-                </Button>
-              </div>
-            </Card>
-
-            {/* AÇÕES RÁPIDAS */}
-            <section className="reveal" style={{ '--d': '.42s' } as any}>
-              <h2 className="font-cinzel font-semibold text-lg tracking-wide flex items-center gap-2 mb-4">
-                <IconBolt size={20} className="text-gold" /> Ações Rápidas
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <button className="flex items-center gap-3 p-4 rounded-md bg-surface-2 border border-border text-left transition-all hover:-translate-y-1 hover:border-[#3d444d] hover:bg-[#222936]" onClick={() => navigate('/mapa')}>
-                  <div className="w-9 h-9 rounded-md grid place-items-center text-gold bg-gold/10 shrink-0"><IconMap2 size={18} /></div>
-                  <div><b className="block font-semibold text-sm">Explorar Mapa</b><small className="text-text-mute text-xs">Veja sua jornada completa</small></div>
-                </button>
-                <button className="flex items-center gap-3 p-4 rounded-md bg-surface-2 border border-border text-left transition-all hover:-translate-y-1 hover:border-[#3d444d] hover:bg-[#222936]" onClick={() => navigate('/revisao')}>
-                  <div className="w-9 h-9 rounded-md grid place-items-center text-blue bg-blue/10 shrink-0"><IconCards size={18} /></div>
-                  <div><b className="block font-semibold text-sm">Iniciar Revisão</b><small className="text-text-mute text-xs">Revise seus flashcards de hoje</small></div>
-                </button>
-                <button className="flex items-center gap-3 p-4 rounded-md bg-surface-2 border border-border text-left transition-all hover:-translate-y-1 hover:border-[#3d444d] hover:bg-[#222936]">
-                  <div className="w-9 h-9 rounded-md grid place-items-center text-green bg-green/10 shrink-0"><IconCards size={18} /></div>
-                  <div><b className="block font-semibold text-sm">Novo Deck</b><small className="text-text-mute text-xs">Organize seus estudos</small></div>
-                </button>
-                <button className="flex items-center gap-3 p-4 rounded-md bg-surface-2 border border-border text-left transition-all hover:-translate-y-1 hover:border-[#3d444d] hover:bg-[#222936]" onClick={() => navigate('/conquistas')}>
-                  <div className="w-9 h-9 rounded-md grid place-items-center text-red bg-red/10 shrink-0"><IconTrophy size={18} /></div>
-                  <div><b className="block font-semibold text-sm">Ver Conquistas</b><small className="text-text-mute text-xs">Suas medalhas e troféus</small></div>
-                </button>
-              </div>
-            </section>
+          {/* Avatar Frame */}
+          <div className="relative w-32 h-32 flex-shrink-0 border-border-width border-primary p-1 bg-surface-container-lowest z-10">
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt="Avatar do Jogador"
+                className="w-full h-full object-cover grayscale contrast-125"
+                onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }}
+              />
+            ) : null}
+            <div className="w-full h-full flex items-center justify-center font-code text-4xl text-on-surface" style={{ display: user.avatarUrl ? 'none' : 'flex' }}>
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="absolute -bottom-3 -right-3 bg-primary text-on-primary border-border-width border-outline font-label-caps text-label-caps px-2 py-1">
+                LVL {user.lvl}
+            </div>
           </div>
 
-          {/* COLUNA DIREITA */}
-          <div className="flex flex-col gap-6">
-            {/* RANKING SEMANAL */}
-            <Card className="p-6 reveal" style={{ '--d': '.34s' } as any}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-cinzel font-semibold text-lg tracking-wide flex items-center gap-2">
-                  <IconCrown size={20} className="text-gold" /> Ranking Semanal
-                </h2>
-                <button onClick={() => navigate('/ranking')} className="text-[13px] text-text-dim flex items-center gap-1 hover:text-blue transition-colors">
-                  Ver tudo <IconChevronRight size={16} />
+          {/* Stats Bars */}
+          <div className="flex-grow w-full flex flex-col gap-sm z-10">
+            <div className="flex justify-between items-end mb-1">
+              <div>
+                <h2 className="font-h3 text-h3 text-primary uppercase">{user.name}</h2>
+                <p className="font-label-caps text-label-caps text-on-surface-variant">Status: EM ATIVIDADE | {stats?.cargo ?? 'Aventureiro'}</p>
+              </div>
+              <div className="flex items-center gap-1 text-error">
+                <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
+                <span className="font-h3 text-h3">{user.currentStreak}</span>
+              </div>
+            </div>
+
+            {/* HP Bar */}
+            <div className="flex items-center gap-sm">
+              <span className="font-label-caps text-label-caps w-12 text-tertiary">HP</span>
+              <div className="flex-grow h-6 bg-surface-dim border-border-width border-black relative">
+                <div className="absolute inset-0 bg-tertiary progress-bar-segment" style={{ width: '100%' }}></div>
+                <span className="absolute inset-0 flex items-center justify-center text-black font-bold z-10 mix-blend-difference font-code">{stats?.flashcardsDominados ?? 0} DOMINADOS</span>
+              </div>
+            </div>
+
+            {/* Mana Bar */}
+            <div className="flex items-center gap-sm">
+              <span className="font-label-caps text-label-caps w-12 text-secondary">MP</span>
+              <div className="flex-grow h-6 bg-surface-dim border-border-width border-black relative">
+                <div className="absolute inset-0 bg-secondary progress-bar-segment" style={{ width: '100%' }}></div>
+                <span className="absolute inset-0 flex items-center justify-center text-black font-bold z-10 mix-blend-difference font-code">{stats?.missoesConcluidas ?? 0} MISSÕES</span>
+              </div>
+            </div>
+
+            {/* XP Bar */}
+            <div className="flex items-center gap-sm">
+              <span className="font-label-caps text-label-caps w-12 text-primary">XP</span>
+              <div className="flex-grow h-4 bg-surface-dim border-border-width border-black relative mt-1">
+                <div className="absolute inset-0 bg-primary progress-bar-segment" style={{ width: `${(user.totalXp % 1000) / 10}%` }}></div>
+              </div>
+              <span className="font-code text-code w-16 text-right text-primary">{user.totalXp} XP</span>
+            </div>
+          </div>
+        </section>
+
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-lg">
+          
+          {/* Left Column: Active Mission / Map */}
+          <div className="md:col-span-8 flex flex-col gap-md">
+            <div className="bg-surface-container border-border-width border-outline-variant pixel-shadow h-full flex flex-col">
+              <div className="bg-surface-container-high border-b-border-width border-outline-variant px-sm py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">map</span>
+                  <h3 className="font-label-caps text-label-caps text-on-surface uppercase">COORDENADAS ATUAIS</h3>
+                </div>
+                <span className="bg-primary-container text-on-primary-container px-2 py-1 font-code text-xs border-[2px] border-black">
+                  {activeTrilha ? 'ZONA ATIVA' : 'SEM ZONA'}
+                </span>
+              </div>
+              
+              <div className="p-sm flex-grow flex flex-col relative min-h-[400px]">
+                {/* Simulated Map Area */}
+                <div className="absolute inset-sm border-border-width border-outline-variant bg-surface-container-lowest overflow-hidden">
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-40" viewBox="0 0 1000 400" preserveAspectRatio="none" style={{ stroke: '#f0c060', strokeWidth: 2, fill: 'none' }}>
+                     <path d="M0,100 Q250,20 500,100 T1000,100" />
+                     <path d="M0,200 Q250,120 500,200 T1000,200" />
+                     <path d="M0,300 Q250,220 500,300 T1000,300" />
+                  </svg>
+                  
+                  {activeTrilha ? (
+                    <>
+                      {/* Dynamic path connecting nodes up to the last completed/in-progress */}
+                      <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 400" preserveAspectRatio="none" style={{ stroke: '#f0c060', strokeWidth: 4, fill: 'none', strokeDasharray: '12 6' }}>
+                        <path d={`M100,${activeNos.length > 0 ? (100 <= 500 ? 200 - 160*(100/500) + 160*Math.pow(100/500, 2) : 200 + 160*((100-500)/500) - 160*Math.pow((100-500)/500, 2)) : 200} ` + 
+                          activeNos.map((no, i) => {
+                            if (no.status === 'BLOQUEADO' && i > 0 && activeNos[i-1].status === 'BLOQUEADO') return ''; // Don't draw path to blocked nodes past the first one
+                            const N = activeNos.length;
+                            const spacing = 800 / Math.max(1, N - 1);
+                            const x = 100 + i * spacing;
+                            const y = x <= 500 ? 200 - 160*(x/500) + 160*Math.pow(x/500, 2) : 200 + 160*((x-500)/500) - 160*Math.pow((x-500)/500, 2);
+                            return `L${x},${y}`;
+                          }).join(' ')
+                        } />
+                      </svg>
+                      
+                      {activeNos.map((no, i) => {
+                        const N = activeNos.length;
+                        const spacing = 800 / Math.max(1, N - 1);
+                        const x = 100 + i * spacing;
+                        const y = x <= 500 ? 200 - 160*(x/500) + 160*Math.pow(x/500, 2) : 200 + 160*((x-500)/500) - 160*Math.pow((x-500)/500, 2);
+                        
+                        const isCurrent = no.status === 'EM_PROGRESSO' || no.status === 'DISPONIVEL' || (no.status === 'BLOQUEADO' && i > 0 && activeNos[i-1].status === 'CONCLUIDO');
+                        const isCompleted = no.status === 'CONCLUIDO';
+                        
+                        return (
+                          <div key={no.id} className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10 flex flex-col items-center group cursor-pointer"
+                               style={{ left: `${(x / 1000) * 100}%`, top: `${(y / 400) * 100}%` }}
+                               onClick={() => navigate('/mapa')}>
+                            
+                            {/* Marker */}
+                            {isCurrent ? (
+                              <div className="w-5 h-5 bg-error rounded-full animate-pulse border-[3px] border-white pixel-shadow flex items-center justify-center"></div>
+                            ) : isCompleted ? (
+                              <div className="w-5 h-5 bg-primary border-[2px] border-black flex items-center justify-center transform rotate-45 pixel-shadow">
+                                <span className="material-symbols-outlined text-[10px] text-black -rotate-45">check</span>
+                              </div>
+                            ) : (
+                              <div className="w-4 h-4 bg-surface-container-highest border-[2px] border-outline-variant rounded-full flex items-center justify-center">
+                                <span className="material-symbols-outlined text-[10px] text-outline-variant">lock</span>
+                              </div>
+                            )}
+                            
+                            {/* Tooltip */}
+                            <div className="absolute top-full mt-2 w-max bg-surface-container-highest border-border-width border-outline text-on-surface text-[10px] font-code px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                               {no.titulo}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      
+                      {/* End Flag */}
+                      {activeNos.length > 0 && (
+                        <div className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
+                             style={{ left: `${((100 + (activeNos.length - 1) * (800 / Math.max(1, activeNos.length - 1))) / 1000) * 100}%`, top: `${((100 + (activeNos.length - 1) * (800 / Math.max(1, activeNos.length - 1))) <= 500 ? 200 - 160*((100 + (activeNos.length - 1) * (800 / Math.max(1, activeNos.length - 1)))/500) + 160*Math.pow(((100 + (activeNos.length - 1) * (800 / Math.max(1, activeNos.length - 1))))/500, 2) : 200 + 160*((100 + (activeNos.length - 1) * (800 / Math.max(1, activeNos.length - 1))) - 500)/500 - 160*Math.pow(((100 + (activeNos.length - 1) * (800 / Math.max(1, activeNos.length - 1))) - 500)/500, 2)) / 400 * 100}%` }}>
+                           <div className="absolute -top-8 -right-2 w-6 h-6 bg-primary border-[2px] border-black flex items-center justify-center pixel-shadow">
+                             <span className="material-symbols-outlined text-black text-[14px] font-bold">flag</span>
+                           </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-center font-code text-on-surface-variant">
+                      NENHUMA MISSÃO ATIVA.<br/>SELECIONE UMA TRILHA.
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-md border-t-border-width border-outline-variant bg-surface-container-low flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                  <h3 className="font-h3 text-h3 text-on-surface uppercase">{activeTrilha?.titulo || 'Operação: Nenhuma'}</h3>
+                  <p className="font-code text-code text-on-surface-variant">Objetivo: {activeTrilha ? proximoNoTitulo : 'Matricule-se para iniciar.'}</p>
+                </div>
+                <button 
+                  onClick={() => activeTrilha ? navigate('/mapa') : trilhasDisponiveis[0] && handleMatricular(trilhasDisponiveis[0].id)}
+                  disabled={!activeTrilha && trilhasDisponiveis.length === 0}
+                  className="bg-primary text-on-primary border-border-width border-black font-label-caps text-label-caps px-lg py-sm pixel-shadow pixel-shadow-hover pixel-shadow-active transition-all cursor-pointer disabled:opacity-50 disabled:grayscale"
+                >
+                  {activeTrilha ? 'CONTINUAR MISSÃO' : 'INICIAR MISSÃO'}
                 </button>
               </div>
-              <div className="flex flex-col gap-3">
+            </div>
+          </div>
+
+          {/* Right Column: Leaderboard & Achievements */}
+          <div className="md:col-span-4 flex flex-col gap-lg">
+            
+            {/* Arcade Leaderboard */}
+            <div className="bg-surface-container border-border-width border-outline-variant pixel-shadow">
+              <div className="bg-surface-container-high border-b-border-width border-outline-variant px-sm py-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">trophy</span>
+                  <h3 className="font-label-caps text-label-caps text-on-surface text-primary">RANKING SEMANAL</h3>
+                </div>
+              </div>
+              <ul className="p-sm space-y-2 font-code text-code">
                 {(!ranking?.top10 || ranking.top10.length === 0) ? (
-                  <div className="text-center py-6 text-text-mute text-sm">
-                    Nenhum jogador no ranking ainda.<br/>Acumule XP para ser o primeiro!
-                  </div>
+                   <li className="p-2 text-on-surface-variant text-center">SEM DADOS</li>
                 ) : (
-                  (ranking?.top10?.slice(0, 3) || []).map((item, idx) => (
-                    <div key={idx} className={`flex items-center gap-3 p-3 rounded-md border transition-all hover:translate-x-1 ${item.isCurrentUser ? 'border-gold/45 bg-gold/5' : 'border-border bg-surface-2'}`}>
-                      <div className={`w-5 text-center font-cinzel font-bold text-base ${idx === 0 ? 'text-gold' : 'text-text-mute'}`}>{item.posicao}</div>
-                      <div className="w-10 h-10 rounded-md shrink-0 relative grid place-items-center font-cinzel font-bold text-sm text-[#0d1117] bg-gradient-to-br from-gold to-[#caa244]">
-                        {idx === 0 && <IconCrown size={16} className="absolute -top-3 left-1/2 -translate-x-1/2 rotate-12 text-gold" />}
-                        {item.userName.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm flex items-center gap-2">
-                          {item.userName}
-                          {item.isCurrentUser && <span className="text-[10px] font-bold text-gold border-[0.5px] border-gold/50 rounded-sm px-1 tracking-wide">VOCÊ</span>}
-                        </div>
-                        {/* TODO: O backend precisa enviar o cargo/título no RankingItem */}
-                        <div className="text-xs text-text-mute">{stats?.cargo ?? 'Aventureiro'}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-bold text-sm text-gold">{item.xpSemana}</div>
-                        <small className="block text-[11px] text-text-mute">XP semana</small>
-                      </div>
-                    </div>
-                  ))
+                   (ranking?.top10?.slice(0, 4) || []).map((item, idx) => (
+                     <li key={idx} className={`flex justify-between items-center p-2 transition-colors ${item.isCurrentUser ? 'bg-surface-container-highest border-[2px] border-primary text-primary' : 'text-on-surface hover:bg-surface-variant'}`}>
+                       <span>{item.posicao}. {item.userName.toUpperCase()} {item.isCurrentUser && '(VOCÊ)'}</span>
+                       <span>{item.xpSemana}</span>
+                     </li>
+                   ))
                 )}
-              </div>
-            </Card>
+              </ul>
+            </div>
 
-            {/* CONQUISTAS RECENTES */}
-            <section className="reveal" style={{ '--d': '.40s' } as any}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-cinzel font-semibold text-lg tracking-wide flex items-center gap-2">
-                  <IconAward size={20} className="text-gold" /> Conquistas Recentes
-                </h2>
-                <button onClick={() => navigate('/conquistas')} className="text-[13px] text-text-dim flex items-center gap-1 hover:text-blue transition-colors">
-                  Galeria <IconChevronRight size={16} />
-                </button>
+            {/* Achievements Log */}
+            <div className="bg-surface-container border-border-width border-outline-variant pixel-shadow flex-grow">
+              <div className="bg-surface-container-high border-b-border-width border-outline-variant px-sm py-3 flex items-center gap-2">
+                <span className="material-symbols-outlined text-on-surface">stars</span>
+                <h3 className="font-label-caps text-label-caps text-on-surface">REGISTRO DE CONQUISTAS</h3>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              <div className="p-sm flex flex-col gap-sm">
                 {conquistas.length === 0 ? (
-                  <div className="text-center py-6 w-full text-text-mute text-sm">
-                    Nenhuma conquista desbloqueada ainda.<br/>Complete missões para ganhar insígnias!
-                  </div>
+                  <div className="text-center py-4 font-code text-on-surface-variant">NENHUM REGISTRO</div>
                 ) : (
-                  conquistas.map((c, i) => (
-                    <div key={i} className="flex-none w-[158px] p-4 rounded-md bg-surface border border-border text-center transition-all hover:-translate-y-1 hover:border-gold/45">
-                      <div className="w-12 h-12 mx-auto mb-3 rounded-full grid place-items-center text-2xl text-gold border-[0.5px] border-gold/40" style={{ background: 'linear-gradient(155deg, rgba(240,192,96,.2), rgba(240,192,96,.04))' }}>
-                        <IconAward size={24} />
+                  conquistas.slice(0, 3).map((c, i) => (
+                    <div key={i} className="flex items-start space-x-sm bg-surface-dim p-2 border-[2px] border-outline-variant">
+                      <div className="w-10 h-10 bg-tertiary-container border-[2px] border-black flex items-center justify-center shrink-0">
+                        <span className="material-symbols-outlined text-on-tertiary-container" style={{ fontVariationSettings: "'FILL' 1" }}>shield</span>
                       </div>
-                      <div className="font-semibold text-[13.5px] line-clamp-1">{c.titulo}</div>
-                      <div className="text-[11.5px] text-text-mute mt-1 line-clamp-2">{c.descricao}</div>
+                      <div>
+                        <h4 className="font-label-caps text-sm text-tertiary uppercase">{c.titulo}</h4>
+                        <p className="font-code text-xs text-on-surface-variant">{c.descricao}</p>
+                      </div>
                     </div>
                   ))
                 )}
               </div>
-            </section>
-          </div>
+            </div>
 
+          </div>
         </div>
+
       </main>
     </div>
   );

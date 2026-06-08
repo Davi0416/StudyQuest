@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
-import { IconSword, IconMap, IconFlask, IconMedal, IconTrophy, IconFlame, IconHome } from '@tabler/icons-react';
 
 export function Topbar() {
   const { user } = useUser();
@@ -9,70 +8,59 @@ export function Topbar() {
   if (!user) return null;
 
   return (
-    <header className="sticky top-0 z-50 h-[64px] backdrop-blur-[12px] border-b border-border bg-bg/80 px-6 flex items-center justify-between relative">
-      {/* Logo */}
-      <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity" title="Início">
-        <IconSword className="text-gold" size={24} />
-        <h1 className="font-cinzel text-xl font-bold text-text">
-          Study<span className="text-gold">Quest</span>
-        </h1>
-      </Link>
+    <nav className="bg-surface border-b-border-width border-outline sticky top-0 z-50">
+      <div className="flex justify-between items-center w-full px-md h-xl max-w-container-max mx-auto">
+        <Link to="/" className="font-h2 text-h2 text-primary uppercase tracking-widest flex items-center gap-2 active:translate-x-xs active:translate-y-xs transition-transform" title="Início">
+          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>swords</span>
+          <span>STUDY_QUEST</span>
+        </Link>
 
-      {/* Nav */}
-      <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-6">
-        <NavLink to="/" end className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors ${isActive ? 'text-gold' : 'text-text-mute hover:text-text'}`}>
-          <IconHome size={18} /> Home
-        </NavLink>
-        <NavLink to="/mapa" className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors ${isActive ? 'text-gold' : 'text-text-mute hover:text-text'}`}>
-          <IconMap size={18} /> Mapa
-        </NavLink>
-        <NavLink to="/revisao" className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors ${isActive ? 'text-gold' : 'text-text-mute hover:text-text'}`}>
-          <IconFlask size={18} /> Lab
-        </NavLink>
-        <NavLink to="/conquistas" className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors ${isActive ? 'text-gold' : 'text-text-mute hover:text-text'}`}>
-          <IconMedal size={18} /> Conquistas
-        </NavLink>
-        <NavLink to="/ranking" className={({ isActive }) => `flex items-center gap-2 text-sm font-medium transition-colors ${isActive ? 'text-gold' : 'text-text-mute hover:text-text'}`}>
-          <IconTrophy size={18} /> Ranking
-        </NavLink>
-      </nav>
-
-      {/* Direita */}
-      <div className="flex items-center gap-4">
-        {/* Streak Chip */}
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-red/30 bg-red/10">
-          <IconFlame size={16} className="text-red animate-pulse" />
-          <span className="text-sm font-bold text-red">{user.currentStreak}</span>
+        <div className="hidden md:flex items-center gap-md font-label-caps text-label-caps h-full">
+          <NavLink to="/" end className={({ isActive }) => `h-full flex items-center px-2 py-1 active:translate-x-xs active:translate-y-xs transition-all duration-75 ${isActive ? 'text-primary border-b-border-width border-primary pb-1' : 'text-on-surface-variant hover:text-primary hover:bg-primary-container hover:text-on-primary-container'}`}>
+             HOME
+          </NavLink>
+          <NavLink to="/mapa" className={({ isActive }) => `h-full flex items-center px-2 py-1 active:translate-x-xs active:translate-y-xs transition-all duration-75 ${isActive ? 'text-primary border-b-border-width border-primary pb-1' : 'text-on-surface-variant hover:text-primary hover:bg-primary-container hover:text-on-primary-container'}`}>
+             MAPA
+          </NavLink>
+          <NavLink to="/revisao" className={({ isActive }) => `h-full flex items-center px-2 py-1 active:translate-x-xs active:translate-y-xs transition-all duration-75 ${isActive ? 'text-primary border-b-border-width border-primary pb-1' : 'text-on-surface-variant hover:text-primary hover:bg-primary-container hover:text-on-primary-container'}`}>
+             LAB
+          </NavLink>
+          <NavLink to="/conquistas" className={({ isActive }) => `h-full flex items-center px-2 py-1 active:translate-x-xs active:translate-y-xs transition-all duration-75 ${isActive ? 'text-primary border-b-border-width border-primary pb-1' : 'text-on-surface-variant hover:text-primary hover:bg-primary-container hover:text-on-primary-container'}`}>
+             CONQUISTAS
+          </NavLink>
+          <NavLink to="/ranking" className={({ isActive }) => `h-full flex items-center px-2 py-1 active:translate-x-xs active:translate-y-xs transition-all duration-75 ${isActive ? 'text-primary border-b-border-width border-primary pb-1' : 'text-on-surface-variant hover:text-primary hover:bg-primary-container hover:text-on-primary-container'}`}>
+             RANKING
+          </NavLink>
         </div>
 
-        {/* Bloco do usuário */}
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col items-end">
-            <span className="text-sm font-bold">{user.name}</span>
-            {/* Barra XP mini */}
-            <div className="w-16 h-[5px] bg-surface-2 rounded-full mt-1 overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-gold to-[#ffe39b] rounded-full"
-                style={{ width: `${(user.totalXp % 1000) / 10}%`, transition: 'width 1s ease-out' }}
-              />
-            </div>
+        <div className="flex items-center gap-sm text-primary">
+          <div className="flex items-center gap-1.5 px-2 py-1 border-[2px] border-error bg-error/10 pixel-shadow">
+             <span className="material-symbols-outlined text-error animate-pulse text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>local_fire_department</span>
+             <span className="text-sm font-bold text-error font-code">{user.currentStreak}</span>
           </div>
+
+          <button className="p-1 hover:bg-primary-container hover:text-on-primary-container transition-all active:translate-x-xs active:translate-y-xs duration-75 border-border-width border-transparent hover:border-outline ml-2">
+            <span className="material-symbols-outlined">notifications</span>
+          </button>
+          <button className="p-1 hover:bg-primary-container hover:text-on-primary-container transition-all active:translate-x-xs active:translate-y-xs duration-75 border-border-width border-transparent hover:border-outline">
+            <span className="material-symbols-outlined">settings</span>
+          </button>
           
-          {/* Avatar */}
-          <Link to="/perfil" className="relative group" title="Meu perfil">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gold to-[#d8a945] flex items-center justify-center text-[#1a1206] font-bold text-lg ring-2 ring-transparent group-hover:ring-gold/50 transition-shadow overflow-hidden">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
-              ) : (
-                user.name.charAt(0).toUpperCase()
-              )}
-            </div>
-            <div className="absolute -bottom-1 -right-1 bg-surface border border-border text-[10px] font-bold px-1.5 rounded-sm">
-              Lvl {user.lvl}
+          <Link to="/perfil" className="w-10 h-10 border-border-width border-outline bg-surface-container-high ml-2 pixel-shadow active-press relative group overflow-hidden block">
+            {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt="Avatar"
+                  className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all"
+                  onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }}
+                />
+              ) : null}
+            <div className="w-full h-full flex items-center justify-center font-code text-lg text-on-surface" style={{ display: user.avatarUrl ? 'none' : 'flex' }}>
+              {user.name.charAt(0).toUpperCase()}
             </div>
           </Link>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
