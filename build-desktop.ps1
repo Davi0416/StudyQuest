@@ -60,6 +60,23 @@ if (-not (Test-Path $jreDest)) {
 Write-Host "    target/backend pronto:"
 Get-ChildItem $backend -Depth 0 | ForEach-Object { Write-Host "      $($_.Name)" }
 
+# 3c. .env com credenciais do banco restrito
+$apiEnvPath = "$root\api\.env"
+if (Test-Path $apiEnvPath) {
+    $envContent = Get-Content $apiEnvPath
+    $dbUrl = ($envContent | Where-Object { $_ -match "^POSTGRES_URL=" }) -replace "^POSTGRES_URL=",""
+    $desktopPass = ($envContent | Where-Object { $_ -match "^DESKTOP_DB_PASSWORD=" }) -replace "^DESKTOP_DB_PASSWORD=",""
+    
+    if ($dbUrl -and $desktopPass) {
+        $backendEnvPath = "$backend\.env"
+        "DESKTOP_DB_URL=$dbUrl" | Out-File -FilePath $backendEnvPath -Encoding UTF8
+        "DESKTOP_DB_PASSWORD=$desktopPass" | Out-File -FilePath $backendEnvPath -Encoding UTF8 -Append
+        Write-Host "    .env gerado em target/backend"
+    } else {
+        Write-Host "    Aviso: POSTGRES_URL ou DESKTOP_DB_PASSWORD nao encontrados em api/.env" -ForegroundColor Yellow
+    }
+}
+
 # ── 4. Electron ────────────────────────────────────────────────────────────────
 Step "Build Electron (Windows installer)"
 Set-Location "$root\electron"
