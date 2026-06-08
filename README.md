@@ -6,25 +6,6 @@ O backend roda como um **executável nativo embutido** construído com **Quarkus
 
 ---
 
-## Demonstração
-
-### Hub do aventureiro
-Dashboard com XP, streak, progresso da trilha, ranking semanal e revisão diária.
-
-![Hub](docs/screenshots/hub.png)
-
-### Mapa Overworld
-Currículo em estilo RPG pixel art — cada nó é uma etapa a desbloquear, com biomas, miniboss e boss final.
-
-![Mapa](docs/screenshots/mapa.png)
-
-### Lab — Revisão espaçada (Leitner)
-Flashcards organizados por caixa de repetição espaçada.
-
-![Lab](docs/screenshots/lab.png)
-
----
-
 ## Funcionalidades
 
 - **Mapa Overworld** — currículo em estilo RPG pixel art com biomas, nós e skill tree
