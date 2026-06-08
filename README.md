@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/Davi0416/StudyQuest/releases/latest">
-    <img src="https://img.shields.io/github/v/release/Davi0416/StudyQuest?style=for-the-badge&logo=windows&logoColor=white&label=Download%20para%20Windows&color=FFB800&labelColor=1a1a2e&logoSize=auto" alt="Download StudyQuest" height="40">
+    <img src="https://img.shields.io/badge/Download%20para%20Windows-v1.1.2-FFB800?style=for-the-badge&logo=windows&logoColor=white&labelColor=1a1a2e" alt="Download StudyQuest" height="40">
   </a>
 </p>
 
