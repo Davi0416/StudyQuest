@@ -45,7 +45,7 @@ export interface No {
 
 export type AulaBloco =
   | { tipo: 'texto'; titulo?: string; conteudo: string }
-  | { tipo: 'video'; titulo: string; url: string; linkAssistir?: string }
+  | { tipo: 'video'; titulo: string; url: string; linkAssistir?: string; autor?: string; legenda?: string }
   | { tipo: 'exercicio'; id: string; nivel: number; icone?: string; titulo?: string; boss?: boolean; miniboss?: boolean; enunciado: string; codigoInicial: string; linguagem: string; testes: { stdin?: string; expected_output: string }[] }
   | { tipo: 'flashcards' }
 

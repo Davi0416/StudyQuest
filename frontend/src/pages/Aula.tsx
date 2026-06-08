@@ -46,9 +46,13 @@ function youtubeAssistirUrl(url: string, linkAssistir?: string): string {
   return url;
 }
 
-function VideoBloco({ titulo, url, linkAssistir }: { titulo: string; url: string; linkAssistir?: string }) {
+function VideoBloco({ titulo, url, linkAssistir, autor, legenda }: { titulo: string; url: string; linkAssistir?: string; autor?: string; legenda?: string }) {
   const embedUrl = toYoutubeEmbedUrl(url);
   const assistirUrl = youtubeAssistirUrl(url, linkAssistir);
+
+  const legendaTexto = legenda || (autor 
+    ? `Vídeo extra de ${autor}. Se não carregar aqui, abra direto no YouTube.`
+    : "Vídeo extra do Curso em Vídeo (Gustavo Guanabara). Se não carregar aqui, abra direto no YouTube.");
 
   return (
     <div className="rounded-lg overflow-hidden border border-border bg-surface flex flex-col">
@@ -67,7 +71,7 @@ function VideoBloco({ titulo, url, linkAssistir }: { titulo: string; url: string
       </div>
       <div className="px-4 py-3 border-t border-border bg-surface-2 flex flex-col sm:flex-row sm:items-center gap-3">
         <p className="text-xs text-text-mute flex-1">
-          Vídeo extra do Curso em Vídeo (Gustavo Guanabara). Se não carregar aqui, abra direto no YouTube.
+          {legendaTexto}
         </p>
         <a
           href={assistirUrl}
@@ -293,7 +297,7 @@ export function Aula() {
   const renderBloco = (bloco: AulaBloco) => {
     if (bloco.tipo === 'texto') return <TextoBloco conteudo={bloco.conteudo} />;
     if (bloco.tipo === 'video') {
-      return <VideoBloco titulo={bloco.titulo} url={bloco.url} linkAssistir={bloco.linkAssistir} />;
+      return <VideoBloco titulo={bloco.titulo} url={bloco.url} linkAssistir={bloco.linkAssistir} autor={bloco.autor} legenda={bloco.legenda} />;
     }
     if (bloco.tipo === 'exercicio') {
       return (

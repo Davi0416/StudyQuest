@@ -8,6 +8,25 @@ function initials(name: string) {
   return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
 }
 
+function RankingAvatar({ url, name, fallbackClass }: { url?: string | null, name?: string, fallbackClass: string }) {
+  const displayName = name || '-';
+  return (
+    <>
+      {url && (
+        <img
+          src={url}
+          alt={displayName}
+          className="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all"
+          onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement | null)?.style.setProperty('display', 'flex'); }}
+        />
+      )}
+      <div className={`w-full h-full flex items-center justify-center ${fallbackClass}`} style={{ display: url ? 'none' : 'flex' }}>
+        {displayName === '-' ? '-' : initials(displayName)}
+      </div>
+    </>
+  );
+}
+
 export function Ranking() {
   const { user } = useUser();
   const [ranking, setRanking] = useState<RankingResponse | null>(null);
@@ -53,9 +72,7 @@ export function Ranking() {
               <div className="border-border-width border-outline bg-surface-container-high p-sm flex flex-col items-center gap-sm relative order-2 md:order-1 h-[250px] justify-end pixel-shadow">
                 <div className="absolute -top-6 bg-surface-container border-[3px] border-on-surface w-12 h-12 flex items-center justify-center font-h3 text-h3 text-secondary z-10 rotate-[-10deg]">2</div>
                 <div className="w-24 h-24 border-border-width border-outline bg-surface overflow-hidden flex items-center justify-center">
-                  <div className="w-full h-full bg-secondary-container flex items-center justify-center font-h2 text-h2 text-on-secondary-container">
-                    {p2 ? initials(p2.userName) : '-'}
-                  </div>
+                  <RankingAvatar url={p2?.avatarUrl} name={p2?.userName} fallbackClass="bg-secondary-container font-h2 text-h2 text-on-secondary-container" />
                 </div>
                 <div className="text-center w-full">
                   <h3 className="font-h3 text-h3 text-secondary truncate">{p2 ? p2.userName : 'Vazio'}</h3>
@@ -73,9 +90,7 @@ export function Ranking() {
                   <div className="bg-primary-container border-[3px] border-on-primary-container w-16 h-16 flex items-center justify-center font-h1 text-h3 text-on-primary-container">1</div>
                 </div>
                 <div className="w-32 h-32 border-border-width border-primary bg-surface overflow-hidden flex items-center justify-center">
-                   <div className="w-full h-full bg-primary flex items-center justify-center font-h1 text-h1 text-on-primary">
-                    {p1 ? initials(p1.userName) : '-'}
-                  </div>
+                   <RankingAvatar url={p1?.avatarUrl} name={p1?.userName} fallbackClass="bg-primary font-h1 text-h1 text-on-primary" />
                 </div>
                 <div className="text-center w-full">
                   <h3 className="font-h3 text-h3 text-primary truncate drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{p1 ? p1.userName : 'Vazio'}</h3>
@@ -90,9 +105,7 @@ export function Ranking() {
               <div className="border-border-width border-outline bg-surface-container-high p-sm flex flex-col items-center gap-sm relative order-3 md:order-3 h-[220px] justify-end pixel-shadow">
                 <div className="absolute -top-6 bg-surface-container border-[3px] border-on-surface w-12 h-12 flex items-center justify-center font-h3 text-h3 text-tertiary z-10 rotate-[10deg]">3</div>
                 <div className="w-20 h-20 border-border-width border-outline bg-surface overflow-hidden flex items-center justify-center">
-                  <div className="w-full h-full bg-tertiary-container flex items-center justify-center font-h2 text-h2 text-on-tertiary-container">
-                    {p3 ? initials(p3.userName) : '-'}
-                  </div>
+                  <RankingAvatar url={p3?.avatarUrl} name={p3?.userName} fallbackClass="bg-tertiary-container font-h2 text-h2 text-on-tertiary-container" />
                 </div>
                 <div className="text-center w-full">
                   <h3 className="font-h3 text-h3 text-tertiary truncate">{p3 ? p3.userName : 'Vazio'}</h3>
@@ -127,9 +140,7 @@ export function Ranking() {
                   <div className={`w-16 font-h3 text-h3 ${i < 3 ? 'text-primary' : 'text-on-surface'}`}>{item.posicao}</div>
                   <div className="flex-1 flex items-center gap-xs">
                     <div className="w-8 h-8 border-border-width border-outline bg-surface flex items-center justify-center overflow-hidden shrink-0">
-                      <div className="w-full h-full bg-surface-container-highest flex items-center justify-center text-on-surface font-code text-xs">
-                        {initials(item.userName)}
-                      </div>
+                      <RankingAvatar url={item.avatarUrl} name={item.userName} fallbackClass="bg-surface-container-highest text-on-surface font-code text-xs" />
                     </div>
                     <div className="flex flex-col">
                       <div className="font-code text-code text-on-surface group-hover:text-primary transition-colors flex items-center gap-2">
@@ -153,8 +164,8 @@ export function Ranking() {
         <div className="fixed bottom-0 left-0 right-0 z-30 w-full bg-surface-container-highest border-t-[3px] border-primary p-sm">
           <div className="max-w-container-max mx-auto flex items-center gap-md">
             <div className="font-h3 text-h3 text-primary shrink-0">{me.posicao}</div>
-            <div className="w-12 h-12 border-border-width border-primary bg-primary shrink-0 grid place-items-center font-h2 text-h2 text-on-primary">
-              {user.name.charAt(0).toUpperCase()}
+            <div className="w-12 h-12 border-border-width border-primary bg-surface overflow-hidden shrink-0 flex items-center justify-center font-h2 text-h2 text-on-primary">
+              <RankingAvatar url={user.avatarUrl} name={user.name} fallbackClass="bg-primary font-h2 text-h2 text-on-primary" />
             </div>
             <div className="flex-1 min-w-0 flex flex-col">
               <div className="font-h3 text-h3 flex items-center gap-2 text-on-surface">

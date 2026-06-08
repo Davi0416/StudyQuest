@@ -9,7 +9,6 @@ export function Perfil() {
   const { user, logout, setUser } = useUser();
   const navigate = useNavigate();
   const [conquistas, setConquistas] = useState<Conquista[]>([]);
-  const [resetConfirm, setResetConfirm] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [draftName, setDraftName] = useState('');
   const [draftAvatarUrl, setDraftAvatarUrl] = useState('');
@@ -35,13 +34,7 @@ export function Perfil() {
   const xpCurrent = (user as any).xpAtualNoNivel ?? (user.totalXp % xpForLevel);
   const xpPct = Math.round(xpCurrent / xpForLevel * 100);
 
-  async function handleResetAndLogout() {
-    try {
-      await api.post('/auth/dev/reset');
-    } catch (e) {
-    }
-    logout();
-  }
+
 
   function openModal() {
     setDraftName(user?.name || '');
@@ -147,10 +140,7 @@ export function Perfil() {
               <span className="material-symbols-outlined text-base">logout</span>
               SAIR
             </button>
-            <button onClick={() => setResetConfirm(true)} className="bg-error border-border-width border-outline-variant text-on-error font-label-caps text-label-caps py-sm px-sm neo-shadow neo-button-active w-full flex justify-center items-center gap-xs transition-colors hover:bg-error-container hover:text-on-error-container mt-4 cursor-pointer">
-              <span className="material-symbols-outlined text-base">delete</span>
-              APAGAR DADOS
-            </button>
+
           </div>
         </div>
 
@@ -241,33 +231,6 @@ export function Perfil() {
         </div>
       </main>
 
-      {/* MODAL RESET */}
-      {resetConfirm && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm"
-             onClick={e => { if (e.target === e.currentTarget) setResetConfirm(false); }}>
-          <div className="w-full max-w-[420px] bg-surface-container border-border-width border-error neo-shadow">
-            <div className="flex items-center gap-3 px-6 py-4 bg-error text-on-error border-b-border-width border-error">
-              <span className="material-symbols-outlined text-2xl">delete</span>
-              <h3 className="font-h3 text-lg uppercase tracking-widest">APAGAR DADOS</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-on-surface text-sm font-code leading-relaxed mb-4">
-                AVISO: ISSO APAGARÁ TODOS OS USUÁRIOS DO BANCO DE DADOS LOCAL E DESLOGARÁ VOCÊ.
-              </p>
-              <p className="text-on-surface-variant text-xs font-code">ÚTIL PARA TESTAR O FLUXO DE REGISTRO.</p>
-            </div>
-            <div className="flex items-center justify-end gap-4 px-6 py-4 border-t-border-width border-error bg-surface">
-              <button onClick={() => setResetConfirm(false)} className="text-on-surface hover:text-primary font-label-caps text-sm cursor-pointer">CANCELAR</button>
-              <button
-                className="bg-error text-on-error border-border-width border-black px-4 py-2 font-label-caps neo-shadow active-press flex items-center gap-2 cursor-pointer"
-                onClick={() => { setResetConfirm(false); handleResetAndLogout(); }}
-              >
-                <span className="material-symbols-outlined text-base">delete</span> CONFIRMAR EXCLUSÃO
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* MODAL EDIT */}
       {modalOpen && (
