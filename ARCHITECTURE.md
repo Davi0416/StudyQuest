@@ -10,13 +10,15 @@ StudyQuest é um aplicativo desktop de estudos gamificado. O backend é constru�
 
 | Camada | Tecnologia |
 |---|---|
-| Desktop shell | Electron (orquestra frontend + processo backend nativo) |
-| Frontend | React + Vite + Tailwind CSS + Monaco Editor |
-| Backend local | Java 21 + Quarkus + GraalVM (executável nativo, sem JVM) |
+| Desktop shell | Electron 36 (orquestra frontend + processo backend nativo) |
+| Frontend | React 19 + Vite 8 + TypeScript + Tailwind CSS + Monaco Editor |
+| Backend local | Java 21 + Quarkus 3.36 + GraalVM (executável nativo, sem JVM) |
 | Banco remoto | PostgreSQL (Neon — plano gratuito) |
 | Banco local | SQLite (na máquina do usuário) |
-| Sandbox de código | Judge0 (API externa) |
+| Migrações | Flyway (schemas separados para PostgreSQL e SQLite) |
+| Sandbox de código | Judge0 (API externa) + Python local (fallback) |
 | Assistente IA | Groq API (LLaMA) via LangChain4j |
+| Auto-update | electron-updater via GitHub Releases |
 
 ---
 
@@ -29,7 +31,8 @@ StudyQuest.exe
 │
 ├── Electron (processo principal)
 │   ├── Inicia o binário nativo do Quarkus via child_process
-│   └── Serve o frontend React via protocolo app://
+│   ├── Serve o frontend React via protocolo app://
+│   └── Gerencia auto-updates via electron-updater (GitHub Releases)
 │
 ├── studyquest-runner (binário nativo — localhost:8080)
 │   ├── Inicialização em milissegundos (sem JVM)
@@ -39,6 +42,9 @@ StudyQuest.exe
 └── Frontend React (app://index.html)
     └── Consome http://localhost:8080/api/*
 ```
+
+**Fallback JRE:**
+Se o binário nativo não estiver presente (e.g., build de desenvolvimento), o Electron detecta automaticamente e usa `jre/bin/java + quarkus-run.jar` do diretório `electron/jre-cache/` — mesma experiência para o usuário.
 
 **Fluxo de inicialização:**
 1. Usuário abre o `StudyQuest.exe`
@@ -50,6 +56,18 @@ StudyQuest.exe
 
 **Protocolo `app://`:**
 O Electron registra um protocolo customizado que serve os arquivos estáticos do React com fallback para `index.html` em qualquer rota — necessário para que o `BrowserRouter` do React funcione sem um servidor HTTP.
+
+---
+
+## Perfis de Configuração
+
+O `application.properties` usa três perfis mutuamente exclusivos:
+
+| Perfil | Datasource principal | Uso |
+|---|---|---|
+| `dev` | SQLite | Desenvolvimento local com JVM, sem dependências externas obrigatórias |
+| `desktop` | SQLite | Produção desktop — sem internet obrigatória, logs em `%APPDATA%\studyquest\` |
+| `neon` | PostgreSQL (Neon) | Deploy em servidor, Flyway habilitado, Judge0 e Groq obrigatórios |
 
 ---
 
@@ -139,9 +157,11 @@ com.studyquest
     │   └── RecursoNaoEncontradoException.java
     ├── response/
     │   └── ApiResponse.java          (envelope padrão de resposta)
+    ├── ratelimit/
+    │   └── RateLimitFilter.java      (proteção por IP em endpoints sensíveis)
     └── sync/
         ├── SyncService.java          (enfileira eventos offline)
-        └── SyncJob.java              (job periódico de sincronização)
+        └── SyncJob.java              (job periódico via Quarkus Scheduler)
 ```
 
 ---
@@ -181,7 +201,7 @@ Dados de identidade, currículo e ranking centralizados.
 
 ### Estratégia de Sincronização
 
-O `SyncJob` roda periodicamente. Consome a `sync_queue` do SQLite — eventos como `NODE_COMPLETED`, `XP_GAINED`, `BADGE_UNLOCKED`. Quando há conexão, processa em lote e atualiza o PostgreSQL remoto.
+O `SyncJob` (via Quarkus `@Scheduled`) roda periodicamente. Consome a `sync_queue` do SQLite — eventos como `NODE_COMPLETED`, `XP_GAINED`, `BADGE_UNLOCKED`. Quando há conexão, processa em lote e atualiza o PostgreSQL remoto.
 
 ---
 
@@ -196,7 +216,7 @@ POST /refresh               body: { refreshToken } → renova o access token
 POST /logout                body: { refreshToken } → invalida o refresh token
 ```
 
-> Verificação de e-mail desabilitada temporariamente — endpoints `/verify` e `/verify/resend` removidos. Registro concede acesso imediato com `emailVerified=true`.
+> Verificação de e-mail desabilitada por ora — registro concede acesso imediato com `emailVerified=true`.
 
 ### Usuários — `/api/users`
 
@@ -231,7 +251,7 @@ POST /{id}/submeter         envia código → Judge0/Python local → salva → 
 GET  /{id}/submissoes       histórico de tentativas
 ```
 
-### Exercícios (feedback) — `/api/exercicios`
+### Exercícios (feedback inline) — `/api/exercicios`
 
 ```
 POST /validar               valida código contra casos de teste do request (feedback imediato)
@@ -266,6 +286,13 @@ GET  /ranking/semanal       top 10 da semana + posição do usuário
 
 ```
 POST /chat                  body: { mensagem, contexto: { trilhaId, noId } }
+```
+
+### Health — `/q/health`
+
+```
+GET  /live                  liveness probe (startup check)
+GET  /ready                 readiness probe
 ```
 
 ---
@@ -336,10 +363,11 @@ O `MissaoService` orquestra a execução de código:
 
 1. Recebe código e linguagem do usuário
 2. Busca os casos de teste da missão
-3. Monta o payload e chama a API do Judge0 via `@RegisterRestClient`
-4. Compara output com o esperado
-5. Persiste a `Submissao` com o resultado
-6. Se aprovado na primeira tentativa, chama `GamificacaoService` para conceder XP
+3. Tenta a execução via `Judge0Client` (`@RegisterRestClient`)
+4. Se Judge0 não estiver configurado (perfil `desktop`), cai para execução via Python local
+5. Compara output com o esperado
+6. Persiste a `Submissao` com o resultado
+7. Se aprovado, chama `GamificacaoService` para conceder XP
 
 ---
 
@@ -356,12 +384,19 @@ O assistente é stateless — cada mensagem carrega o contexto necessário.
 
 ---
 
+## Mapa Overworld
+
+O mapa é gerado proceduralmente no frontend com ruído de Perlin (`noise.ts`) para criar biomas variados. O `mapEngine.ts` e `caveEngine.tsx` gerenciam o rendering do mapa RPG pixel art, posicionamento dos nós da skill tree e transições de bioma. Os nós são sobrepostos ao mapa com status visual derivado do `UserNo` retornado pela API.
+
+---
+
 ## Segurança
 
-- JWT com access token (15min) + refresh token (7 dias), assinado com RSA
+- JWT com access token (15 min) + refresh token (7 dias), assinado com RSA
 - **Chaves separadas por perfil**: `desktop` usa `publicKey.pem`/`privateKey.pem` (embutido no app); `neon` usa `serverPublicKey.pem`/`serverPrivateKey.pem` (injetado via secret) — tokens do desktop são rejeitados pelo servidor e vice-versa
 - `privateKey.pem` e `serverPrivateKey.pem` fora do controle de versão (`.gitignore`)
 - CORS: `*` apenas em dev/desktop; perfil neon exige `CORS_ORIGINS` explícito (sem wildcard)
+- Rate limiting via `RateLimitFilter` nos endpoints de auth (proteção por IP)
 - X-Forwarded-For: só confiado se o IP remoto estiver na lista `app.trusted-proxies`
 - Senhas armazenadas com BCrypt
 - Todos os endpoints (exceto `/api/auth/**`) exigem Bearer token válido
@@ -379,8 +414,10 @@ O assistente é stateless — cada mensagem carrega o contexto necessário.
 | SQLite local para Leitner e progresso | Revisões acontecem offline, várias vezes ao dia — elimina latência do Neon |
 | Pacote `offline/` separado | Entidades do SQLite ficam isoladas das entidades do PostgreSQL, evitando conflitos de PersistenceUnit |
 | Layered Architecture por domínio | Velocidade de desenvolvimento, fácil de navegar, sem over-engineering |
-| Judge0 externo no MVP | Execução segura de código sem gerenciar containers |
+| Judge0 externo + Python local como fallback | Judge0 para execução segura na nuvem; Python embutido garante funcionamento no perfil `desktop` sem internet |
 | LangChain4j + Groq | Gratuito, rápido, integração madura com Quarkus |
 | Sync queue no SQLite | Garante que nenhum evento se perde mesmo sem conexão |
-| JRE embutido como fallback | Se o binário GraalVM nativo não estiver disponível, o Electron detecta e usa `jre/bin/java + quarkus-run.jar` automaticamente — mesmo experiência para o usuário |
+| JRE embutido como fallback | Se o binário GraalVM nativo não estiver disponível, o Electron detecta e usa `jre/bin/java + quarkus-run.jar` automaticamente — mesma experiência para o usuário |
 | `NeonRankingService` fire-and-forget | Upsert ao Neon via `Vertx.executeBlocking` fora da transação local — falha de rede não bloqueia nem reverte XP do usuário |
+| Ruído de Perlin para biomas | Geração procedural garante mapas únicos por seed sem assets estáticos volumosos |
+| electron-updater via GitHub Releases | Auto-update silencioso — usuário recebe novas versões sem reinstalar manualmente |
