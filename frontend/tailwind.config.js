@@ -95,7 +95,8 @@ export default {
         // Fallbacks
         "mono": ["JetBrains Mono", "monospace"],
         "sans": ["Hanken Grotesk", "sans-serif"],
-        "cinzel": ["Space Grotesk", "sans-serif"]
+        "cinzel": ["Space Grotesk", "sans-serif"],
+        "pixel": ["'Press Start 2P'", "cursive"]
       },
       fontSize: {
         "label-caps": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.1em", "fontWeight": "700" }],

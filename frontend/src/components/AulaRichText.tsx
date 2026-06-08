@@ -101,7 +101,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (block.kind === 'saida') {
           return (
             <CalloutBox key={`saida-${bi}`} className="bg-surface-2 border-l-2 border-l-sky-400/60 border border-border font-mono text-sm">
-              <span className="font-cinzel text-[11px] uppercase tracking-[0.15em] text-sky-300/90 block mb-1.5 not-italic font-normal">{block.label}</span>
+              <span className="font-pixel text-[10px] uppercase tracking-[0.15em] text-sky-300/90 block mb-1.5 not-italic font-normal">{block.label}</span>
               {block.body.length > 0 && (
                 <div className="text-green/90 leading-relaxed">
                   {block.body.map((ln, li) => (
@@ -135,7 +135,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (trimmed.startsWith('Contexto:')) {
           return (
             <CalloutBox key={`ctx-${bi}`} className="bg-surface-2 border-l-2 border-l-indigo-400/60 border border-border">
-              <span className="font-cinzel text-[11px] uppercase tracking-[0.15em] text-indigo-300/90 block mb-1.5">Contexto</span>
+              <span className="font-pixel text-[10px] uppercase tracking-[0.15em] text-indigo-300/90 block mb-1.5 mt-1">Contexto</span>
               <span className="text-text-dim">{parseCallout(trimmed, 'Contexto:')}</span>
             </CalloutBox>
           );
@@ -144,7 +144,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (trimmed.startsWith('Objetivo:')) {
           return (
             <CalloutBox key={`obj-${bi}`} className="bg-surface-2 border-l-2 border-l-green/60 border border-border">
-              <span className="font-cinzel text-[11px] uppercase tracking-[0.15em] text-green/90 block mb-1.5">Objetivo</span>
+              <span className="font-pixel text-[10px] uppercase tracking-[0.15em] text-green/90 block mb-1.5 mt-1">Objetivo</span>
               <span className="text-text-dim">{parseCallout(trimmed, 'Objetivo:')}</span>
             </CalloutBox>
           );
@@ -161,7 +161,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (trimmed.startsWith('Prática:')) {
           return (
             <CalloutBox key={`prat-${bi}`} className="bg-gold/5 border border-gold/20">
-              <span className="font-cinzel text-[11px] uppercase tracking-[0.15em] text-gold block mb-1.5">Prática</span>
+              <span className="font-pixel text-[10px] uppercase tracking-[0.15em] text-gold block mb-1.5 mt-1">Prática</span>
               <span className="text-text font-medium">{parseCallout(trimmed, 'Prática:')}</span>
             </CalloutBox>
           );
@@ -170,7 +170,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (trimmed.startsWith('Dica:')) {
           return (
             <CalloutBox key={`dica-${bi}`} className="bg-surface-2 border border-border/80">
-              <span className="text-[11px] uppercase tracking-widest text-gold/80 font-semibold block mb-1">Dica</span>
+              <span className="font-pixel text-[10px] uppercase tracking-[0.15em] text-gold/80 block mb-1 mt-1">Dica</span>
               <span className="text-text-dim">{parseCallout(trimmed, 'Dica:')}</span>
             </CalloutBox>
           );
@@ -179,7 +179,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (trimmed.startsWith('Atenção:')) {
           return (
             <CalloutBox key={`atencao-${bi}`} className="bg-amber-500/5 border-l-2 border-l-amber-500/60 border border-border">
-              <span className="text-[11px] uppercase tracking-widest text-amber-400/90 font-semibold block mb-1">Atenção</span>
+              <span className="font-pixel text-[10px] uppercase tracking-[0.15em] text-amber-400/90 block mb-1 mt-1">Atenção</span>
               <span className="text-text-dim">{parseCallout(trimmed, 'Atenção:')}</span>
             </CalloutBox>
           );
@@ -188,7 +188,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (trimmed.startsWith('Entrada:')) {
           return (
             <p key={`entrada-${bi}`} className="text-sm text-text-dim">
-              <span className="font-semibold text-text-mute uppercase text-[11px] tracking-wider mr-2">Entrada</span>
+              <span className="font-pixel text-text-mute uppercase text-[10px] tracking-wider mr-2">Entrada</span>
               {parseCallout(trimmed, 'Entrada:')}
             </p>
           );

@@ -124,13 +124,13 @@ export function AulaExercicio({ bloco, codigoSalvo, aprovado, onAprovado, onCodi
 
         <div className="flex items-center gap-3">
 
-          <div className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 font-cinzel text-xs font-bold ${bloco.boss ? 'bg-red/20 text-red border border-red/30' : bloco.miniboss ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-gold/10 text-gold border border-gold/25'}`}>
+          <div className={`w-9 h-9 rounded-md flex items-center justify-center shrink-0 font-pixel text-[10px] pt-1 ${bloco.boss ? 'bg-red/20 text-red border border-red/30' : bloco.miniboss ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-gold/10 text-gold border border-gold/25'}`}>
             {bloco.boss ? 'IV' : bloco.miniboss ? 'III' : bloco.nivel}
           </div>
 
           <div>
 
-            <div className={`text-[10px] uppercase tracking-widest font-semibold ${bloco.boss ? 'text-red' : bloco.miniboss ? 'text-orange-400' : 'text-gold'}`}>
+            <div className={`font-pixel text-[10px] uppercase tracking-[0.1em] mt-1 mb-1 ${bloco.boss ? 'text-red' : bloco.miniboss ? 'text-orange-400' : 'text-gold'}`}>
 
               {bloco.boss ? 'Boss final' : bloco.miniboss ? 'Miniboss' : `Nível ${bloco.nivel} · ${NIVEL_LABEL[bloco.nivel] || 'Exercício'}`}
 
@@ -150,7 +150,7 @@ export function AulaExercicio({ bloco, codigoSalvo, aprovado, onAprovado, onCodi
 
         {aprovado && (
 
-          <span className="flex items-center gap-1 text-green text-xs font-bold uppercase">
+          <span className="flex items-center gap-1 text-green font-pixel text-[10px] uppercase mt-1">
 
             <IconCheck size={14} /> Aprovado
 

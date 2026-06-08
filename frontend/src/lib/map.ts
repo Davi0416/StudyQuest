@@ -1,4 +1,4 @@
-// StudyQuest — "O Caminho da Serpente" cave map renderer.
+﻿// StudyQuest — "O Caminho da Serpente" cave map renderer.
 import { fbm, ridged, valueNoise, mulberry32 } from './noise';
 
 export const W = 512, H = 288;            // logical pixel-art resolution (16:9)
@@ -623,3 +623,4 @@ export function makeRenderer(displayCanvas) {
     nodeAnchors: nodePositions, nodes: NODES, boss: BOSS, W, H,
   };
 }
+

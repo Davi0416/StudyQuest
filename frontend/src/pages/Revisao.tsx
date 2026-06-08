@@ -4,6 +4,7 @@ import { Topbar } from '../components/Topbar';
 import api, { unwrap } from '../lib/api';
 import type {  LeitnerCardRevisao, RevisaoHoje  } from "../types";
 import { Button } from '../components/ui/Button';
+import { IconCpu } from '@tabler/icons-react';
 
 export function Revisao() {
   const navigate = useNavigate();
@@ -60,26 +61,34 @@ export function Revisao() {
       <div className="min-h-screen bg-bg flex flex-col">
         <Topbar />
         <div className="flex-1 grid place-items-center p-6">
-          <div className="max-w-md w-full bg-surface border border-border p-8 rounded-xl text-center">
-            <h2 className="font-cinzel font-bold text-2xl text-gold mb-2">Revisão Concluída!</h2>
-            <p className="text-text-dim mb-6">Você revisou todos os cards de hoje.</p>
+          <div className="max-w-md w-full bg-surface-container border border-outline-variant p-8 pixel-shadow text-center">
+            <IconCpu size={48} stroke={1.5} className="text-primary mx-auto mb-4" />
+            <h2 className="font-pixel font-bold text-xl md:text-2xl text-primary mb-6">SESSION_COMPLETE</h2>
+            
+            <p className="font-code font-bold text-base text-on-surface mb-1">Memory Matrix Updated</p>
+            <p className="font-code text-xs text-on-surface-variant mb-8">All scheduled items processed successfully.</p>
             
             <div className="grid grid-cols-3 gap-4 mb-8">
-              <div className="bg-surface-2 p-3 rounded-lg border border-border">
-                <div className="text-green font-bold text-xl">{stats.facil}</div>
-                <div className="text-xs text-text-mute">Fácil</div>
+              <div className="bg-surface-container-high p-3 border border-outline-variant">
+                <div className="text-tertiary-fixed font-code font-bold text-xl">{stats.facil}</div>
+                <div className="text-[10px] text-on-surface-variant uppercase font-code tracking-widest mt-1">EASY</div>
               </div>
-              <div className="bg-surface-2 p-3 rounded-lg border border-border">
-                <div className="text-gold font-bold text-xl">{stats.ok}</div>
-                <div className="text-xs text-text-mute">Ok</div>
+              <div className="bg-surface-container-high p-3 border border-outline-variant">
+                <div className="text-primary-fixed font-code font-bold text-xl">{stats.ok}</div>
+                <div className="text-[10px] text-on-surface-variant uppercase font-code tracking-widest mt-1">GOOD</div>
               </div>
-              <div className="bg-surface-2 p-3 rounded-lg border border-border">
-                <div className="text-red font-bold text-xl">{stats.dificil}</div>
-                <div className="text-xs text-text-mute">Difícil</div>
+              <div className="bg-surface-container-high p-3 border border-outline-variant">
+                <div className="text-error font-code font-bold text-xl">{stats.dificil}</div>
+                <div className="text-[10px] text-on-surface-variant uppercase font-code tracking-widest mt-1">HARD</div>
               </div>
             </div>
 
-            <Button onClick={() => navigate('/')}>Voltar ao Hub</Button>
+            <button 
+              onClick={() => navigate('/')}
+              className="w-full bg-secondary text-on-secondary border-[2px] border-black font-code font-bold text-sm py-3 pixel-shadow pixel-shadow-hover pixel-shadow-active transition-all uppercase"
+            >
+              RETURN_TO_HUB
+            </button>
           </div>
         </div>
       </div>
