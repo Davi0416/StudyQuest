@@ -84,11 +84,22 @@ public class GamificacaoService {
     public RankingResponse rankingSemanal(UUID userId) {
         LocalDate semana = LocalDate.now().with(DayOfWeek.MONDAY);
         try {
-            List<RankingEntry> top10 = rankingRepository.top10Semana(semana);
+            List<RankingEntry> top10;
+            try {
+                top10 = neonRankingService.getTop10Semana(semana);
+                if (top10.isEmpty()) {
+                    top10 = rankingRepository.top10Semana(semana);
+                }
+            } catch (Exception e) {
+                LOG.warn("Falha ao buscar ranking global, caindo para ranking local", e);
+                top10 = rankingRepository.top10Semana(semana);
+            }
 
-            List<RankingResponse.RankingItem> items = IntStream.range(0, top10.size())
+            final List<RankingEntry> finalTop10 = top10;
+
+            List<RankingResponse.RankingItem> items = IntStream.range(0, finalTop10.size())
                     .mapToObj(i -> {
-                        RankingEntry e = top10.get(i);
+                        RankingEntry e = finalTop10.get(i);
                         return new RankingResponse.RankingItem(
                                 i + 1, e.getUserName(), e.getUserAvatarUrl(),
                                 e.getXpSemana(), e.getUserId().equals(userId));

@@ -75,4 +75,42 @@ public class NeonRankingService {
             LOG.debugf(ex, "Falha ao sincronizar ranking no Neon para userId=%s (offline ou Neon indisponível)", userId);
         }
     }
+
+    /**
+     * Busca o Top 10 global direto do Neon DB.
+     */
+    public java.util.List<RankingEntry> getTop10Semana(LocalDate semana) {
+        if (neonUrl.isBlank() || "disabled".equalsIgnoreCase(neonUrl)) {
+            return java.util.Collections.emptyList();
+        }
+
+        java.util.List<RankingEntry> entries = new java.util.ArrayList<>();
+        String sql = """
+                SELECT userid, username, useravatarurl, xpsemana, semana
+                FROM ranking_semanal
+                WHERE semana = ?
+                ORDER BY xpsemana DESC, xptotal DESC
+                LIMIT 10
+                """;
+
+        try (Connection conn = DriverManager.getConnection(neonUrl, neonUser, neonPassword);
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setObject(1, semana);
+            ps.setQueryTimeout(5);
+            try (java.sql.ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    RankingEntry entry = new RankingEntry();
+                    entry.setUserId(UUID.fromString(rs.getString("userid")));
+                    entry.setUserName(rs.getString("username"));
+                    entry.setUserAvatarUrl(rs.getString("useravatarurl"));
+                    entry.setXpSemana(rs.getInt("xpsemana"));
+                    entries.add(entry);
+                }
+            }
+        } catch (Exception ex) {
+            LOG.warnf("Falha ao buscar ranking global no Neon: %s", ex.getMessage());
+            throw new RuntimeException("Erro ao buscar ranking global no Neon", ex);
+        }
+        return entries;
+    }
 }
