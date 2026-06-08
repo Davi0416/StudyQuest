@@ -101,6 +101,18 @@ function buildBackendEnv() {
     env.STUDYQUEST_PYTHON = python
   }
 
+  // Carrega credenciais do banco restrito geradas no build
+  const dotEnvPath = path.join(backendDir, '.env');
+  if (fs.existsSync(dotEnvPath)) {
+    const content = fs.readFileSync(dotEnvPath, 'utf8').replace(/^\uFEFF/, '');
+    content.split(/\r?\n/).forEach(line => {
+      const match = line.match(/^([^=]+)=(.*)$/);
+      if (match) {
+        env[match[1].trim()] = match[2].trim();
+      }
+    });
+  }
+
   return env
 }
 
