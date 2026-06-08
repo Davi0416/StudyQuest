@@ -10,9 +10,11 @@ CREATE ROLE desktop_client WITH LOGIN PASSWORD 'senha_restrita_123';
 -- 2. Dá permissão de uso do schema padrão
 GRANT USAGE ON SCHEMA public TO desktop_client;
 
--- 3. Concede acesso à tabela de ranking. 
--- Note que NÃO concedemos DELETE, apenas SELECT, INSERT e UPDATE.
+-- 3. Concede acesso à tabela de ranking e acesso restrito aos nomes dos usuários.
+-- Note que NÃO concedemos DELETE, apenas SELECT, INSERT e UPDATE no ranking.
 GRANT SELECT, INSERT, UPDATE ON ranking_semanal TO desktop_client;
+-- O ranking faz um JOIN com a tabela de usuários para puxar o nome. Precisamos liberar apenas as colunas id e nome (nunca email e senha!)
+GRANT SELECT (id, nome) ON usuarios TO desktop_client;
 
 -- 4. Habilita o sistema de RLS na tabela
 ALTER TABLE ranking_semanal ENABLE ROW LEVEL SECURITY;
