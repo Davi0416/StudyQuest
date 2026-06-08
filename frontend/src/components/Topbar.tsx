@@ -12,7 +12,7 @@ export function Topbar() {
       <div className="flex justify-between items-center w-full px-md h-xl max-w-container-max mx-auto">
         <Link to="/" className="font-h2 text-h2 text-primary uppercase tracking-widest flex items-center gap-2 active:translate-x-xs active:translate-y-xs transition-transform" title="Início">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>swords</span>
-          <span>STUDY_QUEST</span>
+          <span>STUDYQUEST</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-md font-label-caps text-label-caps h-full">
@@ -45,7 +45,7 @@ export function Topbar() {
           <button className="p-1 hover:bg-primary-container hover:text-on-primary-container transition-all active:translate-x-xs active:translate-y-xs duration-75 border-border-width border-transparent hover:border-outline">
             <span className="material-symbols-outlined">settings</span>
           </button>
-          
+
           <Link to="/perfil" className="w-10 h-10 border-border-width border-outline bg-surface-container-high ml-2 pixel-shadow active-press relative group overflow-hidden block">
             {user.avatarUrl ? (
                 <img
