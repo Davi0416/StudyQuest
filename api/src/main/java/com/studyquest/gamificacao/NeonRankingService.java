@@ -61,16 +61,29 @@ public class NeonRankingService {
                               username      = EXCLUDED.username,
                               useravatarurl = EXCLUDED.useravatarurl
                 """;
-        try (Connection conn = DriverManager.getConnection(neonUrl, neonUser, neonPassword);
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setObject(1, userId);
-            ps.setString(2, userName);
-            ps.setString(3, avatarUrl);
-            ps.setInt(4, xpSemana);
-            ps.setObject(5, semana);
-            ps.setInt(6, xpTotal);
-            ps.setQueryTimeout(5);
-            ps.executeUpdate();
+        try (Connection conn = DriverManager.getConnection(neonUrl, neonUser, neonPassword)) {
+            // Desativa autocommit para garantir que o SET LOCAL dure toda a transação (compatível com Neon Pooler)
+            conn.setAutoCommit(false);
+
+            // Define o contexto do usuário para a política RLS do banco de dados
+            try (PreparedStatement psSet = conn.prepareStatement("SET LOCAL studyquest.current_user_id = ?")) {
+                psSet.setString(1, userId.toString());
+                psSet.execute();
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setObject(1, userId);
+                ps.setString(2, userName);
+                ps.setString(3, avatarUrl);
+                ps.setInt(4, xpSemana);
+                ps.setObject(5, semana);
+                ps.setInt(6, xpTotal);
+                ps.setQueryTimeout(5);
+                ps.executeUpdate();
+            }
+
+            // Confirma a transação
+            conn.commit();
         } catch (Exception ex) {
             LOG.debugf(ex, "Falha ao sincronizar ranking no Neon para userId=%s (offline ou Neon indisponível)", userId);
         }
