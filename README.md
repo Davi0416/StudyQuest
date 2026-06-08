@@ -1,5 +1,11 @@
 # StudyQuest
 
+<p align="center">
+  <a href="https://github.com/Davi0416/StudyQuest/releases/latest">
+    <img src="https://img.shields.io/badge/⬇️%20Download%20para%20Windows-v1.1.2-FFB800?style=for-the-badge" alt="Download StudyQuest">
+  </a>
+</p>
+
 Aplicativo desktop de estudos gamificado. O currículo é apresentado como um mapa RPG interativo onde cada tecnologia é um nó a ser desbloqueado. Missões combinam vídeo-aula, desafio de código e revisão por flashcards com repetição espaçada.
 
 O backend roda como um **executável nativo embutido** construído com **Quarkus + GraalVM**, gerenciado de forma invisível pelo Electron — sem exigir instalação de JVM no computador do usuário.
