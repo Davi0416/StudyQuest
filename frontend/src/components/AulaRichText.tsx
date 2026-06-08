@@ -9,6 +9,26 @@ function looksLikeCode(line: string): boolean {
   return false;
 }
 
+function parseInlineFormatting(text: string) {
+  const parts = text.split(/(\[.*?\]\(.*?\)|\*\*.*?\*\*|\*.*?\*|`.*?`)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="text-white font-bold">{part.slice(2, -2)}</strong>;
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={i} className="italic text-text-dim">{part.slice(1, -1)}</em>;
+    }
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return <code key={i} className="bg-surface-container-highest px-1.5 py-0.5 rounded text-primary font-mono text-[0.85em] border border-outline/30">{part.slice(1, -1)}</code>;
+    }
+    const linkMatch = part.match(/^\[(.*?)\]\((.*?)\)$/);
+    if (linkMatch) {
+      return <a key={i} href={linkMatch[2]} target="_blank" rel="noreferrer" className="text-primary hover:underline">{linkMatch[1]}</a>;
+    }
+    return part;
+  });
+}
+
 function CalloutBox({ children, className }: { children: React.ReactNode; className: string }) {
   return (
     <div className={`px-4 py-3 rounded-md text-sm text-text-dim leading-relaxed ${className}`}>
@@ -21,7 +41,7 @@ function parseCallout(line: string, prefix: string) {
   const content = line.startsWith(prefix) ? line.slice(prefix.length).trim() : line;
   return content.split('\n').map((ln, i, arr) => (
     <React.Fragment key={i}>
-      {ln}
+      {parseInlineFormatting(ln)}
       {i < arr.length - 1 && <br />}
     </React.Fragment>
   ));
@@ -29,7 +49,8 @@ function parseCallout(line: string, prefix: string) {
 
 type Block =
   | { kind: 'line'; index: number; text: string }
-  | { kind: 'saida'; index: number; label: string; header: string; body: string[] };
+  | { kind: 'saida'; index: number; label: string; header: string; body: string[] }
+  | { kind: 'code'; index: number; language: string; body: string[] };
 
 function groupLines(lines: string[]): Block[] {
   const isSaidaHeader = (t: string) => t.startsWith('Saída:') || t.startsWith('Saída esperada:');
@@ -37,20 +58,32 @@ function groupLines(lines: string[]): Block[] {
     t.startsWith('## ') || t.startsWith('Contexto:') || t.startsWith('Objetivo:') ||
     t.startsWith('Mestre:') || t.startsWith('Prática:') || t.startsWith('Dica:') ||
     t.startsWith('Atenção:') || t.startsWith('Entrada:') || t.startsWith('▶') ||
-    isSaidaHeader(t);
+    isSaidaHeader(t) || t.startsWith('```');
 
   const blocks: Block[] = [];
   let i = 0;
   while (i < lines.length) {
     const trimmed = lines[i].trim();
-    if (isSaidaHeader(trimmed)) {
+    if (trimmed.startsWith('```')) {
+      const language = trimmed.slice(3).trim();
+      const body: string[] = [];
+      i++;
+      while (i < lines.length) {
+        if (lines[i].trim().startsWith('```')) {
+          i++;
+          break;
+        }
+        body.push(lines[i]);
+        i++;
+      }
+      blocks.push({ kind: 'code', index: i, language, body });
+    } else if (isSaidaHeader(trimmed)) {
       const isExpected = trimmed.startsWith('Saída esperada:');
       const prefix = isExpected ? 'Saída esperada:' : 'Saída:';
       const label = isExpected ? 'Saída esperada' : 'Saída';
       const inlineValue = trimmed.slice(prefix.length).trim();
       const body: string[] = inlineValue ? [inlineValue] : [];
       i++;
-      // Collect subsequent non-header, non-blank lines into the same block
       while (i < lines.length) {
         const next = lines[i].trim();
         if (!next) { i++; break; }
@@ -98,6 +131,21 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
   return (
     <div className={bodyClass}>
       {blocks.map((block, bi) => {
+        if (block.kind === 'code') {
+          return (
+            <div key={`code-${bi}`} className="rounded-md bg-[#0d1117] border border-border/80 overflow-hidden my-3">
+              {block.language && (
+                <div className="bg-surface-2 px-4 py-1.5 border-b border-border/80 text-[10px] font-mono text-text-mute uppercase tracking-widest">
+                  {block.language}
+                </div>
+              )}
+              <pre className="px-4 py-3 text-[13px] font-mono text-green/90 whitespace-pre-wrap break-words leading-relaxed overflow-x-auto">
+                {block.body.join('\n')}
+              </pre>
+            </div>
+          );
+        }
+
         if (block.kind === 'saida') {
           return (
             <CalloutBox key={`saida-${bi}`} className="bg-surface-2 border-l-2 border-l-sky-400/60 border border-border font-mono text-sm">
@@ -105,7 +153,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
               {block.body.length > 0 && (
                 <div className="text-green/90 leading-relaxed">
                   {block.body.map((ln, li) => (
-                    <div key={li}>{ln}</div>
+                    <div key={li}>{parseInlineFormatting(ln)}</div>
                   ))}
                 </div>
               )}
@@ -120,14 +168,14 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (compact && i === firstContentIdx && !isSpecial(trimmed)) {
           return (
             <p key={`p-${bi}`} className="font-cinzel font-semibold text-text text-base tracking-wide">
-              {trimmed}
+              {parseInlineFormatting(trimmed)}
             </p>
           );
         }
         if (trimmed.startsWith('## ')) {
           return (
-            <h3 key={`h-${bi}`} className="font-cinzel font-bold text-lg text-gold leading-snug tracking-wide border-b border-gold/20 pb-2 mb-1">
-              {trimmed.slice(3)}
+            <h3 key={`h-${bi}`} className="font-cinzel font-bold text-lg text-gold leading-snug tracking-wide border-b border-gold/20 pb-2 mb-1 mt-4">
+              {parseInlineFormatting(trimmed.slice(3))}
             </h3>
           );
         }
@@ -143,7 +191,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
 
         if (trimmed.startsWith('Objetivo:')) {
           return (
-            <CalloutBox key={`obj-${bi}`} className="bg-surface-2 border-l-2 border-l-green/60 border border-border">
+            <CalloutBox key={`obj-${bi}`} className="bg-surface-2 border-l-2 border-l-green/60 border border-border mt-6">
               <span className="font-pixel text-[10px] uppercase tracking-[0.15em] text-green/90 block mb-1.5 mt-1">Objetivo</span>
               <span className="text-text-dim">{parseCallout(trimmed, 'Objetivo:')}</span>
             </CalloutBox>
@@ -197,7 +245,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (trimmed.startsWith('▶')) {
           return (
             <p key={`arrow-${bi}`} className="font-cinzel text-sm font-semibold text-text mt-4 first:mt-0 border-l-2 border-gold/70 pl-3 tracking-wide">
-              {trimmed.slice(1).trim()}
+              {parseInlineFormatting(trimmed.slice(1).trim())}
             </p>
           );
         }
@@ -205,14 +253,14 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
         if (trimmed.startsWith('•')) {
           return (
             <li key={`bullet-${bi}`} className="ml-1 pl-3 text-text-dim leading-relaxed list-none border-l border-border/60">
-              {trimmed.slice(1).trim()}
+              {parseInlineFormatting(trimmed.slice(1).trim())}
             </li>
           );
         }
 
         if (looksLikeCode(trimmed)) {
           return (
-            <pre key={`code-${bi}`} className="px-4 py-3 rounded-md bg-[#0d1117] border border-border/80 text-[13px] font-mono text-green/90 whitespace-pre-wrap break-words leading-relaxed">
+            <pre key={`code-guess-${bi}`} className="px-4 py-3 rounded-md bg-[#0d1117] border border-border/80 text-[13px] font-mono text-green/90 whitespace-pre-wrap break-words leading-relaxed overflow-x-auto my-2">
               {trimmed}
             </pre>
           );
@@ -220,10 +268,11 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
 
         return (
           <p key={`text-${bi}`} className="text-text-dim leading-[1.75] text-sm">
-            {trimmed}
+            {parseInlineFormatting(trimmed)}
           </p>
         );
       })}
     </div>
   );
 }
+
