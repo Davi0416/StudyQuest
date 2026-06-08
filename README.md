@@ -8,31 +8,39 @@ O backend roda como um **executável nativo embutido** construído com **Quarkus
 
 ## Funcionalidades
 
-- **Mapa Overworld** — currículo em estilo RPG pixel art com biomas, nós e skill tree
+- **Mapa Overworld** — currículo em estilo RPG pixel art com biomas gerados por ruído de Perlin, nós e skill tree
 - **Missões** — vídeo-aula embutida → desafio de código na Mini IDE → flashcards
-- **Mini IDE** — editor Monaco com execução segura via Judge0
+- **Mini IDE** — editor Monaco com execução segura via Judge0 (ou Python local como fallback)
 - **Sistema Leitner** — revisão diária offline com algoritmo de repetição espaçada (5 caixas)
 - **Assistente IA** — chat contextual com LLaMA via Groq para tirar dúvidas nas missões
 - **Gamificação** — XP, níveis, streak, badges e ranking semanal
 - **Offline first** — estude sem internet; dados sincronizam com a nuvem automaticamente quando houver conexão
+- **Auto-update** — novas versões instaladas em background via electron-updater
 
 ---
 
 ## Stack
 
 ### Backend (embutido)
-- Java 21 + Quarkus
+- Java 21 + Quarkus 3.36
 - GraalVM (compilação para binário nativo)
 - Hibernate ORM com Panache
-- SmallRye JWT + OAuth2 (Google)
+- SmallRye JWT com RSA (access + refresh tokens)
 - LangChain4j (integração com Groq)
 - PostgreSQL remoto via Neon
 - SQLite local na máquina do usuário
+- Flyway (migrações separadas para PostgreSQL e SQLite)
 
 ### Frontend
-- React + Vite + Tailwind CSS
-- Electron (shell desktop + orquestração do backend nativo)
+- React 19 + Vite 8 + TypeScript
+- Tailwind CSS
 - Monaco Editor (Mini IDE)
+- React Router DOM 7
+
+### Desktop
+- Electron 36 (shell + orquestração do backend nativo)
+- Electron Builder (instaladores NSIS/DMG/AppImage)
+- JRE embutido como fallback se o binário nativo não estiver disponível
 
 ### Serviços externos
 - [Judge0](https://judge0.com) — execução segura de código
@@ -45,7 +53,7 @@ O backend roda como um **executável nativo embutido** construído com **Quarkus
 
 ```
 studyquest/
-├── backend/                         Quarkus — gera o binário nativo
+├── api/                             Quarkus — gera o binário nativo
 │   ├── src/main/java/com/studyquest/
 │   │   ├── auth/
 │   │   ├── usuarios/
@@ -56,18 +64,31 @@ studyquest/
 │   │   ├── revisao/
 │   │   ├── gamificacao/
 │   │   ├── ia/
+│   │   ├── offline/
 │   │   └── shared/
 │   ├── src/main/resources/
-│   │   └── application.properties
+│   │   ├── application.properties   (perfis: dev / desktop / neon)
+│   │   └── db/migrations/           (flyway: postgres/ e sqlite/)
 │   └── pom.xml
 │
-├── frontend/                        React + Electron
+├── frontend/                        React + Vite
 │   ├── src/
-│   ├── electron/
-│   │   └── main.js                  inicia o binário Quarkus via child_process
+│   │   ├── pages/                   (Hub, Mapa, Aula, Missao, Revisao, Conquistas, Ranking, Perfil, Login)
+│   │   ├── components/
+│   │   ├── lib/                     (api.ts, mapEngine.ts, caveEngine.tsx, noise.ts)
+│   │   ├── context/
+│   │   └── types/
 │   ├── package.json
 │   └── vite.config.ts
 │
+├── electron/                        Shell Electron
+│   ├── main.js                      spawna o binário Quarkus, serve frontend via app://
+│   ├── preload.js
+│   └── package.json                 (Electron Builder — NSIS, DMG, AppImage)
+│
+├── scripts/                         Build e deploy
+├── docs/                            Documentação (frontend.md, screenshots)
+├── build-desktop.ps1                Build completo Windows
 ├── ARCHITECTURE.md
 └── README.md
 ```
@@ -86,7 +107,7 @@ studyquest/
 
 ### Variáveis de Ambiente — Backend
 
-Crie um arquivo `.env` na raiz do `backend/`:
+Crie um arquivo `.env` na raiz do `api/`:
 
 ```env
 # PostgreSQL remoto (Neon)
@@ -97,12 +118,8 @@ QUARKUS_DATASOURCE_PASSWORD=sua_senha
 # SQLite local
 QUARKUS_DATASOURCE_LOCAL_JDBC_URL=jdbc:sqlite:studyquest_local.db
 
-# JWT
-JWT_SECRET=sua_chave_secreta_com_minimo_256_bits
-
-# OAuth Google
-GOOGLE_CLIENT_ID=seu_client_id
-GOOGLE_CLIENT_SECRET=seu_client_secret
+# JWT (RSA — gere com openssl)
+# Chaves em api/src/main/resources/privateKey.pem e publicKey.pem
 
 # Groq
 GROQ_API_KEY=sua_groq_api_key
@@ -118,7 +135,7 @@ Em dev você usa a JVM normalmente — o GraalVM só entra no build de produçã
 
 ```bash
 # Backend (modo dev com hot reload)
-cd backend
+cd api
 mvn compile quarkus:dev
 
 # A API estará em http://localhost:8080
@@ -126,28 +143,42 @@ mvn compile quarkus:dev
 ```
 
 ```bash
-# Frontend
+# Frontend (browser)
 cd frontend
 npm install
-npm run dev           # browser
-npm run electron:dev  # Electron
+npm run dev
+```
+
+```bash
+# Electron (com backend já rodando)
+cd electron
+npm install
+npm start
 ```
 
 ### Build de Produção
 
 ```bash
-# 1. Compilar o backend como binário nativo (exige GraalVM)
-cd backend
-mvn package -Dnative
-# Gera: target/studyquest-runner (Linux/Mac) ou target/studyquest-runner.exe (Windows)
+# 1. Build completo (Windows) via script
+./build-desktop.ps1
 
-# 2. Copiar o binário para a pasta de resources do Electron
-cp target/studyquest-runner ../frontend/resources/backend-bin/
+# Ou manualmente:
 
-# 3. Build do Electron
-cd ../frontend
+# 1a. Compilar o backend como binário nativo (exige GraalVM)
+cd api
+mvn package -Pnative
+# Gera: target/studyquest-runner.exe (Windows) ou target/studyquest-runner (Linux/Mac)
+
+# 1b. Build do frontend
+cd frontend
 npm run build
-npm run electron:build
+
+# 1c. Empacotar com Electron Builder
+cd electron
+npm run dist          # todos os alvos
+npm run dist:win      # apenas Windows (NSIS)
+npm run dist:mac      # apenas macOS (DMG)
+npm run dist:linux    # apenas Linux (AppImage)
 ```
 
 ---
@@ -162,6 +193,8 @@ http://localhost:8080/q/swagger-ui/
 
 Para detalhes completos de arquitetura, modelo de dados, endpoints e estratégia de sincronização offline/online, consulte o [ARCHITECTURE.md](./ARCHITECTURE.md).
 
+Documentação de integração para o frontend em [docs/frontend.md](./docs/frontend.md).
+
 ---
 
 ## Roadmap
@@ -169,19 +202,22 @@ Para detalhes completos de arquitetura, modelo de dados, endpoints e estratégia
 - [x] Definição de arquitetura (Quarkus + GraalVM + Electron embutido)
 - [x] Modelo de dados (SQLite local + PostgreSQL remoto)
 - [x] Documentação de endpoints e contratos da API
-- [ ] Setup inicial Quarkus + estrutura de pacotes
-- [ ] Múltiplos datasources (SQLite + PostgreSQL com Panache)
-- [ ] Autenticação JWT + OAuth2 Google
-- [ ] CRUD de trilhas e nós
-- [ ] Lógica de progressão e desbloqueio de nós
-- [ ] Fila de sincronização offline (sync_queue)
-- [ ] Integração Judge0
-- [ ] Sistema Leitner
-- [ ] Integração Groq via LangChain4j
-- [ ] Gamificação (XP, streak, conquistas, ranking)
-- [ ] Frontend React + Electron
-- [ ] Mapa Overworld pixel art
-- [ ] Mini IDE com Monaco Editor
+- [x] Setup Quarkus + estrutura de pacotes por domínio
+- [x] Múltiplos datasources (SQLite + PostgreSQL com Panache)
+- [x] Autenticação JWT (RSA, access + refresh token)
+- [x] CRUD de trilhas e nós com seed de currículo
+- [x] Lógica de progressão e desbloqueio de nós (pré-requisitos)
+- [x] Fila de sincronização offline (sync_queue)
+- [x] Integração Judge0 + Python local como fallback
+- [x] Sistema Leitner (5 caixas, revisão diária)
+- [x] Integração Groq via LangChain4j
+- [x] Gamificação (XP, streak, conquistas, ranking semanal)
+- [x] Frontend React + Electron
+- [x] Mapa Overworld pixel art (biomas com ruído de Perlin)
+- [x] Mini IDE com Monaco Editor
+- [x] Auto-update via electron-updater
+- [ ] OAuth2 Google
+- [ ] Trilhas adicionais além do Caminho da Serpente
 
 ---
 
