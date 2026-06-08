@@ -42,9 +42,6 @@ export function Topbar() {
           <button className="p-1 hover:bg-primary-container hover:text-on-primary-container transition-all active:translate-x-xs active:translate-y-xs duration-75 border-border-width border-transparent hover:border-outline ml-2">
             <span className="material-symbols-outlined">notifications</span>
           </button>
-          <button className="p-1 hover:bg-primary-container hover:text-on-primary-container transition-all active:translate-x-xs active:translate-y-xs duration-75 border-border-width border-transparent hover:border-outline">
-            <span className="material-symbols-outlined">settings</span>
-          </button>
 
           <Link to="/perfil" className="w-10 h-10 border-border-width border-outline bg-surface-container-high ml-2 pixel-shadow active-press relative group overflow-hidden block">
             {user.avatarUrl ? (
