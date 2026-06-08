@@ -1,26 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Topbar } from '../components/Topbar';
-import { Card } from '../components/ui/Card';
 import { useUser } from '../context/UserContext';
 import api, { unwrap } from '../lib/api';
 import type { RankingResponse, RankingItem } from '../types';
-import {
-  IconCrown, IconTrophy, IconListNumbers, IconBolt,
-  IconCalendarWeek, IconClockHour4,
-} from '@tabler/icons-react';
-
-
-const AVATAR_GRADS = [
-  'from-gold to-[#caa244]', 'from-[#aab4bf] to-[#6e7b89]', 'from-[#b87a4b] to-[#8a5a35]',
-  'from-green to-[#3fa05a]', 'from-blue to-[#2f73a0]', 'from-purple to-[#7d56b8]',
-];
 
 function initials(name: string) {
   return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
-}
-
-function avatarGrad(idx: number) {
-  return AVATAR_GRADS[idx % AVATAR_GRADS.length];
 }
 
 export function Ranking() {
@@ -40,175 +25,153 @@ export function Ranking() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen">
+    <div className="bg-background text-on-surface font-body-md min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
       <Topbar />
 
-      <main className="w-full max-w-[1240px] mx-auto px-7 py-8 pb-36">
+      <main className="flex-grow w-full max-w-container-max mx-auto px-md py-lg flex flex-col gap-lg pb-36">
+        
+        {/* Header */}
+        <header className="flex flex-col items-center justify-center text-center gap-xs mt-md mb-md">
+          <h1 className="font-h1 text-h1 text-primary tracking-widest uppercase drop-shadow-[4px_4px_0_rgba(0,0,0,1)] flex items-center gap-2">
+            MAIORES PONTUAÇÕES
+          </h1>
+          <p className="font-code text-code text-on-surface-variant uppercase">Os estudantes que mais acumularam XP nesta semana</p>
+          <div className="font-label-caps text-[10px] text-tertiary border-border-width border-outline px-2 py-1 mt-2">PLACAR ZERA TODA SEGUNDA-FEIRA</div>
+        </header>
 
-        {/* CABEÇALHO */}
-        <section className="flex items-end justify-between gap-8 flex-wrap mb-8 reveal" style={{ '--d': '.02s' } as any}>
-          <div>
-            <div className="text-[13px] text-gold font-semibold tracking-[1.5px] uppercase flex items-center gap-2 mb-2">
-              <IconCrown size={16} /> Ranking Semanal
-            </div>
-            <h1 className="font-cinzel font-bold text-[34px] leading-[1.15]">
-              Salão dos <span className="text-gold">Campeões</span>
-            </h1>
-            <p className="text-text-dim text-[14.5px] mt-2 max-w-[52ch]">
-              Os estudantes que mais acumularam XP nesta semana. O placar zera toda segunda-feira.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 items-end">
-            <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-surface border border-border text-[13.5px]">
-              <IconCalendarWeek size={17} className="text-gold" />
-              <span><b className="text-text">Semana atual</b></span>
-            </div>
-            <div className="flex items-center gap-2 text-[12.5px] text-text-mute">
-              <IconClockHour4 size={15} className="text-text-dim" />
-              Placar zera toda segunda-feira
-            </div>
-          </div>
-        </section>
-
-        {/* PÓDIO */}
-        <Card className="p-8 mb-8 relative overflow-hidden reveal !hover:translate-y-0" style={{ '--d': '.10s' } as any}>
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-gold/60 to-transparent" />
-          <div className="absolute inset-0 bg-[radial-gradient(640px_280px_at_50%_-40%,rgba(240,192,96,.08),transparent_70%)]" />
-          <div className="flex items-center justify-center gap-2 font-cinzel font-semibold text-[15px] tracking-wide uppercase text-text-dim mb-7">
-            <IconTrophy size={17} className="text-gold" /> Pódio da Semana
-          </div>
-
+        {/* Podium */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-md items-end">
           {top10.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-center text-text-mute gap-2">
-              <IconCrown size={32} className="text-text-dim mb-1" />
-              <span className="text-[14px]">O pódio está vazio</span>
-              <span className="text-[12px] text-text-dim">Seja o primeiro a entrar no ranking!</span>
+            <div className="md:col-span-3 flex flex-col items-center justify-center py-10 text-center text-on-surface-variant gap-2 bg-surface-container border-border-width border-outline pixel-shadow">
+              <span className="material-symbols-outlined text-4xl mb-1">sentiment_dissatisfied</span>
+              <span className="font-h3 text-h3">O pódio está vazio</span>
+              <span className="font-code text-code">Seja o primeiro a entrar no ranking!</span>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-4 max-w-[760px] mx-auto items-end">
-              <PodiumPlace player={p2} rank={2} />
-              <PodiumPlace player={p1} rank={1} highlight />
-              <PodiumPlace player={p3} rank={3} />
-            </div>
+            <>
+              {/* Rank 2 */}
+              <div className="border-border-width border-outline bg-surface-container-high p-sm flex flex-col items-center gap-sm relative order-2 md:order-1 h-[250px] justify-end pixel-shadow">
+                <div className="absolute -top-6 bg-surface-container border-[3px] border-on-surface w-12 h-12 flex items-center justify-center font-h3 text-h3 text-secondary z-10 rotate-[-10deg]">2</div>
+                <div className="w-24 h-24 border-border-width border-outline bg-surface overflow-hidden flex items-center justify-center">
+                  <div className="w-full h-full bg-secondary-container flex items-center justify-center font-h2 text-h2 text-on-secondary-container">
+                    {p2 ? initials(p2.userName) : '-'}
+                  </div>
+                </div>
+                <div className="text-center w-full">
+                  <h3 className="font-h3 text-h3 text-secondary truncate">{p2 ? p2.userName : 'Vazio'}</h3>
+                  <div className="font-label-caps text-label-caps text-on-surface-variant mt-1">XP: {p2 ? p2.xpSemana : 0}</div>
+                </div>
+                <div className="w-full h-4 border-[3px] border-black bg-surface relative mt-2">
+                  <div className="h-full bg-secondary w-[80%] border-r-[2px] border-black" style={{ width: p2 && p1 && p1.xpSemana > 0 ? `${(p2.xpSemana / p1.xpSemana) * 100}%` : '0%' }}></div>
+                </div>
+              </div>
+
+              {/* Rank 1 */}
+              <div className="border-border-width border-primary bg-surface-container-highest p-sm flex flex-col items-center gap-sm relative order-1 md:order-2 h-[300px] justify-end pixel-shadow transform md:-translate-y-4">
+                <div className="absolute -top-8 flex flex-col items-center z-10">
+                  <span className="material-symbols-outlined text-primary text-4xl mb-1 drop-shadow-[2px_2px_0_rgba(0,0,0,1)]" style={{ fontVariationSettings: "'FILL' 1" }}>crown</span>
+                  <div className="bg-primary-container border-[3px] border-on-primary-container w-16 h-16 flex items-center justify-center font-h1 text-h3 text-on-primary-container">1</div>
+                </div>
+                <div className="w-32 h-32 border-border-width border-primary bg-surface overflow-hidden flex items-center justify-center">
+                   <div className="w-full h-full bg-primary flex items-center justify-center font-h1 text-h1 text-on-primary">
+                    {p1 ? initials(p1.userName) : '-'}
+                  </div>
+                </div>
+                <div className="text-center w-full">
+                  <h3 className="font-h3 text-h3 text-primary truncate drop-shadow-[2px_2px_0_rgba(0,0,0,1)]">{p1 ? p1.userName : 'Vazio'}</h3>
+                  <div className="font-label-caps text-label-caps text-primary-container mt-1 animate-pulse">XP: {p1 ? p1.xpSemana : 0}</div>
+                </div>
+                <div className="w-full h-4 border-[3px] border-black bg-surface relative mt-2">
+                  <div className="h-full bg-primary w-[98%] border-r-[2px] border-black" style={{ width: p1 && p1.xpSemana > 0 ? '100%' : '0%' }}></div>
+                </div>
+              </div>
+
+              {/* Rank 3 */}
+              <div className="border-border-width border-outline bg-surface-container-high p-sm flex flex-col items-center gap-sm relative order-3 md:order-3 h-[220px] justify-end pixel-shadow">
+                <div className="absolute -top-6 bg-surface-container border-[3px] border-on-surface w-12 h-12 flex items-center justify-center font-h3 text-h3 text-tertiary z-10 rotate-[10deg]">3</div>
+                <div className="w-20 h-20 border-border-width border-outline bg-surface overflow-hidden flex items-center justify-center">
+                  <div className="w-full h-full bg-tertiary-container flex items-center justify-center font-h2 text-h2 text-on-tertiary-container">
+                    {p3 ? initials(p3.userName) : '-'}
+                  </div>
+                </div>
+                <div className="text-center w-full">
+                  <h3 className="font-h3 text-h3 text-tertiary truncate">{p3 ? p3.userName : 'Vazio'}</h3>
+                  <div className="font-label-caps text-label-caps text-on-surface-variant mt-1">XP: {p3 ? p3.xpSemana : 0}</div>
+                </div>
+                <div className="w-full h-4 border-[3px] border-black bg-surface relative mt-2">
+                  <div className="h-full bg-tertiary w-[70%] border-r-[2px] border-black" style={{ width: p3 && p1 && p1.xpSemana > 0 ? `${(p3.xpSemana / p1.xpSemana) * 100}%` : '0%' }}></div>
+                </div>
+              </div>
+            </>
           )}
-        </Card>
+        </section>
 
-        {/* LISTA TOP 10 */}
-        <section className="reveal" style={{ '--d': '.18s' } as any}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-cinzel font-semibold text-lg flex items-center gap-2">
-              <IconListNumbers size={18} className="text-gold" /> Classificação Geral
-            </h2>
-            <span className="text-[13px] text-text-mute">Top 10</span>
+        {/* Leaderboard List */}
+        <section className="border-border-width border-outline bg-surface-container-high flex flex-col pixel-shadow mt-md">
+          {/* Header Row */}
+          <div className="flex items-center px-sm py-xs border-b-[3px] border-outline bg-surface-container-highest">
+            <div className="w-16 font-label-caps text-label-caps text-on-surface-variant">RANK</div>
+            <div className="flex-1 font-label-caps text-label-caps text-on-surface-variant">JOGADOR</div>
+            <div className="w-32 text-right font-label-caps text-label-caps text-on-surface-variant">PONTUAÇÃO (XP)</div>
           </div>
-
-          <div className="bg-surface border border-border rounded-xl overflow-hidden">
-            {top10.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 text-center text-text-mute gap-2">
-                <IconTrophy size={36} className="text-text-dim mb-1" />
-                <span className="text-[14px]">Nenhum dado de ranking ainda</span>
-                <span className="text-[12px] text-text-dim">Acumule XP para aparecer no placar semanal.</span>
+          
+          {/* List Items */}
+          <div className="flex flex-col">
+            {top10.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center text-on-surface-variant gap-2">
+                <span className="font-code text-code text-on-surface-variant">Nenhum dado de ranking ainda. Acumule XP para aparecer no placar.</span>
               </div>
+            ) : (
+              top10.map((item, i) => (
+                <div key={item.posicao} className={`flex items-center px-sm py-xs border-b-[3px] border-outline hover:bg-surface-container transition-colors group cursor-pointer ${item.isCurrentUser ? 'bg-primary-container/10 border-l-[6px] border-l-primary' : ''}`}>
+                  <div className={`w-16 font-h3 text-h3 ${i < 3 ? 'text-primary' : 'text-on-surface'}`}>{item.posicao}</div>
+                  <div className="flex-1 flex items-center gap-xs">
+                    <div className="w-8 h-8 border-border-width border-outline bg-surface flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-full h-full bg-surface-container-highest flex items-center justify-center text-on-surface font-code text-xs">
+                        {initials(item.userName)}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="font-code text-code text-on-surface group-hover:text-primary transition-colors flex items-center gap-2">
+                        {item.userName}
+                        {item.isCurrentUser && <span className="bg-primary text-on-primary px-1 text-[10px] font-label-caps">VOCÊ</span>}
+                      </div>
+                      <div className="text-[10px] text-on-surface-variant uppercase font-code">{(item as any).cargo ?? 'Aventureiro'}</div>
+                    </div>
+                  </div>
+                  <div className="w-32 text-right font-code text-code text-primary-container">{item.xpSemana.toLocaleString('pt-BR')}</div>
+                </div>
+              ))
             )}
-            {top10.map((item, i) => (
-              <div
-                key={item.posicao}
-                className={`flex items-center gap-4 px-4 py-3.5 transition-all hover:bg-surface-2 hover:translate-x-1 ${i > 0 ? 'border-t border-border' : ''} ${item.isCurrentUser ? 'bg-gold/5 border-l-2 border-l-gold' : ''}`}
-              >
-                <div className={`w-8 text-center font-cinzel font-bold text-lg shrink-0 ${i < 3 ? 'text-gold' : 'text-text-mute'}`}>{item.posicao}</div>
-                <div className={`w-11 h-11 rounded-xl shrink-0 grid place-items-center font-cinzel font-bold text-sm text-[#0d1117] bg-gradient-to-br ${avatarGrad(i)}`}>
-                  {initials(item.userName)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-[14.5px] flex items-center gap-2">
-                    {item.userName}
-                    {item.isCurrentUser && <span className="text-[10px] font-bold text-[#1a1206] bg-gradient-to-r from-gold to-[#d8a945] rounded px-1.5 py-0.5">VOCÊ</span>}
-                  </div>
-                  {/* TODO: O backend deve retornar nível e título no ranking */}
-                  <div className="text-xs text-text-mute">{(item as any).cargo ?? 'Aventureiro'}</div>
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="font-cinzel font-bold text-base text-gold flex items-center gap-1 justify-end">
-                    <IconBolt size={14} />{item.xpSemana.toLocaleString('pt-BR')}
-                  </div>
-                  <small className="text-[11px] text-text-mute">XP semana</small>
-                </div>
-              </div>
-            ))}
           </div>
         </section>
+
       </main>
 
       {/* DOCK DO USUÁRIO (fora do top 10) */}
       {me && me.posicao > 10 && (
-        <div className="sticky bottom-5 z-30 w-full max-w-[1240px] mx-auto px-7">
-          <div className="flex items-center gap-4 px-5 py-3.5 rounded-xl border border-gold/50 bg-[rgba(13,17,23,0.92)] backdrop-blur-[12px] shadow-[0_14px_34px_-14px_rgba(240,192,96,0.45)]"
-               style={{ background: 'linear-gradient(150deg, rgba(240,192,96,.14), rgba(240,192,96,.04)), rgba(13,17,23,.92)' }}>
-            <div className="font-cinzel font-bold text-lg text-gold shrink-0">{me.posicao}</div>
-            <div className="w-11 h-11 rounded-xl shrink-0 grid place-items-center font-cinzel font-bold text-sm text-[#0d1117] bg-gradient-to-br from-gold to-[#caa244]">
+        <div className="fixed bottom-0 left-0 right-0 z-30 w-full bg-surface-container-highest border-t-[3px] border-primary p-sm">
+          <div className="max-w-container-max mx-auto flex items-center gap-md">
+            <div className="font-h3 text-h3 text-primary shrink-0">{me.posicao}</div>
+            <div className="w-12 h-12 border-border-width border-primary bg-primary shrink-0 grid place-items-center font-h2 text-h2 text-on-primary">
               {user.name.charAt(0).toUpperCase()}
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-semibold text-[15px] flex items-center gap-2">
+            <div className="flex-1 min-w-0 flex flex-col">
+              <div className="font-h3 text-h3 flex items-center gap-2 text-on-surface">
                 {user.name}
-                <span className="text-[10px] font-bold text-[#1a1206] bg-gradient-to-r from-gold to-[#d8a945] rounded px-1.5 py-0.5">VOCÊ</span>
+                <span className="bg-primary text-on-primary px-1 text-[10px] font-label-caps">VOCÊ</span>
               </div>
-              <div className="text-[12px] text-text-dim">
-                {/* Usando 0 se o ranking tiver menos de 10 pessoas */}
-                Faltam <b className="text-gold">{Math.max(0, (top10[9]?.xpSemana ?? 0) - me.xpSemana)} XP</b> para entrar no Top 10
+              <div className="text-sm font-code text-on-surface-variant">
+                Faltam <span className="text-primary font-bold">{Math.max(0, (top10[9]?.xpSemana ?? 0) - me.xpSemana)} XP</span> para o Top 10
               </div>
             </div>
             <div className="text-right shrink-0">
-              <div className="font-cinzel font-bold text-lg text-gold flex items-center gap-1 justify-end">
-                <IconBolt size={14} />{me.xpSemana}
-              </div>
-              <small className="text-[11px] text-text-mute">XP semana</small>
+              <div className="font-h3 text-h3 text-primary">{me.xpSemana.toLocaleString('pt-BR')}</div>
+              <div className="font-label-caps text-[10px] text-on-surface-variant">XP SEMANA</div>
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function PodiumPlace({ player, rank, highlight }: { player: RankingItem; rank: number; highlight?: boolean }) {
-  const heightMap: Record<number, string> = { 1: 'h-32', 2: 'h-24', 3: 'h-[74px]' };
-  const colorMap: Record<number, string> = {
-    1: 'from-gold to-[#caa244]',
-    2: 'from-[#aab4bf] to-[#6e7b89]',
-    3: 'from-[#b87a4b] to-[#8a5a35]',
-  };
-  const baseColorMap: Record<number, string> = {
-    1: 'border-gold/40 bg-gradient-to-b from-gold/16 to-gold/3 text-gold',
-    2: 'border-[rgba(154,167,180,.3)] bg-gradient-to-b from-[rgba(154,167,180,.13)] to-[rgba(154,167,180,.02)] text-[#9aa7b4]',
-    3: 'border-[rgba(184,122,75,.3)] bg-gradient-to-b from-[rgba(184,122,75,.14)] to-[rgba(184,122,75,.02)] text-[#b87a4b]',
-  };
-
-  if (!player) return <div />;
-
-  const avSize = highlight ? 'w-20 h-20 text-3xl rounded-2xl' : 'w-16 h-16 text-2xl rounded-xl';
-
-  return (
-    <div className="flex flex-col items-center">
-      {highlight && (
-        <IconCrown size={26} className="text-gold mb-1 animate-[floaty_3s_ease-in-out_infinite]" style={{ filter: 'drop-shadow(0 0 10px rgba(240,192,96,0.7))' }} />
-      )}
-      <div className={`w-7 h-7 rounded-full grid place-items-center font-cinzel font-bold text-sm text-[#0d1117] mb-2.5 bg-gradient-to-br ${colorMap[rank]}`}>
-        {rank}
-      </div>
-      <div className={`grid place-items-center font-cinzel font-bold text-[#0d1117] bg-gradient-to-br ${colorMap[rank]} ${avSize} ${highlight ? 'shadow-[0_0_0_4px_rgba(240,192,96,.14),0_0_32px_2px_rgba(240,192,96,.4)]' : ''}`}>
-        {initials(player.userName)}
-      </div>
-      <div className={`font-bold mt-3 text-center ${highlight ? 'text-[16.5px]' : 'text-[15px]'}`}>{player.userName}</div>
-      {/* TODO: O backend deve retornar nível e título no ranking */}
-      <div className="text-xs text-text-mute mt-0.5 text-center">Nível {(player as any).nivel ?? '-'}</div>
-      <div className={`flex items-center gap-1.5 mt-2.5 font-cinzel font-bold text-gold ${highlight ? 'text-[19px]' : 'text-base'}`}>
-        <IconBolt size={14} />{player.xpSemana.toLocaleString('pt-BR')}
-        <span className="font-sans font-medium text-[10.5px] text-text-mute tracking-wide">XP</span>
-      </div>
-      <div className={`mt-4 w-full border-[0.5px] border-b-0 rounded-t-xl grid place-items-center font-cinzel font-bold text-[34px] ${heightMap[rank]} ${baseColorMap[rank]}`}>
-        {rank}
-      </div>
     </div>
   );
 }
