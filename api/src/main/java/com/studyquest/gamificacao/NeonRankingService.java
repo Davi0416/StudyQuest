@@ -65,8 +65,8 @@ public class NeonRankingService {
             // Desativa autocommit para garantir que o SET LOCAL dure toda a transação (compatível com Neon Pooler)
             conn.setAutoCommit(false);
 
-            // Define o contexto do usuário para a política RLS do banco de dados
-            try (PreparedStatement psSet = conn.prepareStatement("SET LOCAL studyquest.current_user_id = ?")) {
+            // Define o contexto do usuário para a política RLS do banco de dados usando set_config
+            try (PreparedStatement psSet = conn.prepareStatement("SELECT set_config('studyquest.current_user_id', ?, true)")) {
                 psSet.setString(1, userId.toString());
                 psSet.execute();
             }

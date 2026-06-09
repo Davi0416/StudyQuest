@@ -153,7 +153,7 @@ export function AulaRichText({ conteudo, compact }: { conteudo: string; compact?
               {block.body.length > 0 && (
                 <div className="text-green/90 leading-relaxed">
                   {block.body.map((ln, li) => (
-                    <div key={li}>{parseInlineFormatting(ln)}</div>
+                    <div key={li}>{ln}</div>
                   ))}
                 </div>
               )}
